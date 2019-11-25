@@ -1,5 +1,6 @@
 <template>
   <v-app>
+    <AppHeader />
     <v-content>
       <router-view/>
     </v-content>
@@ -8,12 +9,12 @@
 
 <script>
 
+import AppHeader from './components/helpers/AppHeader.vue';
+
 export default {
   name: 'App',
   components: {
+    AppHeader,
   },
-  data: () => ({
-    //
-  }),
 };
 </script>

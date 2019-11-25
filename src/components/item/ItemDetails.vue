@@ -1,28 +1,86 @@
 <template>
   <v-card v-if="item">
+    <ItemModal
+      :dialog="editDialog"
+      :data="item"
+      @close="editDialog = false"
+      @submit="itemModalSubmit"
+    />
+    <CompanyInfoModal
+      :dialog="showCompanyInfo"
+      :companyId="item.companyId || -1"
+      @close="showCompanyInfo = false"
+    />
     <v-card-title class="subtitle-1 grey lighten-2" primary-title>
-      <v-flex xs11>
-        <span>{{ title }}</span>
+      <v-flex>
+        <span @contextmenu.prevent="isAdmin() ? editDialog = true : ''">{{ title }}</span>
       </v-flex>
-      <v-flex xs1>
-        <v-icon class="text-right" color="red" @click="$emit('close')">mdi-close</v-icon>
+      <v-flex class="text-right">
+      <span class="pa-0 ma-0" stype="right: 0; top: 0">
+        <v-tooltip bottom>
+          <template v-slot:activator="{ on }">
+            <v-icon
+              color="green"
+              size="20"
+              v-on="on"
+              @click.stop="showCompanyInfo = true"
+            >
+              mdi-information
+            </v-icon>
+          </template>
+          <span>Информация о компании</span>
+        </v-tooltip>
+        <v-icon class="text-right" size="20" color="red" @click="$emit('close')">mdi-close</v-icon>
+      </span>
       </v-flex>
     </v-card-title>
-    <v-img contain :src="item.imagePath || ''" max-height="200">
+    <v-img contain :src="item.imagePath || ''" height="200" style="cursor: pointer;"
+      @click="imageFullSizeDialog = true">
+      <v-dialog
+        v-model="imageFullSizeDialog"
+        scrollable
+        :overlay="false"
+        transition="dialog-transition"
+      >
+        <v-card>
+          <v-img :src="item.imagePath || ''" @click="imageFullSizeDialog = false"></v-img>
+        </v-card>
+      </v-dialog>
     </v-img>
     <v-card-text>
+    <v-divider color="green"></v-divider>
       <div>
       </div>
       <v-tabs>
         <v-tab>Заказ</v-tab>
         <v-tab>Расход</v-tab>
+        <v-tab>Заметка</v-tab>
+        <v-tab>Ссылки</v-tab>
         <v-spacer></v-spacer>
-        <span class="headline green--text">{{ item.amount }}  </span>
+        <v-chip class="headline font-weight-black white--text mt-2"
+          label readonly color="green">
+          {{ item.amount }}</v-chip>
         <v-tab-item>
           <ItemPurchaseList :items="item.purchases" />
         </v-tab-item>
         <v-tab-item>
-          <ItemDistributionList :items="item.distributions" />
+          <ItemDistributionList
+            :itemId="item.id"
+            :items="item.distributions"
+            @submit="newItemDistribution"
+          />
+        </v-tab-item>
+        <v-tab-item class="pa-4">
+          <span class="subtitle-2">{{item.note}}</span>
+        </v-tab-item>
+        <v-tab-item class="pa-4">
+          <router-link
+            v-for="url in item.urls"
+            :key="`url${url.id}`"
+            :to="url.data"
+          >
+            <span>{{ url.name }}</span>
+          </router-link>
         </v-tab-item>
       </v-tabs>
     </v-card-text>
@@ -34,15 +92,20 @@ import api from '../../api';
 
 import ItemPurchaseList from './ItemPurchaseList.vue';
 import ItemDistributionList from './ItemDistributionList.vue';
+import ItemModal from './ItemModal.vue';
+import CompanyInfoModal from '../company/CompanyInfoModal.vue';
 
 const {
+  isAdmin,
   getItemInfo,
 } = api;
 
 export default {
   components: {
+    ItemModal,
     ItemPurchaseList,
     ItemDistributionList,
+    CompanyInfoModal,
   },
 
   props: {
@@ -54,11 +117,17 @@ export default {
   },
 
   async beforeMount() {
+    this.localItemId = this.itemId;
+
     await this.loadItem();
   },
 
   data: () => ({
+    editDialog: false,
+    showCompanyInfo: false,
     item: {},
+    localItemId: 0,
+    imageFullSizeDialog: false,
   }),
 
   computed: {
@@ -69,15 +138,31 @@ export default {
 
   watch: {
     async itemId() {
-      await this.loadItem();
+      if (this.itemId > 0) {
+        this.localItemId = this.itemId;
+
+        await this.loadItem();
+      }
     },
   },
 
   methods: {
+    isAdmin,
     async loadItem() {
-      const data = await getItemInfo(this.itemId);
+      const data = await getItemInfo(this.localItemId);
 
       this.item = data;
+    },
+
+    itemModalSubmit(itemId) {
+      this.localItemId = itemId;
+      this.editDialog = false;
+      this.loadItem();
+    },
+
+    newItemDistribution(itemDist) {
+      this.item.distributions.unshift(itemDist);
+      this.item.amount -= itemDist.amount;
     },
   },
 };

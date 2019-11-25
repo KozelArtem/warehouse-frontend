@@ -4,7 +4,7 @@
     :items="mappedItems"
     class="elevation-1"
     item-key="id"
-    no-data-text=""
+    :no-data-text="noData"
     :no-results-text="noResults"
     locale="ru-RU"
     dense
@@ -21,13 +21,11 @@
 </template>
 
 <script>
-import moment from 'moment';
-
-import sorting from '../../helpers/sorting';
+import dateService from '../../helpers/dates';
 
 import constant from '../../constants/data.json';
 
-const { sortByDate } = sorting;
+const { sortDesc: sortDate, format: formatDate } = dateService;
 
 export default {
   props: {
@@ -55,7 +53,7 @@ export default {
         text: 'Дата',
         value: 'date',
         divider: true,
-        sort: sortByDate,
+        sort: sortDate,
       },
       {
         text: 'Количество',
@@ -71,8 +69,7 @@ export default {
     mappedItems() {
       return this.items.map((item, index) => {
         const amount = item.amount > 0 ? item.amount : item.orderAmount;
-        const date = moment().format('DD.MM.YYYY');
-        console.log(item);
+        const date = formatDate(item.date);
 
         return {
           ...item,

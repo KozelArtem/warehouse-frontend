@@ -1,4 +1,26 @@
 {
   "noData": "Нет данных для отображения",
-  "noResults": "Нет данных для отображения"
+  "noResults": "Нет данных для отображения",
+  "loading": "Загрузка...",
+
+  "orderStatuses": {
+    "all": {
+      "id": 0,
+      "name": "Все"
+    },
+    "active": {
+      "id": 1,
+      "name": "В ожидании"
+    },
+    "completed": {
+      "id": 2,
+      "name": "Завершенные"
+    }
+  },
+  "icons": {
+    "addLink": "mdi-link-plus",
+    "close": "mdi-close",
+    "openedFolder": "mdi-folder-open",
+    "folder": "mdi-folder"
+  }
 }

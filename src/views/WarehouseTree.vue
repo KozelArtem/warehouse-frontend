@@ -1,55 +1,98 @@
 <template>
   <v-container grid-list-sm>
     <v-layout row wrap>
-      <v-flex xs12 v-if="modal">
-        <NewItemModal
-          :dialog="modal"
+      <v-flex xs12>
+        <ItemModal
+          :dialog="newItemModal"
           :category="selectedCategory"
-          @close="modal = false; selectedCategory = null"
-          @save="onNewItemClick"/>
+          @close="newItemModal = false; selectedCategory = null"
+          @submit="saveNewItem"/>
       </v-flex>
-      <v-flex :xs4="itemView" :xs8="!itemView" style="height: 80vh">
-        <v-treeview
-          v-model="tree"
-          :open="open"
-          :items="items"
-          :active.sync="active"
-          activatable
-          item-key="id"
-          open-on-click
+      <v-flex xs11 sm11 md7 lg7>
+        <v-text-field
+          v-model="search"
+          @input="findItems()"
+          prepend-icon="mdi-magnify"
           dense
-          :load-children="fetchInfo"
-        >
-          <template v-slot:label="{ item }">
-            <v-text-field v-if="item.edit"
-              label="Название категории"
-              v-model="item.name"
-            ></v-text-field>
-
-            <span @contextmenu.prevent="onNewItemClick(item, false)">{{ item.name }}</span>
-          </template>
-
-          <template v-slot:prepend="{ item, open }">
-            <v-menu v-model="menu[item.id]" offset-y>
-              <template v-slot:activator="{ on }">
-                <v-icon v-if="item.children"
-                  :color="item.edit ? 'gray' : 'blue'"
-                  @contextmenu.prevent="context(item)"
-                  @click.stop="newCategory(item)">
-                    {{ open ? 'mdi-folder-open' : 'mdi-folder' }}</v-icon>
-              </template>
-              <v-btn small @click="onRenameClick(item)">Переименовать</v-btn>
-              <v-btn
-                small
-                v-if="item.fetch && !item.children.length"
-                @click="onRemoveClick(item)"
-              >Удалить</v-btn>
-            </v-menu>
-          </template>
-        </v-treeview>
+          clearable
+          max-width="300"
+          hide-details
+          class="d-flex mr-3"
+        ></v-text-field>
       </v-flex>
-      <v-flex :xs8="itemView" :xs4="!itemView">
-        <ItemDetails v-if="selectedId" :itemId="selectedId" @close="active = []" />
+      <v-flex hidden-sm-and-down md4 lg4>
+        <!-- TODO Sort by Name (A-Z), Available, Out of stock -->
+        <v-select
+          :items="items"
+          menu-props="auto"
+          label="Сортировка"
+          hide-details
+          dense
+          item-value="id"
+          item-text="name"
+          prepend-icon="mdi-sort"
+          single-line
+        ></v-select>
+      </v-flex>
+      <v-flex xs1 sm1 md1 lg1>
+        <v-icon medium :color="!treeView ? 'red' : ''" @click="treeView = false; itemId = null">
+          mdi-table-large
+        </v-icon>
+        <v-icon large :color="treeView ? 'red' : ''" @click="treeView = true">
+          mdi-table-of-contents
+        </v-icon>
+      </v-flex>
+      <v-flex
+        :hidden-sm-and-down="itemId"
+        :xs4="itemId"
+        :xs12="!itemId" style="max-height: 70vh"
+        class="overflow-y-auto"
+      >
+        <div v-if="search">
+          <v-list
+            subheader dense
+            v-for="group in groupedSearchItems"
+            :key="`group${group.name}`"
+          >
+            <v-subheader>{{group.name}}</v-subheader>
+            <v-list-item
+              v-for="item in group.items"
+              :key="item.id"
+              dense
+              @click="itemId = item.id"
+            >
+              <v-list-item-title v-text="item.name"></v-list-item-title>
+            </v-list-item>
+          </v-list>
+        </div>
+        <div v-else>
+          <WarehouseTreeView
+            v-if="treeView"
+            :items="items"
+            :menuItems="menuItems"
+            :emitOpenCategory="fetchCategoryInfo"
+            @selectItem="input => itemId = input"
+            @newItem="showNewItemModal"
+            @newCategory="newCategory"
+            @renameCategory="renameCategory"
+            @removeCategory="removeCategory"
+          />
+          <WarehouseCardView
+            v-else
+            :items="items"
+            :menuItems="menuItems"
+            :emitOpenCategory="fetchCategoryInfo"
+            @selectItem="input => itemId = input"
+            @newItem="showNewItemModal"
+            @newCategory="newCategory"
+            @renameCategory="renameCategory"
+            @removeCategory="removeCategory"
+          />
+        </div>
+        <v-progress-circular v-if="dataLoading" indeterminate color="primary" />
+      </v-flex>
+      <v-flex :hidden-sm-and-down="!itemId" :md8="itemId" :xs4="!itemId">
+        <ItemDetails v-if="itemId" :itemId="itemId" @close="itemId = null" />
       </v-flex>
     </v-layout>
   </v-container>
@@ -57,6 +100,7 @@
 
 <script>
 import api from '../api';
+import constants from '../constants/data.json';
 
 import {
   createItemKey,
@@ -65,9 +109,12 @@ import {
   findItemInTree,
   createCategoryKey,
 } from '../helpers/treeview';
+import rules from '../helpers/validationRules';
 
 import ItemDetails from '../components/item/ItemDetails.vue';
-import NewItemModal from '../components/item/NewItemModal.vue';
+import ItemModal from '../components/item/ItemModal.vue';
+import WarehouseTreeView from '../components/warehouse/WarehouseTreeView.vue';
+import WarehouseCardView from '../components/warehouse/WarehouseCardView.vue';
 
 const {
   getBaseCategories,
@@ -75,50 +122,90 @@ const {
   createCategory,
   updateCategory,
   removeCategory,
+  searchItems,
 } = api;
 
 export default {
   components: {
     ItemDetails,
-    NewItemModal,
+    ItemModal,
+    WarehouseTreeView,
+    WarehouseCardView,
   },
+  // TODO Add switcher to show bages like in Yandex Disk
+  data: vm => ({
+    ...rules,
+    ...constants,
 
-  data: () => ({
     active: [],
     open: [],
     tree: [],
     items: [],
-    itemView: false,
     menu: {},
 
-    modal: true,
+    treeView: false,
+
+    newItemModal: false,
     selectedCategory: null,
+
+    menuItems: [
+      {
+        name: 'Добавить элемент',
+        condition: () => true,
+        func: vm.showNewItemModal,
+      },
+      {
+        name: 'Создать',
+        condition: () => true,
+        func: vm.newCategory,
+      },
+      {
+        name: 'Переименовать',
+        condition: () => true,
+        func: vm.renameCategory,
+      },
+      {
+        name: 'Удалить',
+        condition: item => item.fetch && !item.children.length,
+        func: vm.removeCategory,
+      },
+    ],
+
+    searching: false,
+    search: null,
+    itemId: null,
+    searchedItems: [],
+
+    dataLoading: false,
   }),
 
   async beforeMount() {
+    this.dataLoading = true;
+
     const data = await getBaseCategories();
 
+    this.dataLoading = false;
     this.items = mapCategories(data);
   },
 
   computed: {
-    selectedId() {
-      const key = (this.active || [])[0];
+    groupedSearchItems() {
+      return this.searchedItems.reduce((acc, cur) => {
+        const catName = cur.categoryName;
+        const group = acc[catName] || { name: catName, items: [] };
 
-      return key ? getIdFromKey(key) : null;
-    },
-  },
+        group.items.push(cur);
+        acc[catName] = group;
 
-  watch: {
-    active() {
-      this.itemView = !!this.active.length;
+        return acc;
+      }, {});
     },
   },
 
   methods: {
-    async fetchInfo(category) {
+    async fetchCategoryInfo(category) {
       const categoryCopy = category;
-      const categoryId = getIdFromKey(category.id);
+      const categoryId = getIdFromKey(categoryCopy.id);
       const { items, categories } = await getCategoryInfo(categoryId);
 
       categoryCopy.fetch = true;
@@ -128,8 +215,24 @@ export default {
       ];
     },
 
+    async openCategory(category) {
+      if (!category.fetch) {
+        await this.fetchCategoryInfo(category);
+      }
+
+      this.open.push(category.id);
+    },
+
+    openMenu(itemId) {
+      this.menu = { [itemId]: true };
+    },
+
     async newCategory(baseCategory) {
       if (baseCategory.id.split('_').includes('new')) {
+        if (!baseCategory.name.trim()) {
+          return;
+        }
+
         const data = {
           parentId: getIdFromKey(baseCategory.parent.id),
           name: baseCategory.name,
@@ -161,28 +264,11 @@ export default {
       }));
     },
 
-    closeNewCategoryMode(baseCategory) {
-      baseCategory.parent.children.shift();
-    },
-
-    async context(category) {
-      this.menu = { [category.id]: true };
-    },
-
-    async openCategory(category) {
-      console.log(category.id, this.open);
-
-      if (!category.fetch) {
-        await this.fetchInfo(category);
-        this.open.push(category.id);
-      }
-    },
-
-    async onRenameClick(category) {
+    async renameCategory(category) {
       // eslint-disable-next-line no-restricted-globals
-      const result = prompt(`message ${category.name}`);
+      const result = prompt(`Предыдущее название ${category.name}`);
 
-      if (result.trim()) {
+      if (result && result.trim()) {
         const categoryId = getIdFromKey(category.id);
         const response = await updateCategory(categoryId, { name: result });
 
@@ -191,7 +277,7 @@ export default {
       }
     },
 
-    async onRemoveClick(category) {
+    async removeCategory(category) {
       // eslint-disable-next-line no-restricted-globals
       const result = confirm(`Вы действительно хотите удалить ${category.name}?`);
 
@@ -210,18 +296,28 @@ export default {
       }
     },
 
-    onNewItemClick(item, newItem = true) {
+    showNewItemModal(baseCategory) {
+      this.selectedCategory = { ...baseCategory, id: +getIdFromKey(baseCategory.id) };
+      this.newItemModal = true;
+    },
+
+    saveNewItem(item, newItem = true) {
       if (newItem) {
         this.selectedCategory.children.unshift(item);
         this.selectedCategory = null;
-        this.modal = false;
+        this.newItemModal = false;
 
         return;
       }
+
       if (item.children) {
-        this.modal = true;
-        this.selectedCategory = { ...item, id: getIdFromKey(item.id) };
+        this.newItemModal = true;
+        this.selectedCategory = { ...item, id: +getIdFromKey(item.id) };
       }
+    },
+
+    async findItems() {
+      this.searchedItems = await searchItems(this.search);
     },
   },
 };

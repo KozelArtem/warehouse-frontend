@@ -18,3 +18,9 @@ export default {
   },
 };
 </script>
+
+<style lang="scss">
+.pointer {
+  cursor: pointer;
+}
+</style>

@@ -22,7 +22,7 @@ const routes = [
   {
     path: '/waybill',
     name: 'waybill',
-    component: () => import('../components/auth/SignInForm.vue'),
+    component: () => import('../components/waybill/WaybillList.vue'),
   },
   {
     path: '/company',

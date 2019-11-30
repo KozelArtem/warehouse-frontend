@@ -27,6 +27,9 @@ const placeService = (distId, id) => `${placeServiceList(distId)}/${id}`;
 const order = '/order';
 const orderById = id => `/order/${id}`;
 
+const waybill = '/waybill';
+const waybillInfo = id => `${waybill}/${id}`;
+
 
 export {
   baseURL,
@@ -57,4 +60,7 @@ export {
 
   order,
   orderById,
+
+  waybill,
+  waybillInfo,
 };

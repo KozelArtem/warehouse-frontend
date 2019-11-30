@@ -1,4 +1,4 @@
-const baseURL = 'http://localhost:3000';
+const baseURL = 'https://warehouse-mpp.herokuapp.com/';
 
 const login = '/login';
 

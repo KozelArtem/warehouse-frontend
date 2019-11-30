@@ -9,7 +9,7 @@
       <v-card>
         <v-card-title class="purple white--text darken-3">
           <span class="headline" v-if="waybill">
-            {{ waybill.number }} {{ waybill.date }}  
+            {{ waybill.number }} {{ waybill.date }}
           </span>
           <v-spacer></v-spacer>
           <v-icon color="red" @click="$emit('close')">mdi-close</v-icon>

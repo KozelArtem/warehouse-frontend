@@ -115,6 +115,7 @@ export default {
 
     onWaybillFormSubmit() {
       this.newWaybillDialog = false;
+      this.selectedWaybill = null;
       this.loadWaybills();
     },
   },

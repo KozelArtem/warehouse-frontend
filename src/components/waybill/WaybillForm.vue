@@ -188,18 +188,19 @@ export default {
     },
 
     async submit() {
-      if (this.valid) {
+      if (!this.valid) {
         return;
       }
 
+      this.loading = true;
       this.waybill.orders = this.orders.filter(order => order.selected);
 
       const waybillFromAPI = await createWaybill(this.waybill);
 
-      if (waybillFromAPI) {
-        this.waybill = { ...this.waybillTemplate };
-        this.$emit('submit', waybillFromAPI);
-      }
+      this.waybill = { ...this.waybillTemplate };
+      this.loading = false;
+      this.$emit('submit', waybillFromAPI);
+
     },
   },
 };

@@ -102,7 +102,6 @@ export default {
 
   watch: {
     items() {
-      console.log(123);
       this.localItems = this.items;
     },
   },
@@ -135,7 +134,6 @@ export default {
 
       await this.emitOpenCategory(category);
       this.baseCategory = category;
-      console.log(this.baseCategory);
       this.localItems = category.children;
     },
 

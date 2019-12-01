@@ -133,7 +133,6 @@ const getOrders = async () => {
 const getOrdersByIds = async (strIds) => {
   try {
     const url = `${order}?ids=${strIds}`;
-    console.log(url);
     const response = await request(METHODS.GET, url);
 
     return response.data || [];

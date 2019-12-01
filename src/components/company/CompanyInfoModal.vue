@@ -145,8 +145,6 @@ export default {
 
   methods: {
     async loadCompany() {
-      console.log(this.companyId);
-
       if (this.companyId <= 0) {
         this.company = {};
 
@@ -158,7 +156,6 @@ export default {
       }
 
       this.company.style = `background: ${this.company.color}`;
-      console.log(this.company);
     },
   },
 };

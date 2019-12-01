@@ -83,8 +83,7 @@ export default {
   }),
 
   methods: {
-    selectRow(row) {
-      console.log(row);
+    selectRow() {
       this.dialog = true;
     },
   },

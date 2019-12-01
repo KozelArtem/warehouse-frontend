@@ -9,7 +9,7 @@ const sort = (a, b, desc = true) => {
   const dateA = moment(a, DEFAULT_DATE_FORMAT);
   const dateB = moment(b, DEFAULT_DATE_FORMAT);
 
-  return desc ? dateA - dateB : dateB - dateA;
+  return desc ? dateB - dateA : dateA - dateB;
 };
 
 const sortDesc = (a, b) => sort(a, b, true);

@@ -1,10 +1,28 @@
 <template>
   <div>
+    <v-dialog
+      v-model="newWaybillDialog"
+      scrollable fullscreen
+      persistent no-click-animation
+      transition="dialog-transition"
+    >
+      <v-card>
+        <v-card-title class="purple white--text darken-3">
+          <span class="headline">Добавление накладной</span>
+          <v-spacer></v-spacer>
+          <v-icon color="red" @click="newWaybillDialog = false">mdi-close</v-icon>
+        </v-card-title>
+        <v-card-text>
+          <WaybillForm @submit="onWaybillFormSubmit"/>
+        </v-card-text>
+      </v-card>
+    </v-dialog>
+
     <v-toolbar class="elevation-0">
       <v-toolbar-title>Накладные</v-toolbar-title>
       <v-spacer></v-spacer>
       <v-btn icon>
-        <v-icon color="green">mdi-plus-circle</v-icon>
+        <v-icon color="green" @click="newWaybillDialog = true">mdi-plus-circle</v-icon>
       </v-btn>
     </v-toolbar>
       <v-divider></v-divider>
@@ -20,13 +38,16 @@
         <tbody>
           <tr
             class="pointer"
-            v-for="item in items"
-            :key="item.id"
-            @click="selectRow(item)"
+            v-for="waybill in waybills"
+            :key="waybill.id"
+            @click="selectRow(waybill)"
           >
-            <td>{{ item.number }}</td>
-            <td>{{ item.date }}</td>
-            <td>{{ item.count }}</td>
+            <td>{{ waybill.number }}</td>
+            <td>{{ waybill.date }}</td>
+            <td>{{ waybill.purchaseCount }}</td>
+            <td>
+               <v-icon>mdi-pencil</v-icon>
+            </td>
           </tr>
         </tbody>
       </template>
@@ -34,20 +55,19 @@
     <v-dialog
       v-model="dialog"
       scrollable fullscreen
-      persistent :overlay="false"
-      max-width="500px"
+      persistent no-click-animation
       transition="dialog-transition"
     >
-      <v-card>
+      <v-card v-if="selectedWaybill">
         <v-card-title class="purple white--text darken-3">
           <span class="headline">
-            <!-- {{ (category || {}).name ? 'Добавление нового' : 'Редактирование' }} элемента -->
+            {{ `${selectedWaybill.number} от ${selectedWaybill.date}` }}
           </span>
           <v-spacer></v-spacer>
-          <v-icon color="red" @click="$emit('close')">{{icons.close}}</v-icon>
+          <v-icon color="red" @click="dialog = false">mdi-close</v-icon>
         </v-card-title>
         <v-card-text>
-          <WaybillOrderList />
+          <WaybillInfo :id="selectedWaybill.id" />
         </v-card-text>
       </v-card>
     </v-dialog>
@@ -55,37 +75,51 @@
 </template>
 
 <script>
-import WaybillOrderList from './WaybillOrderList.vue';
+import api from '../../api';
+
+import dates from '../../helpers/dates';
+
+const { getWaybillList } = api;
+
+const { format: formatDate } = dates;
 
 export default {
   components: {
-    WaybillOrderList,
+    WaybillForm: () => import('./WaybillForm.vue'),
+    WaybillInfo: () => import('./WaybillInfo.vue'),
   },
 
   data: () => ({
     dialog: false,
-    headers: [
-      { name: 'Номер', value: 'number' },
-      { name: 'Дата', value: 'date' },
-      { name: 'Количество', value: 'count' },
-    ],
-    items: [
-      {
-        id: 1, number: 123, date: Date.now(), count: 5,
-      },
-      {
-        id: 2, number: 1234, date: Date.now(), count: 15,
-      },
-      {
-        id: 3, number: 1235, date: Date.now(), count: 52,
-      },
-    ],
+    newWaybillDialog: false,
+
+    selectedWaybill: null,
+
+    waybills: [],
   }),
 
+  beforeMount() {
+    this.loadWaybills();
+  },
+
   methods: {
-    selectRow() {
+    async loadWaybills() {
+      const data = await getWaybillList();
+      this.waybills = data.map(value => ({ ...value, date: formatDate(value.date) }));
+    },
+
+    selectRow(waybill) {
+      this.selectedWaybill = waybill;
       this.dialog = true;
     },
+
+    onWaybillFormSubmit() {
+      this.newWaybillDialog = false;
+      this.loadWaybills();
+    }
   },
 };
 </script>
+
+<style lang="scss">
+</style>

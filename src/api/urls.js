@@ -1,4 +1,4 @@
-const baseURL = 'https://warehouse-mpp.herokuapp.com/';
+const baseURL = 'http://localhost:3000';
 
 const login = '/login';
 
@@ -25,6 +25,7 @@ const placeServiceList = distId => `${distributionPlaces}/${distId}/service`;
 const placeService = (distId, id) => `${placeServiceList(distId)}/${id}`;
 
 const order = '/order';
+const activeOrders = '/order/active';
 const orderById = id => `/order/${id}`;
 
 const waybill = '/waybill';
@@ -59,6 +60,7 @@ export {
   placeService,
 
   order,
+  activeOrders,
   orderById,
 
   waybill,

@@ -7,6 +7,7 @@ import { METHODS, request } from './axiosWrapper';
 import category from './category';
 import company from './company';
 import item from './item';
+import waybill from './waybill';
 
 import {
   login as loginURL,
@@ -17,6 +18,7 @@ import {
   placeService,
 
   order,
+  activeOrders,
   orderById,
   itemDistribution,
   itemDistributionInfo,
@@ -130,6 +132,16 @@ const getOrders = async () => {
   }
 };
 
+const getActiveOrders = async () => {
+  try {
+    const response = await request(METHODS.GET, activeOrders);
+
+    return response.data || {};
+  } catch (err) {
+    return {};
+  }
+};
+
 const getOrdersByIds = async (strIds) => {
   try {
     const url = `${order}?ids=${strIds}`;
@@ -180,6 +192,7 @@ export default {
   ...category,
   ...company,
   ...item,
+  ...waybill,
 
   createItemDistribution,
   getItemDistributionInfo,
@@ -192,6 +205,7 @@ export default {
   updatePlaceService,
 
   getOrders,
+  getActiveOrders,
   getOrdersByIds,
   createOrder,
   updateOrder,

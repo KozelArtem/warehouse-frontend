@@ -38,6 +38,7 @@
                   :loading="loadingCompanies"
                   :slotButtonDisabled="showCompanyDialog"
                   :selectedItemId="order.companyId"
+                  :requiredField="false"
                   @slotButtonClick="showCompanyDialog = true"
                   @change="companyId => order.companyId = companyId"
                 />

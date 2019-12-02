@@ -200,7 +200,6 @@ export default {
       this.waybill = { ...this.waybillTemplate };
       this.loading = false;
       this.$emit('submit', waybillFromAPI);
-
     },
   },
 };

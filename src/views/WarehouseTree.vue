@@ -8,7 +8,7 @@
           @close="newItemModal = false; selectedCategory = null"
           @submit="saveNewItem"/>
       </v-flex>
-      <v-flex xs11 sm11 md7 lg7>
+      <v-flex xs10 sm10 md7 lg7>
         <v-text-field
           v-model="search"
           @input="findItems()"
@@ -34,7 +34,7 @@
           single-line
         ></v-select>
       </v-flex>
-      <v-flex xs1 sm1 md1 lg1>
+      <v-flex xs2 sm2 md1 lg1>
         <v-icon medium :color="!treeView ? 'red' : ''" @click="treeView = false; itemId = null">
           mdi-table-large
         </v-icon>
@@ -143,7 +143,7 @@ export default {
     items: [],
     menu: {},
 
-    treeView: false,
+    treeView: true,
 
     newItemModal: false,
     selectedCategory: null,

@@ -44,17 +44,17 @@
             </v-list-item-icon>
 
             <v-list-item-content>
-              <v-list-item-title class="subtitle-1 d-flex">
-                {{ selectedCompany.name }}
+              <v-list-item-title class="d-flex">
+                <span class="subtitle-1 d-flex">{{ selectedCompany.name }}</span>
                 <v-spacer></v-spacer>
-                <span v-if="isAdmin()" class="d-flex">
+                <v-chip v-if="isAdmin()" color="white" small class="d-flex">
                   <v-icon color="orange" @click="editCompanyModal = true">
                     mdi-pencil
                   </v-icon>
                   <v-icon color="red" @click="removeCompany()">
                     mdi-delete
                   </v-icon>
-                </span>
+                </v-chip>
               </v-list-item-title>
             </v-list-item-content>
           </v-list-item>
@@ -96,7 +96,7 @@
 
             <v-list-item-content>
               <v-list-item-title>
-                <a :href="selectedCompany.website">
+                <a :href="selectedCompany.website" target="_blank" rel="noopener noreferrer">
                   {{ selectedCompany.website }}
                 </a>
               </v-list-item-title>

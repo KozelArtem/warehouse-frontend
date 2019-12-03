@@ -59,7 +59,7 @@
 
             <v-list-item-content>
               <v-list-item-title class="subtitle-2">
-                <a :href="company.website">
+                <a :href="company.website" target="_blank" rel="noopener noreferrer">
                   {{ company.website }}
                 </a>
               </v-list-item-title>

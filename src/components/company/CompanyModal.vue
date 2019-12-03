@@ -10,7 +10,7 @@
       <v-card-title class="green lighten-2 white--text">
         <span class="headline">Карта партнера</span>
         <v-spacer></v-spacer>
-        <v-icon color="red" @click="$emit('close')">mdi-close</v-icon>
+        <v-icon color="red" @click="onClose()">mdi-close</v-icon>
       </v-card-title>
       <v-card-text>
         <v-form v-model="valid">
@@ -195,6 +195,11 @@ export default {
 
       this.company = { ...this.companyTemplate, phones: [''] };
       this.$emit('submit', companyRes);
+    },
+
+    onClose() {
+      this.company = { ...this.companyTemplate };
+      this.$emit('close');
     },
   },
 };

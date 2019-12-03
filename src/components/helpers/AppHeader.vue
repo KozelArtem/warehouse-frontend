@@ -8,7 +8,7 @@
           <template v-slot:activator="{ on }">
             <router-link :to="item.link" v-slot="{ isExactActive, navigate }">
               <v-icon
-                class="px-3"
+                :class="['px-1', { 'px-3': $vuetify.breakpoint.smAndUp }]"
                 medium
                 :color="isExactActive ? 'deep-orange accent-2' : 'white'"
                 v-on="on"
@@ -56,12 +56,12 @@ export default {
         icon: 'mdi-file-document-box-check-outline',
         title: 'Накладные',
       },
-      {
-        id: 4,
-        link: '/report',
-        icon: 'mdi-file-chart-outline',
-        title: 'Отчеты',
-      },
+      // {
+      //   id: 4,
+      //   link: '/report',
+      //   icon: 'mdi-file-chart-outline',
+      //   title: 'Отчеты',
+      // },
       {
         id: 5,
         link: '/distribution',

@@ -129,9 +129,6 @@ import constants from '../../constants/data.json';
 
 import rules from '../../helpers/validationRules';
 
-import AutocompleteWithAdd from '../helpers/AutocompleteWithAdd.vue';
-import CompanyModal from '../company/CompanyModal.vue';
-
 const {
   createItem,
   updateItem,
@@ -147,8 +144,8 @@ const {
 
 export default {
   components: {
-    AutocompleteWithAdd,
-    CompanyModal,
+    AutocompleteWithAdd: () => import('../helpers/AutocompleteWithAdd.vue'),
+    CompanyModal: () => import('../company/CompanyModal.vue'),
   },
 
   props: {
@@ -181,7 +178,10 @@ export default {
       amount: 0,
       imagePath: '',
       note: '',
-      urls: [{}],
+      urls: [{
+        name: '',
+        data: '',
+      }],
     },
 
     search: null,
@@ -216,6 +216,8 @@ export default {
         ...this.data,
         categoryId: (this.data.category || {}).id,
       };
+
+      this.item.urls = this.item.urls.length ? this.item.urls : [{ name: '', data: '' }];
     },
   },
 

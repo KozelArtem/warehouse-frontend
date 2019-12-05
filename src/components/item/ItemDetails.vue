@@ -74,13 +74,14 @@
           <span class="subtitle-2">{{item.note}}</span>
         </v-tab-item>
         <v-tab-item class="pa-4">
-          <router-link
-            v-for="url in item.urls"
-            :key="`url${url.id}`"
-            :to="url.data"
+          <a
+            v-for="(url, ind) in item.urls"
+            :key="`url${ind}`"
+            :href="url.data"
+            target="_blank"
           >
-            <span>{{ url.name }}</span>
-          </router-link>
+            {{ url.name }}
+          </a>
         </v-tab-item>
       </v-tabs>
     </v-card-text>

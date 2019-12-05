@@ -74,12 +74,12 @@ export default {
         icon: 'mdi-domain',
         title: 'Компании',
       },
-      {
-        id: 7,
-        link: '/',
-        icon: 'mdi-book-search',
-        title: 'Дневник',
-      },
+      // {
+      //   id: 7,
+      //   link: '/',
+      //   icon: 'mdi-book-search',
+      //   title: 'Дневник',
+      // },
     ],
   }),
 

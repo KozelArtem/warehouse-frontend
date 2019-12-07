@@ -33,6 +33,14 @@
                 ></v-text-field>
               </v-col>
               <v-col cols="12">
+                <v-textarea
+                  v-model="company.description"
+                  label="Описание"
+                  dense
+                  hide-details
+                ></v-textarea>
+              </v-col>
+              <v-col cols="12">
                 <v-text-field
                   v-model="company.website"
                   label="Сайт"
@@ -119,6 +127,8 @@ export default {
 
     companyTemplate: {
       name: '',
+      person: '',
+      description: '',
       location: '',
       website: '',
       phones: [''],

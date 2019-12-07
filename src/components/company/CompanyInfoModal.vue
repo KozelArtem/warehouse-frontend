@@ -36,6 +36,18 @@
 
           <v-divider inset></v-divider>
 
+          <v-list-item dense>
+            <v-list-item-icon>
+              <v-icon color="indigo">mdi-information</v-icon>
+            </v-list-item-icon>
+
+            <v-list-item-content>
+              {{ company.description }}
+            </v-list-item-content>
+          </v-list-item>
+
+          <v-divider inset></v-divider>
+
           <v-list-item v-for="(phone, pi) in company.phones" :key="`phone${pi}`">
             <v-list-item-icon>
               <v-icon color="indigo" v-if="pi === 0">mdi-phone</v-icon>

@@ -21,11 +21,9 @@
 </template>
 
 <script>
-import dateService from '../../helpers/dates';
+import { format as formatDate, sortDesc } from '../../helpers/dates';
 
 import constant from '../../constants/data.json';
-
-const { sortDesc: sortDate, format: formatDate } = dateService;
 
 export default {
   props: {
@@ -53,7 +51,7 @@ export default {
         text: 'Дата',
         value: 'date',
         divider: true,
-        sort: sortDate,
+        sort: sortDesc,
       },
       {
         text: 'Количество',

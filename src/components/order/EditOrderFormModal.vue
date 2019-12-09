@@ -85,7 +85,7 @@
 import api from '../../api';
 import constants from '../../constants/data.json';
 
-import dates from '../../helpers/dates';
+import { format as formatDate } from '../../helpers/dates';
 import rules from '../../helpers/validationRules';
 
 import AutocompleteWithAdd from '../helpers/AutocompleteWithAdd.vue';
@@ -99,11 +99,6 @@ const {
 const {
   icons,
 } = constants;
-
-const {
-  format: formatDate,
-} = dates;
-
 
 export default {
   components: {

@@ -102,7 +102,7 @@ import api from '../../api';
 
 import constants from '../../constants/data.json';
 
-import dates from '../../helpers/dates';
+import { format as formatDate, sortDesc } from '../../helpers/dates';
 import rules from '../../helpers/validationRules';
 
 const {
@@ -114,11 +114,6 @@ const {
 const {
   icons,
 } = constants;
-
-const {
-  format: formatDate,
-  sortDesc,
-} = dates;
 
 export default {
   components: {

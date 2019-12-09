@@ -52,8 +52,10 @@
 
       <v-dialog
         v-model="dialog"
-        scrollable fullscreen
-        persistent no-click-animation
+        scrollable
+        :fullscreen="fullscreen"
+        :width="$vuetify.breakpoint.xs ? '100%' : '700px'"
+        no-click-animation
         transition="dialog-transition"
       >
         <v-card v-if="selectedWaybill">
@@ -62,6 +64,9 @@
               {{ `${selectedWaybill.number} от ${selectedWaybill.date}` }}
             </span>
             <v-spacer></v-spacer>
+            <v-icon color="white" @click="showFullscreen = !showFullscreen">
+              {{ fullscreen ? 'mdi-fullscreen-exit' : 'mdi-fullscreen' }}
+            </v-icon>
             <v-icon color="red" @click="dialog = false">mdi-close</v-icon>
           </v-card-title>
           <v-card-text>
@@ -76,11 +81,9 @@
 <script>
 import api from '../../api';
 
-import dates from '../../helpers/dates';
+import { format as formatDate } from '../../helpers/dates';
 
 const { getWaybillList } = api;
-
-const { format: formatDate } = dates;
 
 export default {
   components: {
@@ -97,10 +100,18 @@ export default {
     items: [],
     search: null,
     waybills: [],
+
+    showFullscreen: false,
   }),
 
   beforeMount() {
     this.loadWaybills();
+  },
+
+  computed: {
+    fullscreen() {
+      return this.showFullscreen || this.$vuetify.breakpoint.xs;
+    },
   },
 
   watch: {

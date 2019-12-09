@@ -14,21 +14,21 @@
         >
           <template v-slot:top>
             <v-toolbar color="">
-              <v-toolbar-title>{{ title }}</v-toolbar-title>
+              <v-toolbar-title v-if="$vuetify.breakpoint.smAndUp">{{ title }}</v-toolbar-title>
               <v-divider class="mx-4" inset vertical></v-divider>
-                <span style="width: 200px">
-                  <v-select
-                    v-model="activeOrderSortId"
-                    :items="statuses"
-                    menu-props="auto"
-                    label="Статус"
-                    hide-details
-                    item-value="id"
-                    item-text="name"
-                    prepend-icon="mdi-sort"
-                    single-line
-                  ></v-select>
-                </span>
+              <span style="width: 200px">
+                <v-select
+                  v-model="activeOrderSortId"
+                  :items="statuses"
+                  menu-props="auto"
+                  label="Статус"
+                  hide-details
+                  item-value="id"
+                  item-text="name"
+                  prepend-icon="mdi-sort"
+                  single-line
+                ></v-select>
+              </span>
               <v-divider class="mx-4" inset vertical></v-divider>
               <v-spacer></v-spacer>
               <v-dialog persistent v-if="isAdmin()" v-model="dialog" max-width="80%">
@@ -105,7 +105,7 @@
 <script>
 import api from '../api';
 import constants from '../constants/data.json';
-import dates from '../helpers/dates';
+import { format as formatDate, sortDesc } from '../helpers/dates';
 
 import OrderForm from '../components/order/OrderForm.vue';
 import EditOrderFormModal from '../components/order/EditOrderFormModal.vue';
@@ -117,11 +117,6 @@ const {
   getOrdersByIds,
   removeOrder,
 } = api;
-
-const {
-  format: formatDate,
-  sortDesc,
-} = dates;
 
 const orderStatuses = {
   all: {

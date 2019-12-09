@@ -3,8 +3,9 @@
     <v-layout row wrap>
       <v-flex>
         <div class="text-center">
-          <v-sheet color="orange lighten-2"
-            class="subtitle-1">Журнал работ</v-sheet>
+          <v-sheet color="orange lighten-2" class="py-3 subtitle-1">
+            Журнал работ
+          </v-sheet>
         </div>
         <v-data-table
           :headers="headers"
@@ -123,7 +124,7 @@
 
 <script>
 import api from '../../api';
-import dates from '../../helpers/dates';
+import { format as formatDate } from '../../helpers/dates';
 import rules from '../../helpers/validationRules';
 
 const {
@@ -132,8 +133,6 @@ const {
   createPlaceService,
   updatePlaceService,
 } = api;
-
-const { format: formatDate } = dates;
 
 export default {
   data: () => ({

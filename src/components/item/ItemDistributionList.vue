@@ -7,6 +7,7 @@
     :no-data-text="noData"
     :no-results-text="noResults"
     locale="ru-RU"
+    disable-sort
     dense
   >
     <template v-slot:body.prepend="{ item, headers }" v-if="isAdmin()">
@@ -77,7 +78,7 @@
 <script>
 import api from '../../api';
 
-import dateService from '../../helpers/dates';
+import { format as formatDate, sortDesc } from '../../helpers/dates';
 import validationRules from '../../helpers/validationRules';
 
 import constant from '../../constants/data.json';
@@ -91,8 +92,6 @@ const {
   createItemDistribution,
   getItemDistributionInfo,
 } = api;
-
-const { sortDesc: sortDate, format: formatDate } = dateService;
 
 export default {
   components: {
@@ -128,7 +127,7 @@ export default {
         text: 'Дата',
         value: 'date',
         divider: true,
-        sort: sortDate,
+        sort: sortDesc,
       },
       {
         text: 'Количество',

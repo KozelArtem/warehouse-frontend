@@ -4,7 +4,7 @@
       <thead>
         <tr>
           <th class="text-left">Наименование</th>
-          <th class="text-left">Количество</th>
+          <th class="text-left">Кол-во</th>
           <th class="text-left">Дата заказа</th>
           <th class="text-left">Компания</th>
         </tr>
@@ -27,14 +27,11 @@
 <script>
 import api from '../../api';
 
-import dates from '../../helpers/dates';
+import { format as formatDate } from '../../helpers/dates';
 
 const {
   getWaybillInfo,
 } = api;
-
-const { format: formatDate } = dates;
-
 
 export default {
   props: {

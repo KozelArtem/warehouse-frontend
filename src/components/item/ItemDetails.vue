@@ -12,12 +12,9 @@
       :companyId="item.companyId || -1"
       @close="showCompanyInfo = false"
     />
-    <v-card-title class="subtitle-1 grey lighten-2 card-header" primary-title>
+    <v-card-title class="subtitle-1 grey lighten-2" primary-title>
       <v-flex>
-        <span>{{ title }}</span>
-        <span class="control--icons" v-if="isAdmin()">
-          <v-icon color="primary" @click="editDialog = true">mdi-pencil</v-icon>
-        </span>
+        <span @contextmenu.prevent="isAdmin() ? editDialog = true : ''">{{ title }}</span>
       </v-flex>
       <v-flex class="text-right">
       <span class="pa-0 ma-0" stype="right: 0; top: 0">
@@ -174,17 +171,3 @@ export default {
   },
 };
 </script>
-
-<style lang="scss" scoped>
-.card-header {
-  .control--icons {
-    display: none;
-  }
-
-  &:hover {
-    .control--icons {
-      display: inline;
-    }
-  }
-}
-</style>

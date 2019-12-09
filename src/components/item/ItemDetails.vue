@@ -1,19 +1,24 @@
 <template>
   <v-card v-if="item">
     <ItemModal
+      v-if="editDi"
       :dialog="editDialog"
       :data="item"
       @close="editDialog = false"
       @submit="itemModalSubmit"
     />
     <CompanyInfoModal
+      v-if="showCompanyInfo"
       :dialog="showCompanyInfo"
       :companyId="item.companyId || -1"
       @close="showCompanyInfo = false"
     />
-    <v-card-title class="subtitle-1 grey lighten-2" primary-title>
+    <v-card-title class="subtitle-1 grey lighten-2 card-header" primary-title>
       <v-flex>
-        <span @contextmenu.prevent="isAdmin() ? editDialog = true : ''">{{ title }}</span>
+        <span>{{ title }}</span>
+        <span class="control--icons" v-if="isAdmin()">
+          <v-icon color="primary" @click="editDialog = true">mdi-pencil</v-icon>
+        </span>
       </v-flex>
       <v-flex class="text-right">
       <span class="pa-0 ma-0" stype="right: 0; top: 0">
@@ -52,14 +57,21 @@
       <div>
       </div>
       <v-tabs>
+        <v-tab>Заметка</v-tab>
         <v-tab>Заказ</v-tab>
         <v-tab>Расход</v-tab>
-        <v-tab>Заметка</v-tab>
         <v-tab>Ссылки</v-tab>
         <v-spacer></v-spacer>
         <v-chip class="headline font-weight-black white--text mt-2"
           label readonly color="green">
           {{ item.amount }}</v-chip>
+
+        <v-tab-item class="pa-4">
+          <p v-for="row in item.note.split('\n')" :key="row" class="black--text">
+            {{ row }}
+          </p>
+        </v-tab-item>
+
         <v-tab-item>
           <ItemPurchaseList :items="item.purchases" />
         </v-tab-item>
@@ -69,9 +81,6 @@
             :items="item.distributions"
             @submit="newItemDistribution"
           />
-        </v-tab-item>
-        <v-tab-item class="pa-4">
-          <span class="subtitle-2">{{item.note}}</span>
         </v-tab-item>
         <v-tab-item class="pa-4">
           <a
@@ -93,8 +102,6 @@ import api from '../../api';
 
 import ItemPurchaseList from './ItemPurchaseList.vue';
 import ItemDistributionList from './ItemDistributionList.vue';
-import ItemModal from './ItemModal.vue';
-import CompanyInfoModal from '../company/CompanyInfoModal.vue';
 
 const {
   isAdmin,
@@ -103,10 +110,10 @@ const {
 
 export default {
   components: {
-    ItemModal,
+    ItemModal: () => import('./ItemModal.vue'),
     ItemPurchaseList,
     ItemDistributionList,
-    CompanyInfoModal,
+    CompanyInfoModal: () => import('../company/CompanyInfoModal.vue'),
   },
 
   props: {
@@ -170,4 +177,15 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+.card-header {
+  .control--icons {
+    display: none;
+  }
+
+  &:hover {
+    .control--icons {
+      display: inline;
+    }
+  }
+}
 </style>

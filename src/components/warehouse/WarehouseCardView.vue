@@ -12,7 +12,7 @@
         <ItemDetails :itemId="itemId" @close="itemId = -1; itemView = false" />
       </v-dialog>
     </v-flex>
-    <v-flex xs2 v-if="(baseCategory || {}).id">
+    <v-flex xs6 sm4 md3 lg2 v-if="(baseCategory || {}).id">
       <v-card
         height="120"
         flat hover
@@ -24,7 +24,7 @@
         </v-icon>
       </v-card>
     </v-flex>
-    <v-flex xs2 v-for="item in localItems" :key="item.id">
+    <v-flex xs6 sm4 md3 lg2 v-for="item in localItems" :key="item.id">
       <v-card height="120" flat hover @click="openCategory(item)" class="text-center">
         <v-img
           v-if="!item.children"

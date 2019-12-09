@@ -8,24 +8,36 @@
     item-key="id"
     open-on-click
     dense
+    transition
     expand-icon
     :load-children="openCategory"
   >
-    <template v-slot:label="{ item }">
+    <template v-slot:label="{ item, open }">
       <v-text-field
         v-if="item.edit"
         label="Название категории"
         :rules="[required]"
         v-model="item.name"
         @keypress="key => onNewCategoryTFKeyPress(key, item)"
+        append-outer-icon="mdi-close"
+        @click:outer-icon="newCategory(item.parent)"
       ></v-text-field>
 
       <v-menu v-model="menu[item.id]" v-else offset-y>
         <template v-slot:activator="{ on }">
           <span
+            v-if="item.children"
+            @contextmenu.prevent="openMenu(item.id, open)"
+          >
+            {{ item.name }}
+          </span>
+          <span
+            v-else
             :class="item.amount === 0 ? 'red lighten-1 white--text' : ''"
             @contextmenu.prevent="openMenu(item.id)"
-          >{{ item.name }}</span>
+          >
+            {{ item.name }}
+          </span>
         </template>
         <v-layout column class="white">
           <v-btn
@@ -98,8 +110,10 @@ export default {
       return key ? getIdFromKey(key) : null;
     },
 
-    openMenu(itemId) {
-      this.menu = { [itemId]: true };
+    openMenu(itemId, isFolderOpened) {
+      if (isFolderOpened) {
+        this.menu = { [itemId]: true };
+      }
     },
 
     async openCategory(category) {

@@ -45,7 +45,7 @@
       <v-flex
         :hidden-sm-and-down="itemId"
         :xs4="itemId"
-        :xs12="!itemId" style="max-height: 70vh"
+        :xs12="!itemId" style="max-height: 85vh"
         class="overflow-y-auto"
       >
         <div v-if="search">
@@ -207,7 +207,6 @@ export default {
       const categoryCopy = category;
       const categoryId = getIdFromKey(categoryCopy.id);
       const { items, categories } = await getCategoryInfo(categoryId);
-
       categoryCopy.fetch = true;
       categoryCopy.children = [
         ...mapCategories(categories),
@@ -301,9 +300,11 @@ export default {
       this.newItemModal = true;
     },
 
-    saveNewItem(item, newItem = true) {
+    async saveNewItem(item, newItem = true) {
       if (newItem) {
-        this.selectedCategory.children.unshift(item);
+        this.selectedCategory.id = createCategoryKey(this.selectedCategory.id);
+
+        await this.fetchCategoryInfo({ ...this.selectedCategory });
         this.selectedCategory = null;
         this.newItemModal = false;
 

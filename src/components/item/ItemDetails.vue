@@ -1,7 +1,6 @@
 <template>
   <v-card v-if="item">
     <ItemModal
-      v-if="editDi"
       :dialog="editDialog"
       :data="item"
       @close="editDialog = false"
@@ -67,7 +66,7 @@
           {{ item.amount }}</v-chip>
 
         <v-tab-item class="pa-4">
-          <p v-for="row in item.note.split('\n')" :key="row" class="black--text">
+          <p v-for="row in (item.note || '').split('\n')" :key="row" class="black--text">
             {{ row }}
           </p>
         </v-tab-item>

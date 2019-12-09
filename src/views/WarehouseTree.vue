@@ -45,7 +45,7 @@
       <v-flex
         :hidden-sm-and-down="itemId"
         :xs4="itemId"
-        :xs12="!itemId" style="max-height: 85vh"
+        :xs12="!itemId" style="max-height: 82vh"
         class="overflow-y-auto"
       >
         <div v-if="search">

@@ -29,12 +29,12 @@
       </v-flex>
       <v-flex xs2 v-for="company in localCompanies" :key="company.id">
         <v-card :color="company.color">
-          <v-card-title primary-title class="pb-0">
+          <v-card-title primary-title class="pb-0 lh-0">
             <div class="d-flex subtitle-2">{{ company.name }} | {{ company.person }}</div>
             <v-spacer></v-spacer>
             <div v-if="isAdmin()" class="float-right active-buttons">
-              <v-icon color="primary" @click="editCompany(company)">mdi-pencil</v-icon>
-              <v-icon color="red" @click="removeCompany(company)">mdi-delete</v-icon>
+              <v-icon small color="primary" @click="editCompany(company)">mdi-pencil</v-icon>
+              <v-icon small color="red" @click="removeCompany(company)">mdi-delete</v-icon>
             </div>
           </v-card-title>
           <v-card-text class="pb-0">
@@ -216,5 +216,9 @@ export default {
       display: inline;
     }
   }
+}
+
+.lh-0 {
+  line-height: 0 !important;
 }
 </style>

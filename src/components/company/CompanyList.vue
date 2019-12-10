@@ -30,7 +30,7 @@
       <v-flex xs2 v-for="company in localCompanies" :key="company.id">
         <v-card :color="company.color">
           <v-card-title primary-title class="pb-0">
-            <div class="d-flex title">{{ company.name }} | {{ company.person }}</div>
+            <div class="d-flex subtitle-2">{{ company.name }} | {{ company.person }}</div>
             <v-spacer></v-spacer>
             <div v-if="isAdmin()" class="float-right active-buttons">
               <v-icon color="primary" @click="editCompany(company)">mdi-pencil</v-icon>
@@ -38,7 +38,7 @@
             </div>
           </v-card-title>
           <v-card-text class="pb-0">
-            <blockquote>{{ company.description }}</blockquote>
+            <blockquote class="caption">{{ company.description }}</blockquote>
             <v-list v-if="company.showInfo" dense>
               <v-list-item dense>
                 <v-list-item-icon>

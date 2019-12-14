@@ -2,6 +2,7 @@
   <v-dialog v-model="dialog" persistent max-width="600px">
     <QuickCreateItemModal
       :dialog="newItemDialog"
+      :name="inputName"
       @close="newItemDialog = false"
       @submit="onNewItem"
     />
@@ -27,7 +28,7 @@
                   :loading="loadingItems"
                   :slotButtonDisabled="newItemDialog"
                   :selectedItemId="order.itemId"
-                  @slotButtonClick="newItemDialog = true"
+                  @slotButtonClick="onAddNewItemClick"
                   @change="onItemSelect"
                 />
               </v-flex>
@@ -143,6 +144,7 @@ export default {
     itemsLoading: false,
     newItemDialog: false,
     showCompanyDialog: false,
+    inputName: null,
 
     loadingItems: false,
     items: [],
@@ -244,6 +246,11 @@ export default {
       this.order = { ...this.orderTemplate };
 
       this.$emit('close');
+    },
+
+    onAddNewItemClick(input) {
+      this.newItemDialog = true;
+      this.inputName = input;
     },
   },
 };

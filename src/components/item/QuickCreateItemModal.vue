@@ -76,6 +76,11 @@ export default {
       required: true,
       default: false,
     },
+    name: {
+      type: String,
+      required: false,
+      default: '',
+    },
   },
 
   data: () => ({
@@ -100,6 +105,12 @@ export default {
   async beforeMount() {
     this.item = this.itemTemplate;
     await this.loadCategoriesList();
+  },
+
+  watch: {
+    name() {
+      this.item.name = this.name;
+    },
   },
 
   methods: {

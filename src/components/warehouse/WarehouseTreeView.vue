@@ -26,6 +26,7 @@
       <v-menu v-model="menu[item.id]" v-else offset-y>
         <template v-slot:activator="{ on }">
           <span
+            class="subtitle-2"
             v-if="item.children"
             @contextmenu.prevent="openMenu(item.id, open)"
           >
@@ -33,7 +34,7 @@
           </span>
           <span
             v-else
-            :class="item.amount === 0 ? 'red lighten-1 white--text' : ''"
+            :class="['subtitle-2', { 'red lighten-1 white--text': item.amount === 0 }]"
             @contextmenu.prevent="openMenu(item.id)"
           >
             {{ item.name }}

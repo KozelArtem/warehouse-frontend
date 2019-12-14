@@ -117,7 +117,9 @@ export default {
         return;
       }
 
-      result.categoryName = this.categories[result.categoryId].name;
+      result.categoryName = this.categories
+        .find(category => category.id === result.categoryId)
+        .name;
 
       this.item = this.itemTemplate;
       this.$emit('submit', result);

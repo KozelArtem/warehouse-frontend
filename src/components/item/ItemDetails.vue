@@ -63,9 +63,10 @@
           {{ item.amount }}</v-chip>
 
         <v-tab-item class="pa-4">
-          <p v-for="row in (item.note || '').split('\n')" :key="row" class="black--text">
+          <span v-for="row in (item.note || '').split('\n')" :key="row" class="black--text">
             {{ row }}
-          </p>
+            <br>
+          </span>
         </v-tab-item>
 
         <v-tab-item>

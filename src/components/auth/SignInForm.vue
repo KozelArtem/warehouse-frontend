@@ -35,6 +35,7 @@
           <v-card-actions>
             <v-spacer />
             <v-btn
+              type="submit"
               color="primary"
               :disabled="!valid"
               :loading="loading"

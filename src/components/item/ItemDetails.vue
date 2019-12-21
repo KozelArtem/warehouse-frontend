@@ -91,14 +91,11 @@
           />
         </v-tab-item>
         <v-tab-item class="pa-4">
-          <a
-            v-for="(url, ind) in item.urls"
-            :key="`url${ind}`"
-            :href="url.data"
-            target="_blank"
-          >
-            {{ url.name }}
-          </a>
+          <ol>
+            <li v-for="(url, ind) in item.urls" :key="`url${ind}`">
+              <a :href="url.data" target="_blank">{{ url.name }}</a>
+            </li>
+          </ol>
         </v-tab-item>
       </v-tabs>
     </v-card-text>
@@ -207,6 +204,7 @@ export default {
 <style lang="scss">
 .wrapper {
   .control-panel {
+    padding-left: 10px;
     display: none;
   }
 

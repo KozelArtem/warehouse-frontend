@@ -1,5 +1,12 @@
 <template>
   <v-card v-if="item">
+    <DeleteModal
+      v-if="removeModal"
+      :dialog="removeModal"
+      title="Удаление элемента"
+      :description="removeModalDescription"
+      @click="closeRemoveModal"
+    />
     <ItemModal
       :dialog="editDialog"
       :data="item"
@@ -12,9 +19,13 @@
       :companyId="item.companyId || -1"
       @close="showCompanyInfo = false"
     />
-    <v-card-title class="subtitle-1 grey lighten-2" primary-title>
+    <v-card-title class="subtitle-1 grey lighten-2 wrapper" primary-title>
       <v-flex>
-        <span @contextmenu.prevent="isAdmin() ? editDialog = true : ''">{{ title }}</span>
+        <span>{{ title }}</span>
+        <span class="control-panel" v-if="isAdmin()">
+          <v-icon @click="editDialog = true" color="primary">mdi-pencil</v-icon>
+          <v-icon @click="removeElement(item)" color="red">mdi-delete</v-icon>
+        </span>
       </v-flex>
       <v-flex class="text-right">
       <span class="pa-0 ma-0" stype="right: 0; top: 0">
@@ -103,6 +114,7 @@ import ItemDistributionList from './ItemDistributionList.vue';
 const {
   isAdmin,
   getItemInfo,
+  removeItem,
 } = api;
 
 export default {
@@ -111,6 +123,7 @@ export default {
     ItemPurchaseList,
     ItemDistributionList,
     CompanyInfoModal: () => import('../company/CompanyInfoModal.vue'),
+    DeleteModal: () => import('../helpers/DeleteModal.vue'),
   },
 
   props: {
@@ -133,6 +146,9 @@ export default {
     item: {},
     localItemId: 0,
     imageFullSizeDialog: false,
+
+    removeModal: false,
+    removeModalDescription: null,
   }),
 
   computed: {
@@ -169,6 +185,35 @@ export default {
       this.item.distributions.unshift(itemDist);
       this.item.amount -= itemDist.amount;
     },
+
+    removeElement() {
+      this.removeModal = true;
+      this.removeModalDescription = `Вы действительно хотите удалить ${this.item.name}?`;
+    },
+
+    async closeRemoveModal(result) {
+      if (result) {
+        await removeItem(this.item.id);
+        this.$emit('close');
+        this.item = {};
+      }
+
+      this.removeModal = false;
+    },
   },
 };
 </script>
+
+<style lang="scss">
+.wrapper {
+  .control-panel {
+    display: none;
+  }
+
+  &:hover {
+    .control-panel {
+      display: inline;
+    }
+  }
+}
+</style>

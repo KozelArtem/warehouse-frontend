@@ -54,7 +54,7 @@
             v-for="group in groupedSearchItems"
             :key="`group${group.name}`"
           >
-            <v-subheader>{{group.name}}</v-subheader>
+            <span class="body-2">{{group.name}}</span>
             <v-list-item
               v-for="item in group.items"
               :key="item.id"
@@ -318,14 +318,17 @@ export default {
     },
 
     async findItems() {
-      this.searchedItems = await searchItems(this.search);
+      if ((this.search || '').trim()) {
+        this.searchedItems = await searchItems(this.search);
+      }
     },
   },
 };
 </script>
 
 <style lang="scss">
-.v-treeview--dense .v-treeview-node__root {
+.v-treeview--dense .v-treeview-node__root,
+.v-list-item--dense, .v-list--dense .v-list-item {
   min-height: 20px !important;
 }
 </style>

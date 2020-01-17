@@ -25,7 +25,7 @@
           <v-toolbar-title>Журнал работ</v-toolbar-title>
           <v-spacer></v-spacer>
           <v-btn icon>
-            <v-icon color="green" @click="createPlaceService">mdi-database-plus</v-icon>
+            <v-icon color="green" @click="createNewPlace = true">mdi-database-plus</v-icon>
           </v-btn>
         </v-toolbar>
         <v-data-table
@@ -290,9 +290,7 @@ export default {
     },
 
     async createPlaceService(name) {
-      if (!name) {
-        this.createNewPlace = true;
-
+      if (!name.trim()) {
         return;
       }
 

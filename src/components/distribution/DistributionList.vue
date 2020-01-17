@@ -2,11 +2,32 @@
   <v-container grid-list-xs>
     <v-layout row wrap>
       <v-flex>
-        <div class="text-center">
-          <v-sheet color="orange lighten-2" class="py-3 subtitle-1">
-            Журнал работ
-          </v-sheet>
-        </div>
+        <v-dialog
+          v-model="createNewPlace"
+          :overlay="false"
+          max-width="500px"
+          transition="dialog-transition"
+        >
+          <v-card>
+            <v-card-title primary-title>
+              Добавление нового места
+            </v-card-title>
+            <v-card-text>
+              <v-text-field v-model="name"/>
+            </v-card-text>
+            <v-card-actions>
+              <v-spacer></v-spacer>
+              <v-btn outlined color="green" @click="createPlaceService(name)">Сохранить</v-btn>
+            </v-card-actions>
+          </v-card>
+        </v-dialog>
+        <v-toolbar dense color="orange lighten-2">
+          <v-toolbar-title>Журнал работ</v-toolbar-title>
+          <v-spacer></v-spacer>
+          <v-btn icon>
+            <v-icon color="green" @click="createPlaceService">mdi-database-plus</v-icon>
+          </v-btn>
+        </v-toolbar>
         <v-data-table
           :headers="headers"
           :items="places"
@@ -18,7 +39,10 @@
           class="elevation-1"
         >
           <template v-slot:item.count="{ item }">
-            {{ item.todos.length || '' }}
+            {{ item.todos.length || 0 }} / {{ item.completed.length || 0 }}
+          </template>
+          <template v-slot:item.TO="{ item }">
+            {{ getLastTO(item) }} -- {{ getNextTO(item) }}
           </template>
           <template v-slot:expanded-item="{ headers, item }">
             <td :colspan="headers.length">
@@ -55,7 +79,18 @@
                     <tbody>
                       <tr v-for="(todo, ind) in item.todos" :key="`pAtodo${ind}`">
                         <td class="text-center">{{ ind + 1 }}</td>
-                        <td class="text-center">{{ todo.name }}</td>
+                        <td class="text-center"
+                          v-show="!todo.rename"
+                          @click="todo.rename = true"
+                        >{{ todo.name }}</td>
+                        <td class="text-center" v-show="todo.rename">
+                          <v-text-field dense hide-details v-model="todo.name"
+                            append-icon="mdi-close"
+                            append-outer-icon="mdi-check"
+                            @click:append="todo.rename = false"
+                            @click:append-outer="updateTodo(ind, todo)"
+                          />
+                        </td>
                         <td class="text-center">
                           <v-menu
                             v-model="todo.datePicker"
@@ -107,7 +142,18 @@
                   <tbody>
                     <tr v-for="(todo, ind) in item.completed" :key="`pCtodo${todo.id}`">
                       <td class="text-center">{{ ind + 1 }}</td>
-                      <td class="text-center">{{ todo.name }}</td>
+                      <td class="text-center"
+                        v-show="!todo.rename"
+                        @click="todo.rename = true"
+                      >{{ todo.name }}</td>
+                      <td class="text-center" v-show="todo.rename">
+                        <v-text-field dense hide-details v-model="todo.name"
+                          append-icon="mdi-close"
+                          append-outer-icon="mdi-check"
+                          @click:append="todo.rename = false"
+                          @click:append-outer="updateTodo(ind, todo)"
+                        />
+                      </td>
                       <td class="text-center">{{ todo.createdAt }}</td>
                       <td class="text-center">{{ todo.completedDate }}</td>
                     </tr>
@@ -123,15 +169,19 @@
 </template>
 
 <script>
+import vue from 'vue';
+import moment from 'moment';
+
 import api from '../../api';
 import { format as formatDate } from '../../helpers/dates';
 import rules from '../../helpers/validationRules';
 
 const {
   loadDistributionPlaces,
-  loadPlaceServices,
   createPlaceService,
   updatePlaceService,
+  isAdmin,
+  createDistributionPlace,
 } = api;
 
 export default {
@@ -150,57 +200,48 @@ export default {
         sortable: false,
         class: 'subtitle-1 font-weight-bold',
       },
+      {
+        text: 'ТО',
+        value: 'TO',
+        sortable: false,
+        align: 'center',
+        class: 'subtitle-1 font-weight-bold',
+      },
     ],
     expanded: [],
     places: [],
     detail: [],
     datePickerMenu: false,
+    completedCount: 0,
+
+    createNewPlace: false,
+    name: '',
   }),
 
   async beforeMount() {
     await this.loadData();
   },
 
-  watch: {
-    expanded() {
-      if ((this.expanded[0] || {}).id) {
-        this.loadPlaceServiceList();
-      }
-    },
-  },
-
   methods: {
+    isAdmin,
     formatDate,
     async loadData() {
       const data = await loadDistributionPlaces();
-      this.places = data.map((place) => {
-        const todos = (place.todos || []).map(this.formatTodo).filter(todo => !todo.completed);
+      this.places = data
+        .map((place) => {
+          const mapped = (place.todos || []).map(this.formatTodo);
+          const todos = mapped.filter(todo => !todo.completed);
+          const completed = mapped.filter(todo => todo.completed);
 
-        return {
-          ...place,
-          todos,
-          showCompleted: false,
-          newTodo: '',
-        };
-      });
-    },
-
-    async loadPlaceServiceList() {
-      const activeDist = this.expanded[0];
-      const data = await loadPlaceServices(activeDist.id);
-
-      activeDist.todos = data.map(this.formatTodo);
-
-      this.expanded[0] = activeDist;
-    },
-
-    async loadCompletedPlaceServiceList() {
-      const activeDist = this.expanded[0];
-      const data = await loadPlaceServices(activeDist.id, true);
-
-      activeDist.completed = data.map(this.formatTodo);
-
-      this.expanded[0] = activeDist;
+          return {
+            ...place,
+            todos,
+            completed,
+            showCompleted: false,
+            newTodo: '',
+          };
+        })
+        .sort((a, b) => b.todos.length - a.todos.length);
     },
 
     formatTodo(todo) {
@@ -211,6 +252,7 @@ export default {
         ...todo,
         createdAt,
         completedDate,
+        rename: false,
         datePicker: false,
       };
     },
@@ -234,6 +276,53 @@ export default {
       this.expanded[0] = activeItem;
     },
 
+    async updateTodo(ind, todo) {
+      const { name } = todo;
+      if (!name && name.length < 2) {
+        return;
+      }
+
+      const activeItem = this.expanded[0];
+      const updated = await updatePlaceService(activeItem.id, todo.id, { name });
+      const formated = this.formatTodo(updated);
+
+      vue.set(activeItem.completed, ind, formated);
+    },
+
+    async createPlaceService(name) {
+      if (!name) {
+        this.createNewPlace = true;
+
+        return;
+      }
+
+      await createDistributionPlace({ name });
+      this.loadData();
+      this.createNewPlace = false;
+    },
+
+    getLastTO(item) {
+      const to = (item.completed || [])
+        .filter(todo => todo.name === 'ТО')
+        .sort((a, b) => moment(b).diff(a))[0];
+
+      if (to) {
+        return formatDate(to.completedDate, 'YYYY-MM-DD');
+      }
+
+      return '';
+    },
+
+    getNextTO(item) {
+      const lastTO = this.getLastTO(item);
+
+      if (lastTO) {
+        return moment(lastTO).add(1, 'month').format('YYYY-MM-DD');
+      }
+
+      return '';
+    },
+
     onKeyDown(key) {
       if (key.code === 'Enter') {
         key.preventDefault();
@@ -249,15 +338,11 @@ export default {
       };
 
       await updatePlaceService(dist.id, todo.id, data);
-
-
-      this.expanded[0].completed.push(todo);
-      await this.loadPlaceServiceList();
+      this.expanded[0].completed.unshift(todo);
+      this.expanded[0].todos = this.expanded[0].todos.filter(t => t.id !== todo.id);
     },
 
-    async showHistory() {
-      await this.loadCompletedPlaceServiceList();
-
+    showHistory() {
       this.expanded[0].showCompleted = !this.expanded[0].showCompleted;
     },
   },

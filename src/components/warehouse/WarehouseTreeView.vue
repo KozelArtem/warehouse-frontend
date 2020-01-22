@@ -34,11 +34,12 @@
           </span>
           <span
             v-else
-            :class="['subtitle-2', { 'red lighten-1 white--text': item.amount === 0 }]"
+            :class="['subtitle-2', { 'red--text': item.amount === 0 }]"
             @contextmenu.prevent="openMenu(item.id)"
           >
             {{ item.name }}
           </span>
+          <v-divider></v-divider>
         </template>
         <v-layout column class="white">
           <v-btn
@@ -58,6 +59,7 @@
       <v-icon v-if="item.children" color="deep-orange">
         {{ open ? 'mdi-folder-open' : 'mdi-folder' }}
       </v-icon>
+      <v-icon v-else color="blue">mdi-menu-right</v-icon>
     </template>
   </v-treeview>
 </template>

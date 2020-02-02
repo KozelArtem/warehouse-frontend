@@ -39,6 +39,12 @@ const routes = [
     component: () => import('../components/distribution/DistributionList.vue'),
   },
   {
+    path: '/distribution/:id',
+    name: 'distPlaceInfo',
+    component: () => import('../components/distribution/DistributionItem.vue'),
+    props: true,
+  },
+  {
     path: '/login',
     name: 'login',
     meta: { title: 'Авторизация' },

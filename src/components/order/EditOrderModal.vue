@@ -3,11 +3,6 @@
     <v-container grid-list-md>
       <v-layout row wrap>
         <v-flex>
-          <AutocompleteWithAdd
-            :items=""
-          />
-        </v-flex>
-        <v-flex>
           <v-text-field
             :rules="[required, positive]"
             label="Количество"

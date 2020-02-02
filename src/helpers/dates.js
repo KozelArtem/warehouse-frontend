@@ -3,7 +3,7 @@ import moment from 'moment';
 moment.locale('ru');
 const DEFAULT_DATE_FORMAT = 'YYYY.MM.DD';
 
-export const format = (date, formatType = DEFAULT_DATE_FORMAT) => moment(date).format(formatType);
+export const format = (date, formatType = DEFAULT_DATE_FORMAT) => (date ? moment(date).format(formatType) : '');
 
 const sort = (a, b, desc = true) => {
   const dateA = moment(a, DEFAULT_DATE_FORMAT);

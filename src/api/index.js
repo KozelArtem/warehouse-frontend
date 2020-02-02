@@ -122,6 +122,16 @@ const updatePlaceService = async (distId, id, data) => {
   }
 };
 
+const removePlaceService = async (distId, id) => {
+  try {
+    const response = await request(METHODS.DELETE, placeService(distId, id));
+
+    return response.data || {};
+  } catch (err) {
+    return {};
+  }
+};
+
 const getOrders = async () => {
   try {
     const response = await request(METHODS.GET, order);
@@ -203,6 +213,7 @@ export default {
   loadPlaceServices,
   createPlaceService,
   updatePlaceService,
+  removePlaceService,
 
   getOrders,
   getActiveOrders,

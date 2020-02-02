@@ -81,6 +81,11 @@ export default {
       required: false,
       default: '',
     },
+    categoryName: {
+      type: String,
+      required: false,
+      default: '',
+    },
   },
 
   data: () => ({
@@ -109,7 +114,14 @@ export default {
 
   watch: {
     name() {
+      this.item = { ...this.itemTemplate };
       this.item.name = this.name;
+    },
+
+    categoryName() {
+      const category = this.categories.find(cat => cat.name === this.categoryName);
+
+      this.item.categoryId = (category || {}).id;
     },
   },
 

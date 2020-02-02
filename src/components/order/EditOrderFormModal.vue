@@ -2,6 +2,8 @@
   <v-dialog v-model="dialog" persistent max-width="600px">
     <QuickCreateItemModal
       :dialog="newItemDialog"
+      :name="newItemName"
+      :categoryName="newItemCategory"
       @close="newItemDialog = false"
       @submit="onNewItem"
     />
@@ -22,7 +24,7 @@
                   :loading="loadingItems"
                   :slotButtonDisabled="newItemDialog"
                   :selectedItemId="localOrder.itemId"
-                  @slotButtonClick="newItemDialog = true; activeOrderInd = i"
+                  @slotButtonClick="openNewItemDialog"
                   @change="itemId => localOrder.itemId = itemId"
                 />
               </v-flex>
@@ -126,6 +128,8 @@ export default {
     itemsLoading: false,
     newItemDialog: false,
     activeOrderInd: -1,
+    newItemName: '',
+    newItemCategory: '',
 
     loadingItems: false,
     items: [],
@@ -176,6 +180,19 @@ export default {
 
   methods: {
     formatDate,
+
+    openNewItemDialog(name) {
+      this.newItemDialog = true;
+
+      if (name.includes(' - ')) {
+        const [category, itemName] = name.split(' - ');
+
+        this.newItemName = itemName;
+        this.newItemCategory = category;
+      } else {
+        this.newItemName = name;
+      }
+    },
 
     onNewItem(item) {
       this.items.push(item);

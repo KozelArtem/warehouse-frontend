@@ -322,7 +322,6 @@ export default {
           completedDatePicker: false,
           showRemove: false,
         }));
-      console.log(this.$vuetify.lang.current);
 
       this.groupTodosByMonths();
       this.loading = false;

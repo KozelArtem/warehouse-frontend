@@ -22,9 +22,18 @@ const routes = [
   },
   {
     path: '/waybill',
-    name: 'waybill',
+    name: 'waybillList',
     meta: { title: 'Накладные' },
     component: () => import('../components/waybill/WaybillList.vue'),
+    children: [
+      {
+        path: ':id',
+        name: 'waybillInfo',
+        meta: { title: 'Накладные' },
+        component: () => import('../components/waybill/WaybillInfo.vue'),
+        props: true,
+      },
+    ],
   },
   {
     path: '/company',

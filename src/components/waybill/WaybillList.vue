@@ -2,7 +2,7 @@
   <v-container grid-list-md>
     <v-layout row wrap>
       <v-flex xs12>
-      <v-dialog
+        <v-dialog
           v-model="newWaybillDialog"
           scrollable fullscreen
           persistent no-click-animation
@@ -50,30 +50,7 @@
         </v-card>
       </v-flex>
 
-      <v-dialog
-        v-model="dialog"
-        scrollable
-        :fullscreen="fullscreen"
-        :width="$vuetify.breakpoint.xs ? '100%' : '700px'"
-        no-click-animation
-        transition="dialog-transition"
-      >
-        <v-card v-if="selectedWaybill">
-          <v-card-title class="purple white--text darken-3">
-            <span class="headline">
-              {{ `${selectedWaybill.number} от ${selectedWaybill.date}` }}
-            </span>
-            <v-spacer></v-spacer>
-            <v-icon color="white" @click="showFullscreen = !showFullscreen">
-              {{ fullscreen ? 'mdi-fullscreen-exit' : 'mdi-fullscreen' }}
-            </v-icon>
-            <v-icon color="red" @click="dialog = false">mdi-close</v-icon>
-          </v-card-title>
-          <v-card-text>
-            <WaybillInfo :id="selectedWaybill.id" />
-          </v-card-text>
-        </v-card>
-      </v-dialog>
+      <router-view></router-view>
     </v-layout>
   </v-container>
 </template>
@@ -88,35 +65,25 @@ const { getWaybillList } = api;
 export default {
   components: {
     WaybillForm: () => import('./WaybillForm.vue'),
-    WaybillInfo: () => import('./WaybillInfo.vue'),
+    // WaybillInfo: () => import('./WaybillInfo.vue'),
   },
 
   data: () => ({
-    dialog: false,
     newWaybillDialog: false,
-
-    selectedWaybill: null,
 
     items: [],
     search: null,
     waybills: [],
-
-    showFullscreen: false,
   }),
 
   beforeMount() {
     this.loadWaybills();
   },
 
-  computed: {
-    fullscreen() {
-      return this.showFullscreen || this.$vuetify.breakpoint.xs;
-    },
-  },
-
   watch: {
     search() {
       const searchValue = this.search.trim();
+
       this.items = this.waybills.filter(waybill => waybill.number.includes(searchValue));
     },
   },
@@ -124,18 +91,17 @@ export default {
   methods: {
     async loadWaybills() {
       const data = await getWaybillList();
+
       this.waybills = data.map(value => ({ ...value, date: formatDate(value.date) }));
       this.items = this.waybills;
     },
 
     selectRow(waybill) {
-      this.selectedWaybill = waybill;
-      this.dialog = true;
+      this.$router.push({ name: 'waybillInfo', params: { id: waybill.id } });
     },
 
     onWaybillFormSubmit() {
       this.newWaybillDialog = false;
-      this.selectedWaybill = null;
       this.loadWaybills();
     },
   },

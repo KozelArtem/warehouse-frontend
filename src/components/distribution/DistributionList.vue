@@ -151,7 +151,7 @@ export default {
     getLastTO(item) {
       const to = (item.completed || [])
         .filter(todo => todo.name === 'ТО')
-        .sort((a, b) => moment(b).diff(a))[0];
+        .sort((a, b) => (new Date(b.completedDate) - new Date(a.completedDate) > 0 ? 1 : -1))[0];
 
       if (to) {
         return to.completedDate;

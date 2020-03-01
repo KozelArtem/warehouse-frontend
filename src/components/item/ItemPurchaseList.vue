@@ -13,7 +13,7 @@
       <span v-if="!item.waybillNumber">
         Ожидание
       </span>
-      <router-link v-else :to="`waybill/${item.waybillNumber}`">
+      <router-link v-else :to="`waybill/${item.waybill.id}`">
         {{ item.waybillNumber }}
       </router-link>
     </template>

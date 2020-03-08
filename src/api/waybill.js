@@ -6,9 +6,15 @@ import {
 } from './urls';
 
 
-const getWaybillList = async () => {
+const getWaybillList = async (itemId) => {
   try {
-    const response = await request(METHODS.GET, waybill);
+    let url = waybill;
+
+    if (itemId) {
+      url = `${url}?itemId=${itemId}`;
+    }
+
+    const response = await request(METHODS.GET, url);
 
     return response.data || [];
   } catch (err) {

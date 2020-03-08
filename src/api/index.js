@@ -81,6 +81,16 @@ const createItemDistribution = async (itemId, data) => {
   }
 };
 
+const updateItemDistribution = async (itemId, id, data) => {
+  try {
+    const response = await request(METHODS.PUT, itemDistributionInfo(itemId, id), data);
+
+    return response.data || {};
+  } catch (err) {
+    return {};
+  }
+};
+
 const getItemDistributionInfo = async (itemId, distId) => {
   try {
     const response = await request(METHODS.GET, itemDistributionInfo(itemId, distId));
@@ -205,6 +215,7 @@ export default {
   ...waybill,
 
   createItemDistribution,
+  updateItemDistribution,
   getItemDistributionInfo,
 
   loadDistributionPlaces,

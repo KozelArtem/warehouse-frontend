@@ -179,6 +179,7 @@ export default {
     },
 
     newItemDistribution(itemDist) {
+      this.item.distributions = this.item.distributions.filter(item => item.id !== itemDist.id);
       this.item.distributions.unshift(itemDist);
       this.item.amount -= itemDist.amount;
     },

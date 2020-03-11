@@ -114,7 +114,7 @@
         </span>
       </template>
       <template v-slot:item.waybill="{ item }">
-        <router-link :to="`waybill/${item.waybill.id}`">
+        <router-link v-if="item.waybill" :to="`waybill/${item.waybill.id}`">
           {{ item.waybill.number }}
         </router-link>
       </template>

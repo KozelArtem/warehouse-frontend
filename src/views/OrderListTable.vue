@@ -1,83 +1,86 @@
 <template>
   <v-container>
-  <v-layout row wrap>
-    <v-flex xs12>
-      <v-toolbar color="rgba(76, 175, 80, 0.25)">
-        <v-toolbar-title v-if="$vuetify.breakpoint.smAndUp">{{ title }}</v-toolbar-title>
-        <v-divider class="mx-4" inset vertical></v-divider>
-        <span style="width: 200px">
-          <v-select
-            v-model="activeOrderSortId"
-            :items="statuses"
-            menu-props="auto"
-            label="Статус"
-            hide-details
-            item-value="id"
-            item-text="name"
-            prepend-icon="mdi-sort"
-            single-line
-          ></v-select>
-        </span>
-        <v-spacer></v-spacer>
-        <span :class="['d-flex', {
-          'w-200': $vuetify.breakpoint.smAndUp,
-          'w-100': $vuetify.breakpoint.xs,
-          }
-        ]">
-          <v-text-field append-icon="mdi-magnify"
-            dense label="Поиск"
-            hide-details v-model="search"></v-text-field>
-        </span>
-      </v-toolbar>
-      <v-divider></v-divider>
-      <v-progress-linear
-        :active="loading"
-        indeterminate
-        color="green"
-        height="7px"
-        opacity="0.3"
-      ></v-progress-linear>
-      <v-simple-table
-        :height="sortedOrders.length * 25 + 50"
-        fixed-header
-        dense
-        class="elevation-10"
-      >
-        <template v-slot:default>
-        <thead>
-          <tr>
-            <th v-for="header in headers" :key="header.text" :width="header.width">
-              {{ header.text }}
-            </th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr v-for="(order, i) in sortedOrders" :key="order.id">
-            <td>{{ i + 1 }}</td>
-            <td>
-              {{ order.item.name }}
-              <span class="show-on-hover" v-if="isAdmin()">
-                <v-icon @click="editOrder(order)" color="gray" small>mdi-lead-pencil</v-icon>
-              </span>
-            </td>
-            <td>{{ order.amount || 0 }} / {{ order.orderAmount }}</td>
-            <td>{{ order.date | date }}</td>
-            <td>
-              <v-icon
-                color="green"
-                small
-                @click.stop="companyId = order.item.companyId; companyDialog = true"
-              >
-                mdi-information
-              </v-icon>
-              <v-icon :color="order.status.color" small>{{ order.status.icon }}</v-icon>
-            </td>
-          </tr>
-        </tbody>
-      </template>
-    </v-simple-table>
-    </v-flex>
-    <v-flex xs12>
+    <v-layout row wrap>
+      <v-flex xs12>
+        <v-toolbar color="rgba(76, 175, 80, 0.25)">
+          <v-toolbar-title v-if="$vuetify.breakpoint.smAndUp">{{ title }}</v-toolbar-title>
+          <v-divider class="mx-4" inset vertical></v-divider>
+          <span style="width: 200px">
+            <v-select
+              v-model="activeOrderSortId"
+              :items="statuses"
+              menu-props="auto"
+              label="Статус"
+              hide-details
+              item-value="id"
+              item-text="name"
+              prepend-icon="mdi-sort"
+              single-line
+            ></v-select>
+          </span>
+          <v-spacer></v-spacer>
+          <span :class="['d-flex', {
+            'w-200': $vuetify.breakpoint.smAndUp,
+            'w-100': $vuetify.breakpoint.xs,
+            }
+          ]">
+            <v-text-field append-icon="mdi-magnify"
+              dense label="Поиск"
+              hide-details v-model="search"></v-text-field>
+          </span>
+        </v-toolbar>
+        <v-divider></v-divider>
+        <v-progress-linear
+          :active="loading"
+          indeterminate
+          color="green"
+          height="7px"
+          opacity="0.3"
+        ></v-progress-linear>
+        <v-simple-table
+          fixed-header
+          dense
+          class="elevation-10"
+        >
+          <template v-slot:default>
+            <thead>
+              <tr>
+                <th
+                  v-for="header in headers"
+                  :key="header.text"
+                  :width="header.width"
+                  v-show="header.breakpoint()"
+                >
+                  {{ header.text }}
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="(order, i) in sortedOrders" :key="order.id">
+                <td v-if="headers[0].breakpoint()">{{ i + 1 }}</td>
+                <td>
+                  {{ order.item.name }}
+                  <span class="show-on-hover" v-if="isAdmin()">
+                    <v-icon @click="editOrder(order)" color="gray" small>mdi-lead-pencil</v-icon>
+                  </span>
+                </td>
+                <td>{{ order.amount || 0 }} / {{ order.orderAmount }}</td>
+                <td>{{ order.date | date }}</td>
+                <td>
+                  <v-icon
+                    color="green"
+                    small
+                    @click.stop="companyId = order.item.companyId; companyDialog = true"
+                  >
+                    mdi-information
+                  </v-icon>
+                  <v-icon :color="order.status.color" small>{{ order.status.icon }}</v-icon>
+                </td>
+              </tr>
+            </tbody>
+          </template>
+        </v-simple-table>
+      </v-flex>
       <CompanyInfoModal
         :companyId="companyId || 0"
         :dialog="companyDialog"
@@ -94,20 +97,20 @@
         @submit="onSubmit"
         @close="dialog = false"
       />
-    </v-flex>
-      <v-footer fixed>
-        <v-btn
-          v-if="isAdmin()"
-          small
-          fixed
-          dark
-          fab
-          bottom
-          right
-          color="green"
-          @click="dialog = true"
-        >
-          <v-icon>mdi-plus</v-icon>
+    </v-layout>
+    <v-footer absolute>
+      <v-btn
+        v-if="isAdmin()"
+        small
+        fixed
+        dark
+        fab
+        bottom
+        right
+        color="green"
+        @click="dialog = true"
+      >
+        <v-icon>mdi-plus</v-icon>
       </v-btn>
 
       <v-pagination
@@ -116,10 +119,9 @@
         color="dark green"
         v-model="page"
         :length="totalPages"
-        :total-visible="10"
+        :total-visible="7"
       ></v-pagination>
-      </v-footer>
-  </v-layout>
+    </v-footer>
   </v-container>
 </template>
 
@@ -163,7 +165,7 @@ export default {
     CompanyInfoModal,
   },
 
-  data: () => ({
+  data: vm => ({
     selectedRow: null,
     editRow: false,
     search: '',
@@ -171,11 +173,11 @@ export default {
     activeOrderSortId: orderStatuses.active.id,
 
     headers: [
-      { text: '№', width: '5%' },
-      { text: 'Наименование', width: '70%' },
-      { text: 'Пришло / Заказано', width: '10%' },
-      { text: 'Дата', width: '10%' },
-      { text: 'Статус', width: '5%' },
+      { text: '№', width: '5%', breakpoint: () => vm.$vuetify.breakpoint.smAndUp },
+      { text: 'Наименование', width: '70%', breakpoint: () => true },
+      { text: 'Пришло / Заказано', width: '10%', breakpoint: () => true },
+      { text: 'Дата', width: '10%', breakpoint: () => true },
+      { text: 'Статус', width: '5%', breakpoint: () => true },
     ],
 
     page: 1,

@@ -4,7 +4,7 @@
       <v-flex xs12>
         <v-toolbar color="rgba(76, 175, 80, 0.25)">
           <v-toolbar-title v-if="$vuetify.breakpoint.smAndUp">{{ title }}</v-toolbar-title>
-          <v-divider class="mx-4" inset vertical></v-divider>
+          <v-divider v-if="$vuetify.breakpoint.smAndUp" class="mx-4" inset vertical></v-divider>
           <span style="width: 200px">
             <v-select
               v-model="activeOrderSortId"
@@ -78,6 +78,20 @@
                 </td>
               </tr>
             </tbody>
+            <tfoot style="background-color: rgba(76, 175, 80, 0.25)">
+              <tr>
+                <td :colspan="headers.length">
+                   <v-pagination
+                      v-if="totalPages > 1"
+                      bottom
+                      color="dark green"
+                      v-model="page"
+                      :length="totalPages"
+                      :total-visible="7"
+                    ></v-pagination>
+                </td>
+              </tr>
+            </tfoot>
           </template>
         </v-simple-table>
       </v-flex>
@@ -98,30 +112,19 @@
         @close="dialog = false"
       />
     </v-layout>
-    <v-footer absolute>
-      <v-btn
-        v-if="isAdmin()"
-        small
-        fixed
-        dark
-        fab
-        bottom
-        right
-        color="green"
-        @click="dialog = true"
-      >
-        <v-icon>mdi-plus</v-icon>
-      </v-btn>
-
-      <v-pagination
-        bottom
-        fixed
-        color="dark green"
-        v-model="page"
-        :length="totalPages"
-        :total-visible="7"
-      ></v-pagination>
-    </v-footer>
+    <v-btn
+      v-if="isAdmin()"
+      small
+      fixed
+      dark
+      fab
+      bottom
+      right
+      color="green"
+      @click="dialog = true"
+    >
+      <v-icon>mdi-plus</v-icon>
+    </v-btn>
   </v-container>
 </template>
 

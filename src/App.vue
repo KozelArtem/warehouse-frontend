@@ -22,5 +22,16 @@ export default {
 <style lang="scss">
 .pointer {
   cursor: pointer;
+};
+tr {
+  .show-on-hover {
+    display: none;
+  }
+  &:hover {
+    .show-on-hover {
+
+      display: inline;
+    }
+  }
 }
 </style>

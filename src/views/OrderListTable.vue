@@ -1,111 +1,132 @@
 <template>
-  <v-container grid-list-xs>
-    <v-layout row wrap>
-      <v-flex xs12>
-        <v-data-table
-          dense
-          :headers="headers"
-          :items="sortedOrders"
-          :loading="loading"
-          :loading-text="constants.loading"
-          :no-results-text="constants.noResults"
-          :no-data-text="constants.noData"
-          @click:row="selectRow"
+  <v-container>
+  <v-layout row wrap>
+    <v-flex xs12>
+      <v-toolbar color="rgba(76, 175, 80, 0.25)">
+        <v-toolbar-title v-if="$vuetify.breakpoint.smAndUp">{{ title }}</v-toolbar-title>
+        <v-divider class="mx-4" inset vertical></v-divider>
+        <span style="width: 200px">
+          <v-select
+            v-model="activeOrderSortId"
+            :items="statuses"
+            menu-props="auto"
+            label="Статус"
+            hide-details
+            item-value="id"
+            item-text="name"
+            prepend-icon="mdi-sort"
+            single-line
+          ></v-select>
+        </span>
+        <v-spacer></v-spacer>
+        <span :class="['d-flex', {
+          'w-200': $vuetify.breakpoint.smAndUp,
+          'w-100': $vuetify.breakpoint.xs,
+          }
+        ]">
+          <v-text-field append-icon="mdi-magnify"
+            dense label="Поиск"
+            hide-details v-model="search"></v-text-field>
+        </span>
+      </v-toolbar>
+      <v-divider></v-divider>
+      <v-progress-linear
+        :active="loading"
+        indeterminate
+        color="green"
+        height="7px"
+        opacity="0.3"
+      ></v-progress-linear>
+      <v-simple-table
+        :height="sortedOrders.length * 25 + 50"
+        fixed-header
+        dense
+        class="elevation-10"
+      >
+        <template v-slot:default>
+        <thead>
+          <tr>
+            <th v-for="header in headers" :key="header.text" :width="header.width">
+              {{ header.text }}
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="(order, i) in sortedOrders" :key="order.id">
+            <td>{{ i + 1 }}</td>
+            <td>
+              {{ order.item.name }}
+              <span class="show-on-hover" v-if="isAdmin()">
+                <v-icon @click="editOrder(order)" color="gray" small>mdi-lead-pencil</v-icon>
+              </span>
+            </td>
+            <td>{{ order.amount || 0 }} / {{ order.orderAmount }}</td>
+            <td>{{ order.date | date }}</td>
+            <td>
+              <v-icon
+                color="green"
+                small
+                @click.stop="companyId = order.item.companyId; companyDialog = true"
+              >
+                mdi-information
+              </v-icon>
+              <v-icon :color="order.status.color" small>{{ order.status.icon }}</v-icon>
+            </td>
+          </tr>
+        </tbody>
+      </template>
+    </v-simple-table>
+    </v-flex>
+    <v-flex xs12>
+      <CompanyInfoModal
+        :companyId="companyId || 0"
+        :dialog="companyDialog"
+        @close="companyDialog = false"
+      />
+      <EditOrderFormModal
+        :order="editedOrder"
+        :dialog="editOrderDialog"
+        @submit="onEditSubmit"
+        @close="editOrderDialog = false"
+      />
+      <OrderForm
+        :dialog="dialog"
+        @submit="onSubmit"
+        @close="dialog = false"
+      />
+    </v-flex>
+      <v-footer fixed>
+        <v-btn
+          v-if="isAdmin()"
+          small
+          fixed
+          dark
+          fab
+          bottom
+          right
+          color="green"
+          @click="dialog = true"
         >
-          <template v-slot:top>
-            <v-toolbar color="">
-              <v-toolbar-title v-if="$vuetify.breakpoint.smAndUp">{{ title }}</v-toolbar-title>
-              <v-divider class="mx-4" inset vertical></v-divider>
-              <span style="width: 200px">
-                <v-select
-                  v-model="activeOrderSortId"
-                  :items="statuses"
-                  menu-props="auto"
-                  label="Статус"
-                  hide-details
-                  item-value="id"
-                  item-text="name"
-                  prepend-icon="mdi-sort"
-                  single-line
-                ></v-select>
-              </span>
-              <v-divider class="mx-4" inset vertical></v-divider>
-              <v-spacer></v-spacer>
-              <v-dialog persistent v-if="isAdmin()" v-model="dialog" max-width="80%">
-                <template v-slot:activator="{ on }">
-                  <v-icon medium v-on="on" color="green" class="mr-1">
-                    mdi-square-edit-outline</v-icon>
-                </template>
-                <OrderForm :dialog="dialog" @submit="onSubmit" @close="dialog = false" />
-              </v-dialog>
-            </v-toolbar>
-          </template>
+          <v-icon>mdi-plus</v-icon>
+      </v-btn>
 
-          <template v-slot:header.name="{ header }">
-            {{ header.text }}
-            <v-tooltip bottom v-if="isAdmin()">
-              <template v-slot:activator="{ on }">
-                <v-icon color="green" dark small v-on="on">mdi-information</v-icon>
-              </template>
-              <span>
-                Клик - редактирование <br/>
-                Правая - удаление
-              </span>
-            </v-tooltip>
-          </template>
-
-          <template v-slot:item.name="{ item }">
-            <span @contextmenu.prevent="deleteOrder(item)">{{ item.item.name }}</span>
-          </template>
-
-          <template v-slot:item.amount="{ item }">
-            <span>{{ item.orderAmount }} / {{ item.amount }}</span>
-          </template>
-
-          <template v-slot:item.status="{ item }">
-            <v-tooltip top>
-              <template v-slot:activator="{ on }">
-                <v-icon
-                  color="green"
-                  small
-                  v-on="on"
-                  @click.stop="companyId = item.item.companyId; companyDialog = true"
-                >
-                  mdi-information
-                </v-icon>
-              </template>
-              <span>Информация о компании</span>
-            </v-tooltip>
-            <v-tooltip bottom>
-              <template v-slot:activator="{ on }">
-                <v-icon :color="item.status.color" small v-on="on">{{ item.status.icon }}</v-icon>
-              </template>
-              <span>Статус заказа: {{ item.status.name }}</span>
-            </v-tooltip>
-          </template>
-        </v-data-table>
-      </v-flex>
-      <v-flex xs12>
-        <CompanyInfoModal
-          :companyId="companyId || 0"
-          :dialog="companyDialog"
-          @close="companyDialog = false"
-        />
-        <EditOrderFormModal
-          :order="editedOrder"
-          :dialog="editOrderDialog"
-          @submit="onEditSubmit"
-          @close="editOrderDialog = false"
-        />
-      </v-flex>
-    </v-layout>
+      <v-pagination
+        bottom
+        fixed
+        color="dark green"
+        v-model="page"
+        :length="totalPages"
+        :total-visible="10"
+      ></v-pagination>
+      </v-footer>
+  </v-layout>
   </v-container>
 </template>
 
 <script>
 import api from '../api';
 import constants from '../constants/data.json';
-import { format as formatDate, sortDesc } from '../helpers/dates';
+import { sortDesc } from '../helpers/dates';
 
 import OrderForm from '../components/order/OrderForm.vue';
 import EditOrderFormModal from '../components/order/EditOrderFormModal.vue';
@@ -119,18 +140,16 @@ const {
 } = api;
 
 const orderStatuses = {
-  all: {
-    id: 0,
-    name: 'Все',
-  },
   active: {
-    id: 1,
+    id: 0,
+    value: true,
     name: 'В ожидании',
     icon: 'mdi-calendar-clock',
     color: 'orange',
   },
   completed: {
-    id: 2,
+    id: 1,
+    value: false,
     name: 'Завершенные',
     icon: 'mdi-check',
     color: 'green',
@@ -147,22 +166,29 @@ export default {
   data: () => ({
     selectedRow: null,
     editRow: false,
+    search: '',
     constants,
     activeOrderSortId: orderStatuses.active.id,
 
     headers: [
-      { text: '№', value: 'index' },
-      { text: 'Наименование', value: 'name', sortable: false },
-      { text: 'Заказано / Пришло', value: 'amount', sortable: false },
-      { text: 'Дата', value: 'date', sort: sortDesc },
-      { text: 'Статус', value: 'status', sortable: false },
+      { text: '№', width: '5%' },
+      { text: 'Наименование', width: '70%' },
+      { text: 'Пришло / Заказано', width: '10%' },
+      { text: 'Дата', width: '10%' },
+      { text: 'Статус', width: '5%' },
     ],
+
+    page: 1,
+    limit: 20,
+    timeout: null,
+    totalPages: 1,
 
     title: 'Заказы',
 
     loading: false,
     orders: [],
     selected: [],
+
     dialog: false,
 
     companyId: -1,
@@ -178,24 +204,11 @@ export default {
     },
 
     sortedOrders() {
-      let buff = [];
-
-      if (this.activeOrderSortId === orderStatuses.active.id) {
-        buff = this.orders.filter(value => !value.amount);
-      } else if (this.activeOrderSortId === orderStatuses.completed.id) {
-        buff = this.orders.filter(value => !!value.amount);
-      } else {
-        buff = this.orders;
-      }
-
-      return buff
+      return this.orders.slice(0)
         .sort(sortDesc)
-        .map((value, index) => {
-          const formatedDate = formatDate(value.date);
+        .map((value) => {
           const data = {
             ...value,
-            index: index + 1,
-            date: formatedDate,
             status: this.getStatus(value),
           };
 
@@ -204,14 +217,51 @@ export default {
     },
   },
 
-  async beforeMount() {
-    this.orders = await getOrders();
+  beforeMount() {
+    this.loadOrders();
+  },
+
+  watch: {
+    page() {
+      this.loadOrders();
+    },
+    activeOrderSortId() {
+      this.page = 1;
+      this.loadOrders();
+    },
+    search() {
+      this.page = 1;
+      this.loadOrders();
+    },
   },
 
   methods: {
     isAdmin,
 
-    selectRow(order) {
+    async loadOrders() {
+      const offset = this.limit * (this.page - 1);
+      const query = {
+        offset,
+        limit: this.limit,
+        active: this.statuses[this.activeOrderSortId].value,
+        search: this.search,
+      };
+
+      if (this.timeout) {
+        clearTimeout(this.timeout);
+      }
+
+      this.timeout = setTimeout(async () => {
+        this.loading = true;
+        const { data, count } = await getOrders(query);
+
+        this.orders = data;
+        this.totalPages = Math.ceil(+count / this.limit);
+        this.loading = false;
+      }, 300);
+    },
+
+    editOrder(order) {
       this.editedOrder = order;
       this.editOrderDialog = true;
     },

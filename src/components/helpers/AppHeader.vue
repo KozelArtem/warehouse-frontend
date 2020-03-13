@@ -29,7 +29,7 @@
 </template>
 
 <script>
-import api from '@/api';
+import api from '../../api';
 
 const {
   isLoggedIn,
@@ -53,7 +53,7 @@ export default {
       {
         id: 2,
         link: '/waybill',
-        icon: 'mdi-file-document-box-check-outline',
+        icon: 'mdi-file',
         title: 'Накладные',
       },
       // {
@@ -65,7 +65,7 @@ export default {
       {
         id: 5,
         link: '/distribution',
-        icon: 'mdi-settings-transfer',
+        icon: 'mdi-bulldozer',
         title: 'Журнал работ',
       },
       {

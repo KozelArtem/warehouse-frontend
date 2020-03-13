@@ -314,17 +314,3 @@ export default {
   },
 };
 </script>
-
-<style lang="scss" scoped>
-tr {
-  .show-on-hover {
-    display: none;
-  }
-  &:hover {
-    .show-on-hover {
-
-      display: inline;
-    }
-  }
-}
-</style>

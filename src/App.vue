@@ -34,4 +34,9 @@ tr {
     }
   }
 }
+
+input[type="button"]{
+  outline: none !important;
+}
+
 </style>

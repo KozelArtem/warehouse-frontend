@@ -2,7 +2,6 @@
   <v-container grid-list-xs>
     <v-layout row wrap>
       <v-flex>
-
         <v-dialog
           v-model="createNewPlace"
           :overlay="false"
@@ -23,46 +22,98 @@
           </v-card>
         </v-dialog>
 
-        <v-toolbar dense color="orange lighten-2">
-          <v-toolbar-title>Журнал работ</v-toolbar-title>
+        <v-toolbar color="orange lighten-2">
+          <v-toolbar-title v-if="$vuetify.breakpoint.smAndUp">Журнал работ</v-toolbar-title>
           <v-spacer></v-spacer>
-
-          <span style="width: 150px">
-            <v-text-field
-              v-model="search"
-              placeholder="Поиск"
-              hide-details
-              dense
-              append-icon="mdi-magnify"
-            />
+          <span :class="['d-flex', {
+            'w-200': $vuetify.breakpoint.smAndUp,
+            'w-100': $vuetify.breakpoint.xs,
+            }
+          ]">
+            <v-text-field append-icon="mdi-magnify"
+              dense label="Поиск"
+              hide-details v-model="search"></v-text-field>
           </span>
-
-          <v-spacer></v-spacer>
-          <v-btn icon v-if="!isAdmin()">
-            <v-icon color="green" @click="createNewPlace = true">mdi-database-plus</v-icon>
-          </v-btn>
         </v-toolbar>
-        <v-data-table
+        <v-divider></v-divider>
+        <v-progress-linear
+          :active="loading"
+          indeterminate
+          color="orange"
+          height="7px"
+          opacity="0.3"
+        ></v-progress-linear>
+
+        <v-simple-table
+          fixed-header
           dense
-          item-key="name"
-          class="elevation-1"
-          hide-default-footer
-          :headers="headers"
-          :items="places"
-          :items-per-page="100"
-          :search="search"
-          :loading="loading"
-          @click:row="openInfo"
+          class="elevation-10"
         >
-          <template v-slot:item.count="{ item }">
-            {{ item.todos.length || 0 }} / {{ item.completed.length || 0 }}
+          <template v-slot:default>
+            <thead>
+              <tr>
+                <th
+                  class="orange lighten-4"
+                  v-for="header in headers"
+                  :key="header.text"
+                  :width="header.width"
+                  v-show="header.breakpoint()"
+                >
+                  {{ header.text }}
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr
+                class="pointer"
+                v-for="(place, i) in sortedPlaces"
+                :key="place.id"
+                @click="openInfo(place)"
+              >
+                <td v-if="headers[0].breakpoint()">{{ i + 1 }}</td>
+                <td>
+                  {{ place.name }}
+                  <span class="show-on-hover" v-if="isAdmin()">
+                    <v-icon @click="editOrder(place)" color="gray" small>
+                      mdi-lead-pencil
+                    </v-icon>
+                  </span>
+                </td>
+                <td>{{ place.todos.length || 0 }} / {{ place.completed.length || 0 }}</td>
+                <td>{{ getLastTO(place) | date }} -- {{ getNextTO(place) | date }}</td>
+              </tr>
+            </tbody>
+            <tfoot class="orange lighten-4">
+              <tr>
+                <td :colspan="headers.length">
+                   <v-pagination
+                      v-if="totalPages > 1"
+                      bottom
+                      color="orange lighten-2"
+                      v-model="page"
+                      :length="totalPages"
+                      :total-visible="7"
+                    ></v-pagination>
+                </td>
+              </tr>
+            </tfoot>
           </template>
-          <template v-slot:item.TO="{ item }">
-            {{ getLastTO(item) | date }} -- {{ getNextTO(item) | date }}
-          </template>
-        </v-data-table>
+        </v-simple-table>
       </v-flex>
     </v-layout>
+    <v-btn
+      v-if="isAdmin()"
+      small
+      fixed
+      dark
+      fab
+      bottom
+      right
+      color="orange lighten-2"
+      @click="createNewPlace = true"
+    >
+      <v-icon>mdi-plus</v-icon>
+    </v-btn>
   </v-container>
 </template>
 
@@ -79,31 +130,36 @@ const {
 } = api;
 
 export default {
-  data: () => ({
+  data: vm => ({
     headers: [
       {
+        text: '№',
+        width: '5%',
+        breakpoint: () => vm.$vuetify.breakpoint.smAndUp,
+      },
+      {
         text: 'Оборудование',
-        value: 'name',
-        sortable: false,
-        class: 'body-2 font-weight-black black--text',
+        width: '50%',
+        breakpoint: () => true,
       },
       {
         text: 'Задачи',
-        value: 'count',
-        sortable: false,
-        class: 'body-2 font-weight-black black--text',
+        width: '15%',
+        breakpoint: () => true,
       },
       {
         text: 'ТО',
-        value: 'TO',
-        sortable: false,
-        align: 'center',
-        class: 'body-2 font-weight-black black--text',
+        width: '30%',
+        breakpoint: () => true,
       },
     ],
     places: [],
 
     search: '',
+    limit: 20,
+    page: 1,
+    totalPages: 1,
+
     name: '',
 
     loading: true,
@@ -112,17 +168,22 @@ export default {
   }),
 
   beforeMount() {
-    this.loadData();
+    this.loadPlaces();
   },
 
-  methods: {
-    isAdmin,
-    formatDate,
-    async loadData() {
-      this.loading = true;
-      const data = await loadDistributionPlaces();
+  watch: {
+    page() {
+      this.loadPlaces();
+    },
+    search() {
+      this.page = 1;
+      this.loadPlaces();
+    },
+  },
 
-      this.places = data
+  computed: {
+    sortedPlaces() {
+      return this.places.slice(0)
         .map((place) => {
           const todos = place.todos.filter(todo => !todo.completed);
           const completed = place.todos.filter(todo => todo.completed);
@@ -134,8 +195,34 @@ export default {
           };
         })
         .sort((a, b) => b.todos.length - a.todos.length);
+    },
+  },
 
-      this.loading = false;
+  methods: {
+    isAdmin,
+    formatDate,
+    async loadPlaces() {
+      this.loading = true;
+
+      const offset = this.limit * (this.page - 1);
+      const query = {
+        offset,
+        limit: this.limit,
+        search: this.search,
+      };
+
+      if (this.timeout) {
+        clearTimeout(this.timeout);
+      }
+
+      this.timeout = setTimeout(async () => {
+        this.loading = true;
+        const { data, count } = await loadDistributionPlaces(query);
+
+        this.places = data;
+        this.totalPages = Math.ceil(+count / this.limit);
+        this.loading = false;
+      }, 300);
     },
 
     async createPlaceService(name) {
@@ -144,7 +231,7 @@ export default {
       }
 
       await createDistributionPlace({ name });
-      this.loadData();
+      this.loadPlaces();
       this.createNewPlace = false;
     },
 

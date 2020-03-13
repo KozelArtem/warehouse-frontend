@@ -270,8 +270,9 @@ export default {
     },
 
     async loadPlaces() {
-      this.distributionPlaces = await loadDistributionPlaces();
+      const response = await loadDistributionPlaces();
 
+      this.distributionPlaces = response.data;
       this.placesLoading = false;
     },
 

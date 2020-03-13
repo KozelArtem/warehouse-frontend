@@ -51,11 +51,17 @@ const login = async (payload) => {
   }
 };
 
-const loadDistributionPlaces = async () => {
+const loadDistributionPlaces = async (query) => {
   try {
-    const response = await request(METHODS.GET, distributionPlaces);
+    const queryString = Object.keys(query)
+      .reduce((acc, key) => `${acc}&${key}=${query[key]}`, '');
 
-    return response.data || {};
+    const url = `${distributionPlaces}?${queryString}`;
+
+    const response = await request(METHODS.GET, url);
+    const count = response.headers['x-total-count'];
+
+    return { data: response.data || [], count };
   } catch (err) {
     return {};
   }

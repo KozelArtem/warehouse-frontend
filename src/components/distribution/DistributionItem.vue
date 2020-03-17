@@ -16,8 +16,12 @@
               <v-text-field label="Название" v-model="task.name"></v-text-field>
               <DatePicker
                 label="Дата добавления"
-                @update="date => task.addedDate = date"
+                @update="date => task.addedAt = date"
               />
+              <v-switch
+                v-model="task.isTO"
+                label="TO"
+              ></v-switch>
             </v-card-text>
             <v-card-actions>
               <v-btn color="error" @click="closeNewTaskModal()" text>Закрыть</v-btn>
@@ -35,138 +39,174 @@
         />
       </v-flex>
       <v-flex xs12>
-        <v-toolbar>
-          <span class="headline">{{ item.name }}</span>
+        <v-toolbar color="orange lighten-2">
+          <v-toolbar-title>{{ item.name }}</v-toolbar-title>
+          <v-spacer></v-spacer>
+          <span>
+            <span class="body-2 font-weight-medium">
+              <v-icon color="red">mdi-clock</v-icon>
+              {{ item.activeServicesCount || 0 }}
+            </span>
+            <v-divider></v-divider>
+            <span class="body-2 font-weight-medium">
+              <v-icon color="success">mdi-check-circle</v-icon>
+              {{ item.totalServicesCount || 0 }}
+            </span>
+          </span>
         </v-toolbar>
+        <v-divider></v-divider>
+        <v-progress-linear
+          :active="loading"
+          indeterminate
+          color="orange"
+          height="7px"
+          opacity="0.3"
+        ></v-progress-linear>
       </v-flex>
       <v-flex xs12>
-        <v-sheet elevation="10" class="px-2">
-          <v-slide-group v-model="selectedMonthId">
-            <v-slide-item
-              v-for="month in todosByMonths"
-              :key="month.name"
-              v-slot:default="{ active, toggle }"
-            >
-              <v-card
-                :color="active ? 'yellow' : ''"
-                width="85"
-                height="50"
-                @click="toggle"
-                class="text-center"
-              >
-                <span class="body-2 font-weight-black">{{ month.name }}</span>
-                <v-divider></v-divider>
-                <span class="body-2 font-weight-medium">
-                  <v-icon color="orange" xSmall>mdi-clock-outline</v-icon>
-                  {{ month.todos | active }}
-                </span> /
-                <span class="body-2 font-weight-medium">
-                  <v-icon color="success" xSmall>mdi-check</v-icon>
-                  {{ month.todos | completed }}
-                </span>
-              </v-card>
-            </v-slide-item>
-          </v-slide-group>
-        </v-sheet>
-      </v-flex>
-      <v-flex xs12 >
-        <v-data-table
-          :headers="headers"
-          :items="monthTodos"
-          hide-default-footer
-          dense
-          class="elevation-1"
-          item-key="id"
-          :items-per-page="100"
-          :loading="loading"
-          @click:row="showRemoveModal"
+        <v-tabs
+          v-model="selectedMonthId"
+          grow
+          center-active
         >
-          <template v-slot:item.name="{ item }" v-if="isAdmin()">
-            <span v-show="!item.rename" @click="item.rename = true" class="pointer">
-              {{ item.name }}
-            </span>
-            <v-text-field
-              v-show="item.rename"
-              v-model="item.name"
-              dense
-              hide-details
-              append-icon="mdi-close"
-              append-outer-icon="mdi-check"
-              @click:append="item.rename = false"
-              @click:append-outer="updateTodo(item, fields.NAME)"
-            />
-          </template>
-          <template v-slot:item.addedDate="{ item }" v-if="isAdmin()">
-            <v-menu
-              v-model="item.addedDatePicker"
-              :close-on-content-click="false"
-              :nudge-right="40"
-              transition="scale-transition"
-              offset-y
-              min-width="290px"
-            >
-              <template v-slot:activator="{ on }">
-                <v-btn small text color="orange darken-4" v-on="on">
-                  {{ item.addedDate | date }}
-                </v-btn>
-              </template>
-              <v-date-picker
-                v-model="item.addedDate"
-                @input="updateTodo(item, fields.ADDED_DATE)"
-                locale="ru-RU"
-              />
-            </v-menu>
-          </template>
-          <template v-slot:item.completedDate="{ item }" v-if="isAdmin()">
-            <v-menu
-              v-model="item.completedDatePicker"
-              :close-on-content-click="false"
-              :nudge-right="40"
-              transition="scale-transition"
-              offset-y
-              min-width="290px"
-            >
-              <template v-slot:activator="{ on }">
-                <v-btn
-                  v-if="!item.completed"
-                  small text color="green accent-4"
-                  v-on="on"
-                >
-                  Выбрать дату
-                </v-btn>
-                <v-btn small text color="green accent-4" v-on="on" v-else>
-                  {{ item.completedDate | date }}
-                </v-btn>
-              </template>
-              <v-date-picker
-                v-model="item.completedDate"
-                @input="updateTodo(item, fields.COMPLETED_DATE)"
-                locale="ru-RU"
-              />
-            </v-menu>
-            <v-icon v-if="isAdmin() && item.showRemove" @click="removeTask(item)" small
-              class="onHover"
-              color="error">
-              mdi-delete
-            </v-icon>
-          </template>
-        </v-data-table>
-        <v-fab-transition>
-          <v-btn
-            v-if="isAdmin()"
-            color="green"
-            dark
-            bottom
-            absolute
-            right
-            small
-            @click="showNewTaskModal()"
+          <v-tab
+            v-for="month in months"
+            :key="month"
+            @change="selectedMonthId = month"
           >
-            Новая задача
-          </v-btn>
-        </v-fab-transition>
+            {{ month }}
+          </v-tab>
+        </v-tabs>
+      </v-flex>
+      <v-flex xs12>
+        <v-simple-table
+          fixed-header
+          dense
+          class="elevation-10"
+        >
+          <template v-slot:default>
+            <thead>
+              <tr>
+                <th
+                  class="orange lighten-4"
+                  v-for="header in headers"
+                  :key="header.text"
+                  :width="header.width"
+                  v-show="header.breakpoint()"
+                >
+                  {{ header.text }}
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr
+                v-for="(service, i) in sortedServices"
+                :key="service.id"
+              >
+                <td v-if="headers[0].breakpoint()">{{ i + 1 }}</td>
+                 <td>
+                  <span v-if="!service.rename">
+                    {{ service.name }}
+                  </span>
+                  <span class="show-on-hover" v-if="isAdmin()" v-show="!service.rename">
+                    <v-icon @click="service.rename = true" color="gray" small>
+                      mdi-lead-pencil
+                    </v-icon>
+                  </span>
+                  <v-text-field
+                    v-show="service.rename"
+                    v-model="service.name"
+                    dense
+                    hide-details
+                    append-icon="mdi-close"
+                    append-outer-icon="mdi-check"
+                    @click:append="service.rename = false"
+                    @click:append-outer="updateservice(service, fields.NAME)"
+                  />
+                </td>
+                <td>
+                  <span v-if="!isAdmin()">{{ service.addedAt | date }}</span>
+                  <v-menu
+                    v-else
+                    v-model="service.addedAtPicker"
+                    :close-on-content-click="false"
+                    :nudge-right="40"
+                    transition="scale-transition"
+                    offset-y
+                    min-width="290px"
+                  >
+                    <template v-slot:activator="{ on }">
+                      <v-btn small text color="orange darken-4" v-on="on">
+                        {{ service.addedAt | date }}
+                      </v-btn>
+                    </template>
+                    <v-date-picker
+                      color="orange darken-4"
+                      first-day-of-week="1"
+                      :max="today"
+                      v-model="service.addedAt"
+                      @input="updateTodo(service, fields.ADDED_DATE)"
+                      locale="ru-RU"
+                    />
+                  </v-menu>
+                </td>
+                <td>
+                  <span v-if="!isAdmin()">{{ service.completedAt | date }}</span>
+                  <v-menu
+                    v-else
+                    v-model="service.completedAtPicker"
+                    :close-on-content-click="false"
+                    :nudge-right="40"
+                    transition="scale-transition"
+                    offset-y
+                    min-width="290px"
+                  >
+                    <template v-slot:activator="{ on }">
+                      <v-btn
+                        v-if="!service.completed"
+                        small text color="green accent-4"
+                        v-on="on"
+                      >
+                        Выбрать дату
+                      </v-btn>
+                      <v-btn small text color="green accent-4" v-on="on" v-else>
+                        {{ service.completedAt | date }}
+                      </v-btn>
+                    </template>
+                    <v-date-picker
+                      color="green accent-4"
+                      first-day-of-week="1"
+                      :max="today"
+                      v-model="service.completedAt"
+                      @input="updateTodo(service, fields.COMPLETED_DATE)"
+                      locale="ru-RU"
+                    />
+                  </v-menu>
+                  <v-icon v-if="isAdmin() && service.showRemove" @click="removeTask(service)" small
+                    class="onHover"
+                    color="error">
+                    mdi-delete
+                  </v-icon>
+                </td>
+              </tr>
+            </tbody>
+          </template>
+        </v-simple-table>
       </v-flex>
     </v-layout>
+    <v-btn
+      v-if="isAdmin()"
+      small
+      fixed
+      dark
+      fab
+      bottom
+      right
+      color="orange lighten-2"
+      @click="showNewTaskModal()"
+    >
+      <v-icon>mdi-plus</v-icon>
+    </v-btn>
   </v-container>
 </template>
 
@@ -176,14 +216,26 @@ import api from '../../api';
 import { format as formatDate } from '../../helpers/dates';
 
 const {
-  loadPlaceServices,
-  createPlaceService,
-  updatePlaceService,
-  removePlaceService,
+  loadMachineInfo,
+  loadMachineServices,
+  createMachineService,
+  updateMachineService,
+  deleteMachineService,
   isAdmin,
 } = api;
 
 const DATE_FORMAT = 'YYYY-MM-DD';
+
+const mapService = item => ({
+  ...item,
+  clicked: false,
+  rename: false,
+  addedAt: formatDate(item.addedAt, DATE_FORMAT),
+  completedAt: formatDate(item.completedAt, DATE_FORMAT),
+  addedAtPicker: false,
+  completedAtPicker: false,
+  showRemove: false,
+});
 
 export default {
   components: {
@@ -199,59 +251,63 @@ export default {
     },
   },
 
-  filters: {
-    completed(value) {
-      return value.filter(item => item.completed).length;
-    },
-    active(value) {
-      return value.filter(item => !item.completed).length;
+  computed: {
+    sortedServices() {
+      return (this.item.services || []).map(mapService);
     },
   },
 
   async beforeMount() {
-    await this.loadData();
+    const { data } = await loadMachineInfo(this.id);
+
+    this.item = data;
+    this.loading = false;
+    this.loadData();
   },
 
-  data: () => ({
+  data: vm => ({
     headers: [
       {
         text: '№',
-        value: 'index',
-        width: 15,
-        class: 'body-2 font-weight-black black--text',
+        width: '5%',
+        breakpoint: () => vm.$vuetify.breakpoint.smAndUp,
       },
       {
         text: 'Название',
-        value: 'name',
-        sortable: false,
-        width: 100,
-        class: 'body-2 font-weight-black black--text',
+        width: '55%',
+        breakpoint: () => true,
       },
       {
         text: 'Дата добавления',
-        value: 'addedDate',
-        width: 50,
-        class: 'body-2 font-weight-black black--text',
+        width: '20%',
+        breakpoint: () => true,
       },
       {
         text: 'Дата выполнения',
-        value: 'completedDate',
-        width: 50,
-        class: 'body-2 font-weight-black black--text',
+        width: '20%',
+        breakpoint: () => true,
       },
     ],
+    today: formatDate(new Date(), 'YYYY-MM-DD'),
     fields: {
       NAME: 'name',
-      ADDED_DATE: 'addedDate',
-      COMPLETED_DATE: 'completedDate',
+      ADDED_DATE: 'addedAt',
+      COMPLETED_DATE: 'completedAt',
     },
     selectedMonthId: moment().month(),
+    currentMonthId: moment().month(),
     picker: '',
+
     item: {},
-    grouppedTodos: {},
+
     months: moment.months(),
 
-    task: {},
+    task: {
+      name: '',
+      isTO: false,
+      addedAt: null,
+      machineId: vm.id,
+    },
     newTaskModal: false,
 
     deleteTask: {
@@ -264,71 +320,45 @@ export default {
     loading: true,
   }),
 
-  computed: {
-    monthTodos() {
-      return this.grouppedTodos[this.selectedMonthId];
+  watch: {
+    async id() {
+      this.loadMachineData();
     },
 
-    todosByMonths() {
-      return this.months.map((m, ind) => {
-        let todos = [];
-
-        if (this.grouppedTodos[ind]) {
-          todos = this.grouppedTodos[ind];
-        }
-
-        return { todos, name: m };
-      });
+    selectedMonthId() {
+      this.loadData();
     },
   },
 
   methods: {
     isAdmin,
-    groupTodosByMonths() {
-      if (!this.item.todos) {
-        this.grouppedTodos = {};
-
-        return;
-      }
-
-      this.grouppedTodos = this.item.todos
-        .reduce((acc, item, index) => {
-          let month;
-
-          if (item.completed) {
-            month = moment(item.completedDate).month();
-          } else {
-            month = moment().month();
-          }
-
-          acc[month] = acc[month] || [];
-          acc[month].push({ ...item, index });
-
-          return acc;
-        }, {});
-    },
 
     async loadData() {
       this.loading = true;
-      this.item = await loadPlaceServices(this.id);
-      this.item.todos = this.item.todos
-        .map(item => ({
-          ...item,
-          clicked: false,
-          rename: false,
-          addedDate: formatDate(item.addedDate, DATE_FORMAT),
-          completedDate: formatDate(item.completedDate, DATE_FORMAT),
-          addedDatePicker: false,
-          completedDatePicker: false,
-          showRemove: false,
-        }));
 
-      this.groupTodosByMonths();
+      const query = {
+        dateFrom: moment().month(this.selectedMonthId).startOf('month'),
+        dateTo: moment().month(this.selectedMonthId).endOf('month'),
+      };
+
+      const response = await loadMachineServices(this.id, query);
+      const activeServicesCount = response.data.filter(item => !item.completedAt).length;
+
+      this.item.activeServicesCount = activeServicesCount;
+      this.$set(this.item, 'services', response.data);
       this.loading = false;
     },
 
-    getColorForTodo(todo) {
-      return todo.datePicker ? 'primary' : 'yellow lighten-2';
+    async loadMachineData() {
+      const { data } = await loadMachineInfo(this.id);
+
+      this.item = data;
+      this.loading = false;
+      this.loadData();
+    },
+
+    getColorForService(service) {
+      return service.datePicker ? 'primary' : 'yellow lighten-2';
     },
 
     showNewTaskModal() {
@@ -341,10 +371,12 @@ export default {
     },
 
     async createNewTask() {
-      await createPlaceService(this.id, this.task);
+      this.task.addedAt = moment(this.task.addedAt).utc();
+
+      await createMachineService(this.id, this.task);
 
       this.newTaskModal = false;
-      this.loadData();
+      this.loadMachineData();
     },
 
     async updateTodo(todo, fieldName) {
@@ -356,9 +388,10 @@ export default {
 
       todo.datePicker = false;
 
-      await updatePlaceService(this.id, todo.id, { [fieldName]: fieldData });
+      await updateMachineService(this.id, todo.id, { [fieldName]: fieldData });
 
-      this.loadData();
+      this.task = {};
+      this.loadMachineData();
     },
 
     showRemoveModal(item) {
@@ -368,8 +401,8 @@ export default {
     async removeTask(task, success) {
       if (this.deleteTask.task) {
         if (success) {
-          await removePlaceService(this.id, task.id);
-          this.loadData();
+          await deleteMachineService(this.id, task.id);
+          this.loadMachineData();
         }
         this.deleteTask.task = null;
         this.deleteTask.dialog = false;

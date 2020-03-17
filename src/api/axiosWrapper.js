@@ -13,6 +13,13 @@ const getToken = () => localStorage.getItem('token');
 
 const axios = Axios.create();
 
+const buildUrl = (url, query) => {
+  const queryString = Object.keys(query)
+    .reduce((acc, key) => `${acc}&${key}=${query[key]}`, '');
+
+  return `${url}?${queryString}`;
+};
+
 const request = (method, url, data) => axios.request({
   method,
   headers: {
@@ -23,4 +30,4 @@ const request = (method, url, data) => axios.request({
   data,
 });
 
-export { METHODS, request };
+export { METHODS, request, buildUrl };

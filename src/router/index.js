@@ -48,6 +48,12 @@ const routes = [
     component: () => import('../components/distribution/DistributionList.vue'),
   },
   {
+    path: '/distribution/to',
+    name: 'distributionTO',
+    meta: { title: 'Журнал' },
+    component: () => import('../components/distribution/TechnicalServiceList.vue'),
+  },
+  {
     path: '/distribution/:id',
     name: 'distPlaceInfo',
     component: () => import('../components/distribution/DistributionItem.vue'),

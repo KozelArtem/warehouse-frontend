@@ -8,6 +8,7 @@ import category from './category';
 import company from './company';
 import item from './item';
 import waybill from './waybill';
+import machine from './machine';
 
 import {
   login as loginURL,
@@ -225,6 +226,7 @@ export default {
   ...company,
   ...item,
   ...waybill,
+  ...machine,
 
   createItemDistribution,
   updateItemDistribution,

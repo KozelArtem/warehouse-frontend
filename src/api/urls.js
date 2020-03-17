@@ -1,4 +1,5 @@
-const baseURL = 'https://warehouse-mpp.herokuapp.com/';
+// const baseURL = 'https://warehouse-mpp.herokuapp.com/';
+const baseURL = 'http://localhost:3000';
 
 const login = '/login';
 
@@ -30,7 +31,6 @@ const orderById = id => `/order/${id}`;
 
 const waybill = '/waybill';
 const waybillInfo = id => `${waybill}/${id}`;
-
 
 export {
   baseURL,

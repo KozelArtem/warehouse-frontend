@@ -42,6 +42,15 @@
           mdi-table-of-contents
         </v-icon>
       </v-flex>
+      <v-flex xs12>
+        <v-progress-linear
+          :active="loading"
+          indeterminate
+          color="green"
+          height="7px"
+          opacity="0.3"
+        ></v-progress-linear>
+      </v-flex>
       <v-flex
         :hidden-sm-and-down="itemId"
         :xs4="itemId"
@@ -89,7 +98,6 @@
             @removeCategory="removeCategory"
           />
         </div>
-        <v-progress-circular v-if="dataLoading" indeterminate color="primary" />
       </v-flex>
       <v-flex :hidden-sm-and-down="!itemId" :md8="itemId" :xs4="!itemId">
         <ItemDetails v-if="itemId" :itemId="itemId" @close="itemId = null" />
@@ -117,7 +125,7 @@ import WarehouseTreeView from '../components/warehouse/WarehouseTreeView.vue';
 import WarehouseCardView from '../components/warehouse/WarehouseCardView.vue';
 
 const {
-  getBaseCategories,
+  // getBaseCategories,
   getCategoryInfo,
   createCategory,
   updateCategory,
@@ -126,6 +134,14 @@ const {
 } = api;
 
 export default {
+  props: {
+    categoryId: {
+      type: [Number, String],
+      required: false,
+      default: 0,
+    },
+  },
+
   components: {
     ItemDetails,
     ItemModal,
@@ -176,16 +192,26 @@ export default {
     itemId: null,
     searchedItems: [],
 
-    dataLoading: false,
+    loading: true,
   }),
 
+  watch: {
+    async categoryId() {
+      const { children } = await this.fetchCategoryInfo({ id: createCategoryKey(this.categoryId) });
+      this.items = [...children];
+    },
+  },
+
   async beforeMount() {
-    this.dataLoading = true;
+    // this.dataLoading = true;
 
-    const data = await getBaseCategories();
-
-    this.dataLoading = false;
-    this.items = mapCategories(data);
+    // const data = await getBaseCategories();
+    // console.log(data);
+    // this.dataLoading = false;
+    // this.items = mapCategories(data);
+    console.log(this.categoryId);
+    const { children } = await this.fetchCategoryInfo({ id: createCategoryKey(this.categoryId) });
+    this.items = [...children];
   },
 
   computed: {
@@ -204,6 +230,7 @@ export default {
 
   methods: {
     async fetchCategoryInfo(category) {
+      this.loading = true;
       const categoryCopy = category;
       const categoryId = getIdFromKey(categoryCopy.id);
       const { items, categories } = await getCategoryInfo(categoryId);
@@ -212,6 +239,10 @@ export default {
         ...mapCategories(categories),
         ...items.map(item => ({ ...item, id: createItemKey(item.id) })),
       ];
+
+      this.loading = false;
+
+      return categoryCopy;
     },
 
     async openCategory(category) {

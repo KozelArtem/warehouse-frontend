@@ -52,16 +52,22 @@ export default {
       },
       {
         id: 2,
+        link: '/equipments',
+        icon: 'mdi-printer-settings',
+        title: 'Оборудование и техника',
+      },
+      {
+        id: 3,
+        link: '/tools',
+        icon: 'mdi-hammer-wrench',
+        title: 'Инструменты',
+      },
+      {
+        id: 4,
         link: '/waybill',
         icon: 'mdi-file',
         title: 'Накладные',
       },
-      // {
-      //   id: 4,
-      //   link: '/report',
-      //   icon: 'mdi-file-chart-outline',
-      //   title: 'Отчеты',
-      // },
       {
         id: 5,
         link: '/distribution',

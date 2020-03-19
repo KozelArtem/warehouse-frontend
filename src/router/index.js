@@ -18,6 +18,21 @@ const routes = [
     path: '/warehouse',
     name: 'warehouse',
     meta: { title: 'Склад' },
+    props: { categoryId: 71 },
+    component: () => import('../views/WarehouseTree.vue'),
+  },
+  {
+    path: '/tools',
+    name: 'tools',
+    meta: { title: 'Инструменты' },
+    props: { categoryId: 2 },
+    component: () => import('../views/WarehouseTree.vue'),
+  },
+  {
+    path: '/equipments',
+    name: 'equipments',
+    meta: { title: 'Оборудование и техника' },
+    props: { categoryId: 25 },
     component: () => import('../views/WarehouseTree.vue'),
   },
   {

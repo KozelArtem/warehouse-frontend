@@ -339,6 +339,7 @@ export default {
       const query = {
         dateFrom: moment().month(this.selectedMonthId).startOf('month'),
         dateTo: moment().month(this.selectedMonthId).endOf('month'),
+        onlyTO: false,
       };
 
       const response = await loadMachineServices(this.id, query);
@@ -376,6 +377,7 @@ export default {
       await createMachineService(this.id, this.task);
 
       this.newTaskModal = false;
+      this.task = {};
       this.loadMachineData();
     },
 

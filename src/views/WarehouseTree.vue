@@ -206,10 +206,8 @@ export default {
     // this.dataLoading = true;
 
     // const data = await getBaseCategories();
-    // console.log(data);
     // this.dataLoading = false;
     // this.items = mapCategories(data);
-    console.log(this.categoryId);
     const { children } = await this.fetchCategoryInfo({ id: createCategoryKey(this.categoryId) });
     this.items = [...children];
   },

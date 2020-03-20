@@ -157,7 +157,7 @@ export default {
         const month = moment(service.completedAt || service.addedAt).month();
 
         acc[month + 1] = this.formatService(service);
-        console.log(acc[month + 1]);
+
         return acc;
       }, {});
 

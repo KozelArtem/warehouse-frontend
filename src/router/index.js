@@ -18,7 +18,25 @@ const routes = [
     path: '/warehouse',
     name: 'warehouse',
     meta: { title: 'Склад' },
+    redirect: { name: 'categoryInfo', params: { categoryId: 0 } },
     component: () => import('../views/WarehouseTree.vue'),
+    children: [
+      {
+        path: 'category/:categoryId',
+        name: 'categoryInfo',
+        meta: { title: 'Информация' },
+        component: () => import('../components/warehouse/WarehouseCategory.vue'),
+        props: true,
+        children: [
+          {
+            path: 'item/:itemId',
+            name: 'itemInfo',
+            component: () => import('../components/item/ItemDetails.vue'),
+            props: route => ({ route: true, itemId: route.params.itemId }),
+          },
+        ],
+      },
+    ],
   },
   {
     path: '/waybill',

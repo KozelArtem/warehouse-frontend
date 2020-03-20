@@ -1,75 +1,92 @@
 <template>
-  <v-treeview
-    v-model="tree"
-    :open="open"
-    :items="items"
-    :active.sync="active"
-    activatable
-    item-key="id"
-    open-on-click
-    dense
-    transition
-    expand-icon
-    :load-children="openCategory"
-  >
-    <template v-slot:label="{ item, open }">
-      <v-text-field
-        v-if="item.edit"
-        label="Название категории"
-        :rules="[required]"
-        v-model="item.name"
-        @keypress="key => onNewCategoryTFKeyPress(key, item)"
-        append-outer-icon="mdi-close"
-        @click:outer-icon="newCategory(item.parent)"
-      ></v-text-field>
+  <div>
+    <v-dialog
+      v-model="itemView"
+      scrollable fullscreen
+      persistent :overlay="false"
+      max-width="500px"
+      transition="dialog-transition"
+    >
+      <ItemDetails :itemId="itemId" @close="itemId = -1; itemView = false" />
+    </v-dialog>
+    <v-treeview
+      v-model="tree"
+      :open="open"
+      :items="items"
+      :active.sync="active"
+      activatable
+      item-key="id"
+      open-on-click
+      dense
+      transition
+      expand-icon
+      :load-children="openCategory"
+    >
+      <template v-slot:label="{ item, open }">
+        <v-text-field
+          v-if="item.edit"
+          label="Название категории"
+          :rules="[required]"
+          v-model="item.name"
+          @keypress="key => onNewCategoryTFKeyPress(key, item)"
+          append-outer-icon="mdi-close"
+          @click:outer-icon="newCategory(item.parent)"
+        ></v-text-field>
 
-      <v-menu v-model="menu[item.id]" v-else offset-y>
-        <template v-slot:activator="{ on }">
-          <span
-            class="subtitle-2"
-            v-if="item.children"
-            @contextmenu.prevent="openMenu(item.id, open)"
-          >
-            {{ item.name }}
-          </span>
-          <span
-            v-else
-            :class="['subtitle-2', { 'red lighten-1 white--text': item.amount === 0 }]"
-            @contextmenu.prevent="openMenu(item.id)"
-          >
-            {{ item.name }}
-          </span>
-        </template>
-        <v-layout column class="white">
-          <v-btn
-            v-show="menuItem.condition(item)"
-            @click="menuItem.func(item)"
-            v-for="(menuItem, i) in menuItems"
-            :key="`mI${i}`"
-            xSmall
-            outlined
-            text
-          >{{ menuItem.name }}</v-btn>
-        </v-layout>
-      </v-menu>
-    </template>
+        <v-menu v-model="menu[item.id]" v-else offset-y>
+          <template v-slot:activator="{ on }">
+            <span
+              class="subtitle-2"
+              v-if="item.children"
+              @contextmenu.prevent="openMenu(item.id, open)"
+            >
+              {{ item.name }}
+            </span>
+            <span
+              v-else
+              :class="['subtitle-2', { 'red lighten-1 white--text': item.amount === 0 }]"
+              @contextmenu.prevent="openMenu(item.id)"
+            >
+              {{ item.name }}
+            </span>
+          </template>
+          <v-layout column class="white">
+            <v-btn
+              v-show="menuItem.condition(item)"
+              @click="menuItem.func(item)"
+              v-for="(menuItem, i) in menuItems"
+              :key="`mI${i}`"
+              xSmall
+              outlined
+              text
+            >{{ menuItem.name }}</v-btn>
+          </v-layout>
+        </v-menu>
+      </template>
 
-    <template v-slot:prepend="{ item, open }">
-      <v-icon v-if="item.children" color="deep-orange">
-        {{ open ? 'mdi-folder-open' : 'mdi-folder' }}
-      </v-icon>
-    </template>
-  </v-treeview>
+      <template v-slot:prepend="{ item, open }">
+        <v-icon v-if="item.children" color="deep-orange">
+          {{ open ? 'mdi-folder-open' : 'mdi-folder' }}
+        </v-icon>
+      </template>
+    </v-treeview>
+  </div>
 </template>
 
 <script>
 import rules from '../../helpers/validationRules';
+
+import ItemDetails from '../item/ItemDetails.vue';
 
 import {
   getIdFromKey,
 } from '../../helpers/treeview';
 
 export default {
+  components: {
+    ItemDetails,
+  },
+
   props: {
     items: {
       type: Array,
@@ -93,14 +110,15 @@ export default {
     open: [],
     tree: [],
     itemView: false,
+    itemId: null,
     menu: {},
   }),
 
   watch: {
     active() {
       this.itemView = !!this.active.length;
-
-      this.$emit('selectItem', this.getSelectedId());
+      this.itemId = this.getSelectedId();
+      this.$emit('selectItem', this.itemId);
     },
   },
 

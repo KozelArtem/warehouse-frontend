@@ -1,53 +1,34 @@
 <template>
-  <v-container grid-list-sm>
+  <v-container grid-list-xs>
     <v-layout row wrap>
-      <v-flex xs12>
-        <ItemModal
-          :dialog="newItemModal"
-          :category="selectedCategory"
-          @close="newItemModal = false; selectedCategory = null"
-          @submit="saveNewItem"/>
-      </v-flex>
-      <v-flex xs10 sm10 md7 lg7>
-        <v-text-field
-          v-model="search"
-          @input="findItems()"
-          prepend-icon="mdi-magnify"
-          dense
-          clearable
-          max-width="300"
-          hide-details
-          class="d-flex mr-3"
-        ></v-text-field>
-      </v-flex>
-      <v-flex hidden-sm-and-down md4 lg4>
-        <!-- TODO Sort by Name (A-Z), Available, Out of stock -->
-        <v-select
-          :items="items"
-          menu-props="auto"
-          label="Сортировка"
-          hide-details
-          dense
-          item-value="id"
-          item-text="name"
-          prepend-icon="mdi-sort"
-          single-line
-        ></v-select>
-      </v-flex>
-      <v-flex xs2 sm2 md1 lg1>
-        <v-icon medium :color="!treeView ? 'red' : ''" @click="treeView = false; itemId = null">
+      <ItemModal
+      :dialog="newItemModal"
+      :category="selectedCategory"
+      @close="newItemModal = false; selectedCategory = null"
+      @submit="saveNewItem"/>
+
+      <v-text-field
+        v-model="search"
+        @input="findItems()"
+        prepend-icon="mdi-magnify"
+        dense
+        clearable
+        max-width="300"
+        hide-details
+        class="d-flex mr-3"
+      ></v-text-field>
+      <span class="d-flex">
+        <v-icon medium :color="isSelectedMode(CARD)" @click="selectMode(CARD)">
           mdi-table-large
         </v-icon>
-        <v-icon large :color="treeView ? 'red' : ''" @click="treeView = true">
+        <v-icon large :color="isSelectedMode(LIST)" @click="selectMode(LIST)">
           mdi-table-of-contents
         </v-icon>
-      </v-flex>
-      <v-flex
-        :hidden-sm-and-down="itemId"
-        :xs4="itemId"
-        :xs12="!itemId" style="max-height: 82vh"
-        class="overflow-y-auto"
-      >
+        <v-icon medium :color="isSelectedMode(TREE)" @click="selectMode(TREE)">
+          mdi-file-tree
+        </v-icon>
+      </span>
+      <v-flex xs12>
         <div v-if="search">
           <v-list
             subheader dense
@@ -66,19 +47,8 @@
           </v-list>
         </div>
         <div v-else>
-          <WarehouseTreeView
-            v-if="treeView"
-            :items="items"
-            :menuItems="menuItems"
-            :emitOpenCategory="fetchCategoryInfo"
-            @selectItem="input => itemId = input"
-            @newItem="showNewItemModal"
-            @newCategory="newCategory"
-            @renameCategory="renameCategory"
-            @removeCategory="removeCategory"
-          />
           <WarehouseCardView
-            v-else
+            v-if="selectedMode === CARD"
             :items="items"
             :menuItems="menuItems"
             :emitOpenCategory="fetchCategoryInfo"
@@ -88,11 +58,20 @@
             @renameCategory="renameCategory"
             @removeCategory="removeCategory"
           />
+          <WarehouseTreeView
+            v-if="selectedMode === TREE"
+            :items="items"
+            :menuItems="menuItems"
+            :emitOpenCategory="fetchCategoryInfo"
+            @selectItem="input => itemId = input"
+            @newItem="showNewItemModal"
+            @newCategory="newCategory"
+            @renameCategory="renameCategory"
+            @removeCategory="removeCategory"
+          />
+
+          <router-view v-if="selectedMode === LIST"></router-view>
         </div>
-        <v-progress-circular v-if="dataLoading" indeterminate color="primary" />
-      </v-flex>
-      <v-flex :hidden-sm-and-down="!itemId" :md8="itemId" :xs4="!itemId">
-        <ItemDetails v-if="itemId" :itemId="itemId" @close="itemId = null" />
       </v-flex>
     </v-layout>
   </v-container>
@@ -111,7 +90,7 @@ import {
 } from '../helpers/treeview';
 import rules from '../helpers/validationRules';
 
-import ItemDetails from '../components/item/ItemDetails.vue';
+// import ItemDetails from '../components/item/ItemDetails.vue';
 import ItemModal from '../components/item/ItemModal.vue';
 import WarehouseTreeView from '../components/warehouse/WarehouseTreeView.vue';
 import WarehouseCardView from '../components/warehouse/WarehouseCardView.vue';
@@ -125,25 +104,28 @@ const {
   searchItems,
 } = api;
 
+const modes = {
+  CARD: 'card',
+  LIST: 'list',
+  TREE: 'tree',
+};
+
 export default {
   components: {
-    ItemDetails,
-    ItemModal,
     WarehouseTreeView,
     WarehouseCardView,
+    ItemModal,
   },
-  // TODO Add switcher to show bages like in Yandex Disk
   data: vm => ({
     ...rules,
     ...constants,
+    ...modes,
 
     active: [],
     open: [],
     tree: [],
     items: [],
     menu: {},
-
-    treeView: true,
 
     newItemModal: false,
     selectedCategory: null,
@@ -176,6 +158,8 @@ export default {
     itemId: null,
     searchedItems: [],
 
+    selectedMode: modes.LIST,
+
     dataLoading: false,
   }),
 
@@ -203,6 +187,22 @@ export default {
   },
 
   methods: {
+    isSelectedMode(mode) {
+      if (this.selectedMode === mode) {
+        return 'red';
+      }
+
+      return '';
+    },
+
+    selectMode(mode) {
+      if (this.selectedMode === mode) {
+        return;
+      }
+
+      this.selectedMode = mode;
+    },
+
     async fetchCategoryInfo(category) {
       const categoryCopy = category;
       const categoryId = getIdFromKey(categoryCopy.id);

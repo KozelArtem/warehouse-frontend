@@ -50,6 +50,7 @@
                             Нажмите для выбора даты выполнения
                           </v-tooltip>
                         </th>
+                        <th class="text-center" v-if="isAdmin()">Управление</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -77,6 +78,10 @@
                               locale="ru-RU"
                             />
                           </v-menu>
+                        </td>
+                        <td class="text-center" v-if="isAdmin()">
+                          <v-icon small color="primary" @click="editTodo(todo)">mdi-pencil</v-icon>
+                          <v-icon small color="red" @click="removeTodo(todo)">mdi-delete</v-icon>
                         </td>
                       </tr>
                     </tbody>
@@ -118,6 +123,14 @@
           </template>
         </v-data-table>
       </v-flex>
+      <v-flex>
+        <DeleteModal
+          :dialog="removeTodoDialog.show"
+          :title="removeDialog.title"
+          :description="removeDialog.description"
+          @click="removeDialog.action"
+        />
+      </v-flex>
     </v-layout>
   </v-container>
 </template>
@@ -135,7 +148,11 @@ const {
 } = api;
 
 export default {
-  data: () => ({
+  components: {
+    DeleteModal: () => import('../helpers/DeleteModal.vue'),
+  },
+
+  data: vm => ({
     ...rules,
     headers: [
       {
@@ -155,6 +172,13 @@ export default {
     places: [],
     detail: [],
     datePickerMenu: false,
+
+    removeDialog: {
+      show: false,
+      title: 'Удаление задания',
+      description: '',
+      action: vm.removeTodoResult,
+    },
   }),
 
   async beforeMount() {
@@ -232,6 +256,18 @@ export default {
       activeItem.newTodo = '';
 
       this.expanded[0] = activeItem;
+    },
+
+    async removeTodo(todo) {
+      console.log(todo);
+    },
+
+    removeTodoResult(result) {
+      if (!result) {
+        this.removeDialog.show = false;
+        this.removeDialog.description = '';
+        // return;
+      }
     },
 
     onKeyDown(key) {

@@ -32,6 +32,17 @@ const createMachine = async (data) => {
   }
 };
 
+const updateMachine = async (machineId, data) => {
+  try {
+    const url = MACHINE_BY_ID.replace(':machineId', machineId);
+    const response = await request(METHODS.PUT, url, data);
+
+    return { data: response.data || {} };
+  } catch (err) {
+    return {};
+  }
+};
+
 const loadMachineInfo = async (machineId, query = {}) => {
   try {
     const url = buildUrl(MACHINE_BY_ID.replace(':machineId', machineId), query);
@@ -95,6 +106,7 @@ const deleteMachineService = async (machineId, id) => {
 export default {
   loadMachines,
   createMachine,
+  updateMachine,
   loadMachineInfo,
   loadMachineServices,
   createMachineService,

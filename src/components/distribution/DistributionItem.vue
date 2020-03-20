@@ -40,7 +40,27 @@
       </v-flex>
       <v-flex xs12>
         <v-toolbar color="orange lighten-2">
-          <v-toolbar-title>{{ item.name }}</v-toolbar-title>
+          <v-toolbar-title>
+            <v-text-field
+              v-if="editing"
+              v-model="item.name"
+              solo
+              dense
+              hide-details
+              clearable
+              append-outer-icon="mdi-check"
+              @click:clear="editing = false"
+              @click:append-outer="updateMachine()"
+            ></v-text-field>
+            <span v-else>
+              {{ item.name }}
+              <span class="show-on-hover" v-if="isAdmin()">
+                <v-icon @click="editing = true" color="gray" small>
+                  mdi-lead-pencil
+                </v-icon>
+              </span>
+            </span>
+          </v-toolbar-title>
           <v-spacer></v-spacer>
           <span>
             <span class="body-2 font-weight-medium">
@@ -100,29 +120,29 @@
             </thead>
             <tbody>
               <tr
-                v-for="(service, i) in sortedServices"
+                v-for="(service, i) in item.services"
                 :key="service.id"
               >
                 <td v-if="headers[0].breakpoint()">{{ i + 1 }}</td>
                  <td>
-                  <span v-if="!service.rename">
-                    {{ service.name }}
-                  </span>
-                  <span class="show-on-hover" v-if="isAdmin()" v-show="!service.rename">
-                    <v-icon @click="service.rename = true" color="gray" small>
-                      mdi-lead-pencil
-                    </v-icon>
-                  </span>
                   <v-text-field
-                    v-show="service.rename"
+                    v-if="service.rename"
                     v-model="service.name"
                     dense
                     hide-details
-                    append-icon="mdi-close"
+                    clearable
                     append-outer-icon="mdi-check"
-                    @click:append="service.rename = false"
-                    @click:append-outer="updateservice(service, fields.NAME)"
-                  />
+                    @click:clear="editing = false"
+                    @click:append-outer="updateTodo(service, fields.NAME)"
+                  ></v-text-field>
+                  <span v-else>
+                    {{ service.name }}
+                    <span class="show-on-hover" v-if="isAdmin()">
+                      <v-icon @click="service.rename = true" color="gray" small>
+                        mdi-lead-pencil
+                      </v-icon>
+                    </span>
+                  </span>
                 </td>
                 <td>
                   <span v-if="!isAdmin()">{{ service.addedAt | date }}</span>
@@ -217,6 +237,7 @@ import { format as formatDate } from '../../helpers/dates';
 
 const {
   loadMachineInfo,
+  updateMachine,
   loadMachineServices,
   createMachineService,
   updateMachineService,
@@ -248,12 +269,6 @@ export default {
       type: [Number, String],
       required: true,
       default: 0,
-    },
-  },
-
-  computed: {
-    sortedServices() {
-      return (this.item.services || []).map(mapService);
     },
   },
 
@@ -299,6 +314,7 @@ export default {
     picker: '',
 
     item: {},
+    editing: false,
 
     months: moment.months(),
 
@@ -344,13 +360,16 @@ export default {
 
       const response = await loadMachineServices(this.id, query);
       const activeServicesCount = response.data.filter(item => !item.completedAt).length;
+      const services = response.data.map(mapService);
 
       this.item.activeServicesCount = activeServicesCount;
-      this.$set(this.item, 'services', response.data);
+      this.$set(this.item, 'services', services);
       this.loading = false;
     },
 
     async loadMachineData() {
+      this.loading = true;
+
       const { data } = await loadMachineInfo(this.id);
 
       this.item = data;
@@ -394,6 +413,13 @@ export default {
 
       this.task = {};
       this.loadMachineData();
+    },
+
+    async updateMachine() {
+      await updateMachine(this.id, this.item);
+
+      this.editing = false;
+      this.loadMachineData(this.id);
     },
 
     showRemoveModal(item) {

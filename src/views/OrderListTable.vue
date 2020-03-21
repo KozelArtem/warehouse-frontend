@@ -2,7 +2,7 @@
   <v-container>
     <v-layout row wrap>
       <v-flex xs12>
-        <v-toolbar color="rgba(76, 175, 80, 0.25)">
+        <v-toolbar color="green lighten-3">
           <v-toolbar-title v-if="$vuetify.breakpoint.smAndUp">{{ title }}</v-toolbar-title>
           <v-divider v-if="$vuetify.breakpoint.smAndUp" class="mx-4" inset vertical></v-divider>
           <span style="width: 200px">
@@ -33,7 +33,7 @@
         <v-progress-linear
           :active="loading"
           indeterminate
-          color="green"
+          color="green lighten-3"
           height="7px"
           opacity="0.3"
         ></v-progress-linear>
@@ -78,7 +78,7 @@
                 </td>
               </tr>
             </tbody>
-            <tfoot style="background-color: rgba(76, 175, 80, 0.25)">
+            <tfoot class="green lighten-3">
               <tr>
                 <td :colspan="headers.length">
                    <v-pagination

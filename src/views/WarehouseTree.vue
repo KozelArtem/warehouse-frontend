@@ -1,5 +1,5 @@
 <template>
-  <v-container grid-list-sm>
+  <v-container>
     <v-layout row wrap>
       <v-flex xs12>
         <ItemModal
@@ -8,45 +8,43 @@
           @close="newItemModal = false; selectedCategory = null"
           @submit="saveNewItem"/>
       </v-flex>
-      <v-flex xs10 sm10 md7 lg7>
-        <v-text-field
-          v-model="search"
-          @input="findItems()"
-          prepend-icon="mdi-magnify"
-          dense
-          clearable
-          max-width="300"
-          hide-details
-          class="d-flex mr-3"
-        ></v-text-field>
-      </v-flex>
-      <v-flex hidden-sm-and-down md4 lg4>
-        <!-- TODO Sort by Name (A-Z), Available, Out of stock -->
-        <v-select
-          :items="items"
-          menu-props="auto"
-          label="Сортировка"
-          hide-details
-          dense
-          item-value="id"
-          item-text="name"
-          prepend-icon="mdi-sort"
-          single-line
-        ></v-select>
-      </v-flex>
-      <v-flex xs2 sm2 md1 lg1>
-        <v-icon medium :color="!treeView ? 'red' : ''" @click="treeView = false; itemId = null">
-          mdi-table-large
-        </v-icon>
-        <v-icon large :color="treeView ? 'red' : ''" @click="treeView = true">
-          mdi-table-of-contents
-        </v-icon>
-      </v-flex>
       <v-flex xs12>
+        <v-toolbar :class="toolbarColor">
+          <v-toolbar-title>{{ title }}</v-toolbar-title>
+          <v-divider v-if="$vuetify.breakpoint.smAndUp" class="mx-4" inset vertical></v-divider>
+          <span style="width: 200px">
+            <v-select
+              v-model="activeViewId"
+              :items="views"
+              menu-props="auto"
+              hide-details
+              item-value="id"
+              item-text="name"
+              prepend-icon="mdi-sort"
+              single-line
+            >
+            </v-select>
+          </span>
+          <v-spacer></v-spacer>
+          <span :class="['d-flex', {
+            'w-200': $vuetify.breakpoint.smAndUp,
+            'w-100': $vuetify.breakpoint.xs,
+            }
+          ]">
+            <v-text-field
+              label="Поиск"
+              append-icon="mdi-magnify"
+              dense hide-details
+              v-model="search"
+              @input="findItems()"
+            />
+          </span>
+        </v-toolbar>
+        <v-divider></v-divider>
         <v-progress-linear
           :active="loading"
           indeterminate
-          color="green"
+          :color="toolbarColor"
           height="7px"
           opacity="0.3"
         ></v-progress-linear>
@@ -76,7 +74,7 @@
         </div>
         <div v-else>
           <WarehouseTreeView
-            v-if="treeView"
+            v-if="activeViewId === 0"
             :items="items"
             :menuItems="menuItems"
             :emitOpenCategory="fetchCategoryInfo"
@@ -87,7 +85,7 @@
             @removeCategory="removeCategory"
           />
           <WarehouseCardView
-            v-else
+            v-if="activeViewId === 1"
             :items="items"
             :menuItems="menuItems"
             :emitOpenCategory="fetchCategoryInfo"
@@ -133,12 +131,37 @@ const {
   searchItems,
 } = api;
 
+const orderStatuses = {
+  treeView: {
+    id: 0,
+    name: 'Список',
+    icon: 'mdi-calendar-clock',
+    color: 'orange',
+  },
+  cardView: {
+    id: 1,
+    name: 'Папки',
+    icon: 'mdi-check',
+    color: 'green',
+  },
+};
+
 export default {
   props: {
     categoryId: {
       type: [Number, String],
       required: false,
       default: 0,
+    },
+    title: {
+      type: String,
+      required: true,
+      default: '',
+    },
+    toolbarColor: {
+      type: String,
+      required: false,
+      default: 'green',
     },
   },
 
@@ -152,6 +175,8 @@ export default {
   data: vm => ({
     ...rules,
     ...constants,
+
+    activeViewId: orderStatuses.treeView.id,
 
     active: [],
     open: [],
@@ -223,6 +248,9 @@ export default {
 
         return acc;
       }, {});
+    },
+    views() {
+      return Object.values(orderStatuses);
     },
   },
 

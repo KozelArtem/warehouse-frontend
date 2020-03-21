@@ -95,6 +95,7 @@
     >
       <template v-slot:footer="">
         <v-btn
+          v-if="isAdmin()"
           fab
           color="green"
           bottom

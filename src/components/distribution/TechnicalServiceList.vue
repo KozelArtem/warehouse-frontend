@@ -1,5 +1,5 @@
 <template>
-  <v-container grid-list-xs>
+  <v-container>
     <v-layout row wrap>
       <v-flex xs12>
         <v-toolbar color="orange lighten-2">

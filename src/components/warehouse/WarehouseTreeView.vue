@@ -67,9 +67,15 @@
 <script>
 import rules from '../../helpers/validationRules';
 
+import api from '../../api';
+
 import {
   getIdFromKey,
 } from '../../helpers/treeview';
+
+const {
+  isAdmin,
+} = api;
 
 export default {
   props: {
@@ -114,7 +120,7 @@ export default {
     },
 
     openMenu(itemId, isFolderOpened) {
-      if (isFolderOpened) {
+      if (isFolderOpened && isAdmin()) {
         this.menu = { [itemId]: true };
       }
     },

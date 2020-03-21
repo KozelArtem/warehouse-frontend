@@ -1,5 +1,5 @@
 <template>
-  <v-container grid-list-xs>
+  <v-container>
     <v-layout row wrap>
       <v-flex>
         <v-dialog
@@ -110,7 +110,6 @@
       <v-icon>mdi-plus</v-icon>
     </v-btn>
     <v-btn
-      v-if="isAdmin()"
       small
       fixed
       fab

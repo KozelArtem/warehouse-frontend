@@ -1,33 +1,32 @@
 <template>
-  <v-container grid-list-xs>
-    <v-layout column wrap>
-      <v-flex xs1>
-        <CompanyModal
-          v-if="isAdmin() && (newCompanyModal || editCompanyModal)"
-          :dialog="newCompanyModal || editCompanyModal"
-          :data="editCompanyModal ? selectedCompany : {}"
-          @submit="onCompanyModalSubmit"
-          @close="newCompanyModal = false; editCompanyModal = false"
-        />
-      </v-flex>
-      <v-flex xs1>
-        <v-toolbar dense>
-          <span>Список компаний</span>
+  <v-container>
+    <v-layout row wrap>
+      <v-flex xs12>
+        <v-toolbar class="blue lighten-3">
+          <v-toolbar-title>Список компаний</v-toolbar-title>
           <v-spacer></v-spacer>
-          <span>
-            <v-text-field label="Поиск" hide-details dense v-model="search"/>
+          <span :class="['d-flex', {
+            'w-200': $vuetify.breakpoint.smAndUp,
+            'w-100': $vuetify.breakpoint.xs,
+            }
+          ]">
+            <v-text-field
+              label="Поиск"
+              append-icon="mdi-magnify"
+              dense hide-details
+              v-model="search"></v-text-field>
           </span>
-          <v-spacer></v-spacer>
-          <v-icon
-            v-if="isAdmin()"
-            color="primary"
-            @click="newCompanyModal = true"
-          >
-            mdi-plus
-          </v-icon>
         </v-toolbar>
+        <v-divider></v-divider>
+        <v-progress-linear
+          :active="loading"
+          indeterminate
+          color="blue lighten-3"
+          height="7px"
+          opacity="0.3"
+        ></v-progress-linear>
       </v-flex>
-      <v-flex xs2 v-for="company in localCompanies" :key="company.id">
+      <v-flex xs12 v-for="company in localCompanies" :key="company.id">
         <v-card :color="company.color">
           <v-card-title primary-title class="pb-0 lh-0">
             <div class="d-flex subtitle-2">{{ company.name }} | {{ company.person }}</div>
@@ -122,6 +121,28 @@
           </v-card-actions>
         </v-card>
       </v-flex>
+      <v-flex xs12>
+        <CompanyModal
+          v-if="isAdmin() && (newCompanyModal || editCompanyModal)"
+          :dialog="newCompanyModal || editCompanyModal"
+          :data="editCompanyModal ? selectedCompany : {}"
+          @submit="onCompanyModalSubmit"
+          @close="newCompanyModal = false; editCompanyModal = false"
+        />
+      </v-flex>
+      <v-btn
+        v-if="isAdmin()"
+        small
+        fixed
+        dark
+        fab
+        bottom
+        right
+        color="gray"
+        @click="newCompanyModal = true"
+      >
+        <v-icon>mdi-plus</v-icon>
+      </v-btn>
     </v-layout>
   </v-container>
 </template>
@@ -148,6 +169,7 @@ export default {
     newCompanyModal: false,
     editCompanyModal: false,
     search: null,
+    loading: true,
   }),
 
   beforeMount() {
@@ -170,9 +192,13 @@ export default {
     },
 
     async loadData() {
+      this.loading = true;
+
       const data = await getCompaniesWithItems();
+
       this.companies = data.map(company => ({ ...company, showInfo: false }));
       this.localCompanies = this.companies;
+      this.loading = false;
     },
 
     onCompanyModalSubmit() {

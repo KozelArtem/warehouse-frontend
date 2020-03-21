@@ -57,7 +57,7 @@
             </thead>
             <tbody>
               <tr v-for="(order, i) in sortedOrders" :key="order.id">
-                <td v-if="headers[0].breakpoint()">{{ i + 1 }}</td>
+                <td v-if="headers[0].breakpoint()">{{ offset + i + 1 }}</td>
                 <td>
                   {{ order.item.name }}
                   <span class="show-on-hover" v-if="isAdmin()">
@@ -219,6 +219,10 @@ export default {
           return data;
         });
     },
+
+    offset() {
+      return this.limit * (this.page - 1);
+    },
   },
 
   beforeMount() {
@@ -243,9 +247,8 @@ export default {
     isAdmin,
 
     async loadOrders() {
-      const offset = this.limit * (this.page - 1);
       const query = {
-        offset,
+        offset: this.offset,
         limit: this.limit,
         active: this.statuses[this.activeOrderSortId].value,
         search: this.search,

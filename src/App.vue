@@ -23,7 +23,7 @@ export default {
 .pointer {
   cursor: pointer;
 };
-tr {
+tr, .v-toolbar__title {
   .show-on-hover {
     display: none;
   }

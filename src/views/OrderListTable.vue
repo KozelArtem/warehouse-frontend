@@ -297,6 +297,7 @@ export default {
       this.orders = copy;
       this.editedOrder = {};
       this.editOrderDialog = false;
+      this.loadOrders();
     },
 
     async deleteOrder(order) {

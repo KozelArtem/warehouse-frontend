@@ -52,7 +52,7 @@ const login = async (payload) => {
   }
 };
 
-const loadDistributionPlaces = async (query) => {
+const loadDistributionPlaces = async (query = {}) => {
   try {
     const queryString = Object.keys(query)
       .reduce((acc, key) => `${acc}&${key}=${query[key]}`, '');
@@ -149,7 +149,7 @@ const removePlaceService = async (distId, id) => {
   }
 };
 
-const getOrders = async (query) => {
+const getOrders = async (query = {}) => {
   try {
     const queryString = Object.keys(query)
       .reduce((acc, key) => `${acc}&${key}=${query[key]}`, '');

@@ -238,6 +238,13 @@ export default {
     this.loadWaybills();
   },
 
+  watch: {
+    itemId() {
+      this.loadPlaces();
+      this.loadWaybills();
+    },
+  },
+
   methods: {
     isAdmin() {
       return isAdmin();

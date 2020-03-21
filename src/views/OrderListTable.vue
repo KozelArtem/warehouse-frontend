@@ -140,7 +140,6 @@ import CompanyInfoModal from '../components/company/CompanyInfoModal.vue';
 const {
   isAdmin,
   getOrders,
-  getOrdersByIds,
   removeOrder,
 } = api;
 
@@ -279,14 +278,10 @@ export default {
       return orderStatuses.completed;
     },
 
-    async onSubmit(orderId) {
+    async onSubmit() {
       this.dialog = false;
 
-      const orders = await getOrdersByIds(orderId);
-
-      if (orders.length) {
-        this.orders.push(...orders);
-      }
+      this.loadOrders();
     },
 
     onEditSubmit(order) {

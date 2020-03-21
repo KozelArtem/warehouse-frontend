@@ -234,12 +234,12 @@ export default {
 
       delete this.order.companyId;
 
-      const result = await createOrder(this.order);
+      await createOrder(this.order);
 
       this.order = { ...this.orderTemplate };
       this.formLoading = false;
 
-      this.$emit('submit', result.id);
+      this.$emit('submit');
     },
 
     onClose() {

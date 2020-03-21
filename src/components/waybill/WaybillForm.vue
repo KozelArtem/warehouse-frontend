@@ -70,7 +70,7 @@
                 >
                   <td>{{ order.item.name }}</td>
                   <td>{{ order.orderAmount }}</td>
-                  <td>{{ order.date }}</td>
+                  <td>{{ order.date | date }}</td>
                 </tr>
               </tbody>
             </template>
@@ -106,8 +106,7 @@ import { format as formatDate, sortDesc } from '../../helpers/dates';
 import rules from '../../helpers/validationRules';
 
 const {
-  getActiveOrders,
-  getOrdersByIds,
+  getOrders,
   createWaybill,
 } = api;
 
@@ -135,6 +134,13 @@ export default {
       date: formatDate(Date.now(), 'YYYY-MM-DD'),
       orders: [],
     },
+
+    query: {
+      offset: 0,
+      limit: 100,
+      active: true,
+    },
+
     orders: [],
   }),
 
@@ -150,21 +156,27 @@ export default {
   },
 
   methods: {
-    async addOrder(orderId) {
+    async addOrder() {
       this.newOrderDialog = false;
 
-      const data = await getOrdersByIds(orderId);
-      const order = { ...data[0], selected: true, date: formatDate(data[0].date) };
+      this.loading = true;
+      const { data } = await getOrders(this.query);
 
-      this.orders.unshift(order);
+      const newOrders = data
+        .filter(order => !this.orders.find(i => i.id === order.id))
+        .map(order => ({ ...order, selected: true }));
+
+      this.loading = false;
+
+      this.orders.unshift(...newOrders);
     },
 
     async loadOrders() {
-      const data = await getActiveOrders();
+      const { data } = await getOrders(this.query);
+
       this.orders = data
         .map(order => ({
           ...order,
-          date: formatDate(order.date),
           selected: false,
         }))
         .sort((a, b) => sortDesc(a.date, b.date));

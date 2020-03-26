@@ -110,7 +110,7 @@
       </template>
       <template v-slot:item.placeName="{ item }">
         {{ item.placeName }}
-        <span class="show-on-hover">
+        <span class="show-on-hover" v-if="isAdmin()">
           <v-icon @click="openEditDialog(item)" color="gray" small>mdi-lead-pencil</v-icon>
         </span>
       </template>

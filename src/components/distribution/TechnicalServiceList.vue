@@ -45,7 +45,7 @@
                 class="text-center"
                 :class="machine.servicesByMonth[month].class"
               >
-                <span v-if="!machine.servicesByMonth[month].updatable">
+                <span v-if="!(machine.servicesByMonth[month].updatable && isAdmin())">
                   {{ machine.servicesByMonth[month].day }}
                 </span>
                 <v-menu
@@ -89,6 +89,7 @@ import api from '../../api';
 const {
   loadMachines,
   updateMachineService,
+  isAdmin,
 } = api;
 
 export default {
@@ -108,6 +109,7 @@ export default {
   },
 
   methods: {
+    isAdmin,
     getMonth(i) {
       return moment().month(i - 1).format('MMM');
     },

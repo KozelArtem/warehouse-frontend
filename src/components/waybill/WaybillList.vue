@@ -35,8 +35,10 @@
               hide-details v-model="search"></v-text-field>
           </span>
           <v-spacer></v-spacer>
-          <v-btn icon>
-            <v-icon color="green" dark @click="newWaybillDialog = true">mdi-plus-circle</v-icon>
+          <v-btn icon v-if="isAdmin()">
+            <v-icon color="green" dark @click="newWaybillDialog = true">
+              mdi-plus-circle
+            </v-icon>
           </v-btn>
         </v-toolbar>
         <v-divider></v-divider>
@@ -60,7 +62,7 @@ import api from '../../api';
 
 import { format as formatDate } from '../../helpers/dates';
 
-const { getWaybillList } = api;
+const { getWaybillList, isAdmin } = api;
 
 export default {
   components: {
@@ -89,6 +91,7 @@ export default {
   },
 
   methods: {
+    isAdmin,
     async loadWaybills() {
       const data = await getWaybillList();
 

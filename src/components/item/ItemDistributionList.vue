@@ -5,7 +5,7 @@
         <v-card-title class="purple white--text darken-3">
           <span class="headline"></span>
           <v-spacer></v-spacer>
-          <v-icon color="red" @click="closeDialog()">{{icons.close}}</v-icon>
+          <v-icon color="red" @click="closeDialog()">mdi-close</v-icon>
         </v-card-title>
         <v-card-text>
           <v-form v-model="valid">
@@ -23,14 +23,15 @@
                   />
                 </v-flex>
                 <v-flex>
-                  <AutocompleteWithAdd
-                    label="Накладная"
+                 <v-autocomplete
+                    v-model="itemDistribution.waybillId"
                     :items="waybills"
                     :loading="waybillsLoading"
-                    :slotButtonDisabled="true"
-                    :selectedItemId="itemDistribution.waybillId"
-                    @change="waybillId => itemDistribution.waybillId = waybillId"
-                  />
+                    hide-no-data
+                    hide-details
+                    clearable
+                    label="Накладная"
+                  ></v-autocomplete>
                 </v-flex>
                 <v-flex>
                   <v-menu
@@ -80,56 +81,70 @@
         </v-card-actions>
       </v-card>
     </v-dialog>
-
-    <v-data-table
-      :headers="headers"
-      :items="mappedItems"
-      class="elevation-1"
-      item-key="id"
-      :no-data-text="noData"
-      :no-results-text="noResults"
-      locale="ru-RU"
-      disable-sort
+    <v-simple-table
+      fixed-header
       dense
-      hide-default-footer
+      class="elevation-10"
     >
-      <template v-slot:footer="">
-        <v-btn
-          v-if="isAdmin()"
-          fab
-          color="green"
-          bottom
-          xSmall
-          right
-          absolute
-          dark
-          @click="dialog = true"
-        >
-          <v-icon>mdi-plus</v-icon>
-        </v-btn>
+      <template v-slot:default>
+        <thead>
+          <tr>
+            <th
+              class="body-2 font-weight-bold"
+              v-for="(header, i) in headers"
+              :key="`header${i}`"
+              :width="header.width"
+            >
+              {{ header.name }}
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr
+            v-for="(item, i) in localItems"
+            :key="item.id"
+          >
+          <td>{{ i + 1 }}</td>
+          <td>
+            {{ item.place.name }}
+            <span class="show-on-hover" v-if="isAdmin()">
+              <v-icon @click="openEditDialog(item)" color="gray" small>mdi-lead-pencil</v-icon>
+            </span>
+          </td>
+          <td>
+            <router-link v-if="item.waybill" :to="`waybill/${item.waybill.id}`">
+              {{ item.waybill.number }}
+            </router-link>
+          </td>
+          <td>{{ item.date | date }}</td>
+          <td>{{ item.amount }} </td>
+          </tr>
+        </tbody>
+        <tfoot>
+          <v-btn
+            v-if="isAdmin()"
+            fab
+            color="green"
+            bottom
+            xSmall
+            right
+            absolute
+            dark
+            @click="openNewItemDialog()"
+          >
+            <v-icon>mdi-plus</v-icon>
+          </v-btn>
+        </tfoot>
       </template>
-      <template v-slot:item.placeName="{ item }">
-        {{ item.placeName }}
-        <span class="show-on-hover" v-if="isAdmin()">
-          <v-icon @click="openEditDialog(item)" color="gray" small>mdi-lead-pencil</v-icon>
-        </span>
-      </template>
-      <template v-slot:item.waybill="{ item }">
-        <router-link v-if="item.waybill" :to="`waybill/${item.waybill.id}`">
-          {{ item.waybill.number }}
-        </router-link>
-      </template>
-    </v-data-table>
+    </v-simple-table>
   </div>
 </template>
 
 <script>
 import api from '../../api';
 
-import { format as formatDate, sortDesc } from '../../helpers/dates';
+import { format as formatDate } from '../../helpers/dates';
 import validationRules from '../../helpers/validationRules';
-
-import constant from '../../constants/data.json';
 
 import AutocompleteWithAdd from '../helpers/AutocompleteWithAdd.vue';
 
@@ -163,33 +178,24 @@ export default {
   data: () => ({
     headers: [
       {
-        text: '№',
-        value: 'index',
-        divider: true,
+        name: '№',
+        width: '10%',
       },
       {
-        text: 'Куда',
-        value: 'placeName',
-        sortable: false,
-        divider: true,
+        name: 'Куда',
+        width: '30%',
       },
       {
-        text: 'Накладная',
-        value: 'waybill',
-        sortable: false,
-        divider: true,
+        name: 'Накладная',
+        width: '20%',
       },
       {
-        text: 'Дата',
-        value: 'date',
-        divider: true,
-        sort: sortDesc,
+        name: 'Дата',
+        width: '20%',
       },
       {
-        text: 'Количество',
-        value: 'amount',
-        sortable: false,
-        divider: true,
+        name: 'Количество',
+        width: '20%',
       },
     ],
 
@@ -216,19 +222,12 @@ export default {
 
     today: formatDate(Date.now(), 'YYYY-MM-DD'),
     valid: false,
-
-    ...constant,
     ...validationRules,
   }),
 
   computed: {
-    mappedItems() {
-      return this.items.map((item, index) => ({
-        ...item,
-        index: index + 1,
-        date: formatDate(item.date),
-        placeName: item.place.name,
-      }));
+    localItems() {
+      return this.items.slice();
     },
   },
 
@@ -248,6 +247,12 @@ export default {
   methods: {
     isAdmin() {
       return isAdmin();
+    },
+
+    openNewItemDialog() {
+      this.itemDistribution = { ...this.itemDistributionTemplate };
+      this.valid = false;
+      this.dialog = true;
     },
 
     openEditDialog(item) {
@@ -272,7 +277,7 @@ export default {
 
       this.waybills = data.map(item => ({
         id: item.id,
-        name: `${item.number} - ${formatDate(item.date)}`,
+        text: `${item.number} - ${formatDate(item.date)}`,
       }));
       this.waybillsLoading = false;
     },

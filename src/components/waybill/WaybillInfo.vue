@@ -45,10 +45,10 @@
                 v-for="purchase in waybill.purchases"
                 :key="purchase.id"
               >
-                <td>{{ purchase.item.name }}</td>
+                <td>{{ purchase.name }}</td>
                 <td>{{ purchase.amount }}</td>
-                <td>{{ purchase.date }}</td>
-                <td>{{ (purchase.item.company || {}).name }}</td>
+                <td>{{ purchase.date | date }}</td>
+                <td>{{ (purchase.company || {}).name }}</td>
               </tr>
             </tbody>
           </template>
@@ -60,8 +60,6 @@
 
 <script>
 import api from '../../api';
-
-import { format as formatDate } from '../../helpers/dates';
 
 const {
   getWaybillInfo,
@@ -108,8 +106,16 @@ export default {
     async loadWaybill() {
       this.loading = true;
 
-      const data = await getWaybillInfo(this.id);
-      const purchases = data.purchases.map(value => ({ ...value, date: formatDate(value.date) }));
+      const { data } = await getWaybillInfo(this.id);
+      const purchases = data.purchases.map((purchase) => {
+        const item = purchase.item || {};
+
+        return {
+          ...purchase,
+          name: item.name,
+          company: item.company,
+        };
+      });
 
       this.waybill = { ...data, purchases };
       this.loading = false;

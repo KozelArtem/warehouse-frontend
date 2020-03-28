@@ -84,19 +84,7 @@
         ></v-progress-linear>
       </v-flex>
       <v-flex xs12>
-        <v-tabs
-          v-model="selectedMonthId"
-          grow
-          center-active
-        >
-          <v-tab
-            v-for="month in months"
-            :key="month"
-            @change="selectedMonthId = month"
-          >
-            {{ month }}
-          </v-tab>
-        </v-tabs>
+        <MonthTabs :value="selectedMonthId" @change="value => selectedMonthId = value" />
       </v-flex>
       <v-flex xs12>
         <v-simple-table
@@ -262,6 +250,7 @@ export default {
   components: {
     DatePicker: () => import('../helpers/DatePicker.vue'),
     DeleteModal: () => import('../helpers/DeleteModal.vue'),
+    MonthTabs: () => import('../helpers/MonthTabs.vue'),
   },
 
   props: {
@@ -310,13 +299,10 @@ export default {
       COMPLETED_DATE: 'completedAt',
     },
     selectedMonthId: moment().month(),
-    currentMonthId: moment().month(),
     picker: '',
 
     item: {},
     editing: false,
-
-    months: moment.months(),
 
     task: {
       name: '',

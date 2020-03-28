@@ -273,7 +273,7 @@ export default {
     },
 
     async loadWaybills() {
-      const data = await getWaybillList(this.itemId);
+      const data = await getWaybillList({ itemId: this.itemId });
 
       this.waybills = data.map(item => ({
         id: item.id,

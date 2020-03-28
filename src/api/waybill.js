@@ -1,22 +1,15 @@
-import { METHODS, request } from './axiosWrapper';
+import { METHODS, request, buildUrl } from './axiosWrapper';
 
-import {
-  waybillInfo,
-  waybill,
-} from './urls';
+const WAYBILLS = '/waybills';
+const WAYBILL_BY_ID = '/waybills/:waybillId';
 
-
-const getWaybillList = async (itemId) => {
+const getWaybillList = async (query) => {
   try {
-    let url = waybill;
-
-    if (itemId) {
-      url = `${url}?itemId=${itemId}`;
-    }
-
+    const url = buildUrl(WAYBILLS, query);
     const response = await request(METHODS.GET, url);
+    const count = response.headers['x-total-count'];
 
-    return response.data || [];
+    return { data: response.data || [], count };
   } catch (err) {
     return [];
   }
@@ -24,9 +17,10 @@ const getWaybillList = async (itemId) => {
 
 const getWaybillInfo = async (id) => {
   try {
-    const response = await request(METHODS.GET, waybillInfo(id));
+    const url = WAYBILL_BY_ID.replace(':waybillId', id);
+    const response = await request(METHODS.GET, url);
 
-    return response.data || {};
+    return { data: response.data || {} };
   } catch (err) {
     return {};
   }
@@ -34,7 +28,8 @@ const getWaybillInfo = async (id) => {
 
 const createWaybill = async (data) => {
   try {
-    const response = await request(METHODS.POST, waybill, data);
+    const url = WAYBILLS;
+    const response = await request(METHODS.POST, url, data);
 
     return response.data || {};
   } catch (err) {
@@ -44,7 +39,8 @@ const createWaybill = async (data) => {
 
 const updateWaybill = async (id, data) => {
   try {
-    const response = await request(METHODS.PUT, waybillInfo(id), data);
+    const url = WAYBILL_BY_ID.replace(':waybillId', id);
+    const response = await request(METHODS.PUT, url, data);
 
     return response.data || {};
   } catch (err) {
@@ -54,7 +50,9 @@ const updateWaybill = async (id, data) => {
 
 const removeWaybill = async (id) => {
   try {
-    await request(METHODS.DELETE, waybillInfo(id));
+    const url = WAYBILL_BY_ID.replace(':waybillId', id);
+
+    await request(METHODS.DELETE, url);
 
     return true;
   } catch (err) {

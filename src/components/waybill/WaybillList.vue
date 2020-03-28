@@ -21,86 +21,146 @@
         </v-dialog>
       </v-flex>
       <v-flex xs12>
-        <v-toolbar class="elevation-3 purple darken-2">
-          <v-toolbar-title class="white--text">Накладные</v-toolbar-title>
+        <v-toolbar dark color="purple darken-2">
+          <v-toolbar-title v-if="$vuetify.breakpoint.smAndUp">Накладные</v-toolbar-title>
           <v-spacer></v-spacer>
-
           <span :class="['d-flex', {
             'w-200': $vuetify.breakpoint.smAndUp,
             'w-100': $vuetify.breakpoint.xs,
             }
           ]">
-            <v-text-field prepend-icon="mdi-magnify"
-              dark dense label="Поиск"
+            <v-text-field dark append-icon="mdi-magnify"
+              dense label="Поиск"
               hide-details v-model="search"></v-text-field>
           </span>
-          <v-spacer></v-spacer>
-          <v-btn icon v-if="isAdmin()">
-            <v-icon color="green" dark @click="newWaybillDialog = true">
-              mdi-plus-circle
-            </v-icon>
-          </v-btn>
         </v-toolbar>
         <v-divider></v-divider>
+        <v-progress-linear
+          :active="loading"
+          indeterminate
+          color="purple darken-2"
+          height="7px"
+          opacity="0.3"
+        ></v-progress-linear>
       </v-flex>
-      <v-flex xs6 sm4 md3 lg2 v-for="waybill in items" :key="waybill.id">
-        <v-card class="elevation-5 pa-2 pointer" @click="selectRow(waybill)">
-          <div class="overflow-hidden subtitle-2 text-truncate">
-            {{ waybill.number }}
-          </div>
-          <v-card-subtitle class="subtitle-2 pa-0">{{ waybill.date }}</v-card-subtitle>
-        </v-card>
+      <v-flex xs12>
+        <MonthTabs :value="selectedMonthId" @change="month => selectedMonthId = month" />
       </v-flex>
-
+      <v-flex xs12>
+        <v-simple-table
+          fixed-header
+          dense
+          class="elevation-10 inner"
+        >
+          <template v-slot:default>
+            <tbody>
+              <tr v-for="company in localItems" :key="`company${company.id}`">
+                <td>{{ company.name }}</td>
+                <td v-for="i in waybillsCount" :key="`waybill${company.id}-${i}`">
+                  <WaybillCard
+                    v-if="company.waybills[i - 1]"
+                    :waybill="company.waybills[i - 1]"
+                  />
+                </td>
+              </tr>
+            </tbody>
+          </template>
+        </v-simple-table>
+      </v-flex>
       <router-view></router-view>
     </v-layout>
+    <v-btn
+      v-if="isAdmin()"
+      small
+      fixed
+      dark
+      fab
+      bottom
+      right
+      color="purple darken-2"
+      @click="newWaybillDialog = true"
+    >
+      <v-icon>mdi-plus</v-icon>
+    </v-btn>
   </v-container>
 </template>
 
 <script>
-import api from '../../api';
+import moment from 'moment';
 
-import { format as formatDate } from '../../helpers/dates';
+import api from '../../api';
 
 const { getWaybillList, isAdmin } = api;
 
 export default {
   components: {
+    MonthTabs: () => import('../helpers/MonthTabs.vue'),
     WaybillForm: () => import('./WaybillForm.vue'),
-    // WaybillInfo: () => import('./WaybillInfo.vue'),
+    WaybillCard: () => import('./WaybillCard.vue'),
   },
 
   data: () => ({
     newWaybillDialog: false,
 
+    loading: false,
+
+    selectedMonthId: moment().month(),
+
     items: [],
-    search: null,
-    waybills: [],
+    waybillsCount: 1,
+    search: '',
   }),
 
   beforeMount() {
     this.loadWaybills();
   },
 
-  watch: {
-    search() {
-      const searchValue = this.search.trim();
+  computed: {
+    localItems() {
+      return (this.items || [])
+        .filter(item => !!item)
+        .sort((a, b) => b.waybills.length - a.waybills.length)
+        .map((item) => {
+          const waybills = item.waybills
+            .filter((waybill) => {
+              if (this.search.trim()) {
+                return waybill.number.includes(this.search);
+              }
 
-      this.items = this.waybills.filter(waybill => waybill.number.includes(searchValue));
+              return true;
+            })
+            .sort((a, b) => new Date(b.date) - new Date(a.date));
+
+          return {
+            ...item,
+            waybills,
+          };
+        });
+    },
+  },
+
+  watch: {
+    selectedMonthId() {
+      this.loadWaybills();
     },
   },
 
   methods: {
     isAdmin,
     async loadWaybills() {
-      const data = await getWaybillList();
+      this.loading = true;
 
-      this.waybills = data.map(value => ({ ...value, date: formatDate(value.date) }));
-      this.items = this.waybills;
-    },
+      const query = {
+        dateFrom: moment().month(this.selectedMonthId).startOf('month'),
+        dateTo: moment().month(this.selectedMonthId).endOf('month'),
+        byCompany: true,
+      };
 
-    selectRow(waybill) {
-      this.$router.push({ name: 'waybillInfo', params: { id: waybill.id } });
+      const { data } = await getWaybillList(query);
+
+      this.items = data;
+      this.waybillsCount = this.items[0].waybills.length;
+      this.loading = false;
     },
 
     onWaybillFormSubmit() {
@@ -110,21 +170,3 @@ export default {
   },
 };
 </script>
-
-<style lang="scss">
-.w-200 {
-  width: 200px;
-}
-
-.w-100 {
-  width: 100px;
-}
-
-.aaaa {
-  text-overflow: ellipsis;
-  overflow: hidden;
-  width: 160px;
-  height: 1.2em;
-  white-space: nowrap;
-}
-</style>

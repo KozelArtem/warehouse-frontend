@@ -35,6 +35,14 @@ tr, .v-toolbar__title {
   }
 }
 
+.w-200 {
+  width: 200px;
+}
+
+.w-100 {
+  width: 100px;
+}
+
 input[type="button"]{
   outline: none !important;
 }

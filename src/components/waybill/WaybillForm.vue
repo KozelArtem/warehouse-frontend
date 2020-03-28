@@ -8,9 +8,15 @@
       @submit="addOrder"
     />
 
+    <CompanyModal
+      :dialog="showCompanyDialog"
+      @close="showCompanyDialog = false"
+      @submit="onNewCompany"
+    />
+
     <v-container grid-list-xs>
       <v-layout row wrap>
-        <v-flex xs6>
+        <v-flex xs4>
           <v-text-field
             label="Номер"
             hide-details
@@ -19,7 +25,7 @@
             :rules="[required, minLength]"
           />
         </v-flex>
-        <v-flex xs6>
+        <v-flex xs4>
           <v-menu
             v-model="datePickerMenu"
             :close-on-content-click="false"
@@ -44,6 +50,19 @@
               locale="ru-RU"
             />
           </v-menu>
+        </v-flex>
+        <v-flex xs4>
+          <AutocompleteWithAdd
+            label="Компания"
+            :items="companies"
+            :loading="loadingCompanies"
+            :slotButtonDisabled="showCompanyDialog"
+            :selectedItemId="waybill.companyId"
+            :requiredField="false"
+            :clearable="true"
+            @slotButtonClick="showCompanyDialog = true"
+            @change="companyId => waybill.companyId = companyId"
+          />
         </v-flex>
         <v-flex xs12 class="elevation-4 pt-3">
           <span class="d-flex">
@@ -108,6 +127,7 @@ import rules from '../../helpers/validationRules';
 const {
   getOrders,
   createWaybill,
+  getShortCompanyList,
 } = api;
 
 const {
@@ -117,6 +137,8 @@ const {
 export default {
   components: {
     OrderForm: () => import('../order/OrderForm.vue'),
+    CompanyModal: () => import('../company/CompanyModal.vue'),
+    AutocompleteWithAdd: () => import('../helpers/AutocompleteWithAdd.vue'),
   },
 
   data: () => ({
@@ -125,6 +147,10 @@ export default {
 
     newOrderDialog: false,
 
+    showCompanyDialog: false,
+    loadingCompanies: false,
+    companies: [],
+
     valid: false,
     loading: false,
     datePickerMenu: false,
@@ -132,6 +158,7 @@ export default {
     waybillTemplate: {
       number: '',
       date: formatDate(Date.now(), 'YYYY-MM-DD'),
+      companyId: 0,
       orders: [],
     },
 
@@ -147,6 +174,7 @@ export default {
   beforeMount() {
     this.waybill = { ...this.waybillTemplate };
     this.loadOrders();
+    this.loadCompanyList();
   },
 
   computed: {
@@ -207,6 +235,18 @@ export default {
       this.waybill = { ...this.waybillTemplate };
       this.loading = false;
       this.$emit('submit', waybillFromAPI);
+    },
+
+    async loadCompanyList() {
+      this.loadingCompanies = true;
+      this.companies = await getShortCompanyList();
+      this.loadingCompanies = false;
+    },
+
+    async onNewCompany(company) {
+      this.companies.push(company);
+      this.waybill.companyId = company.id;
+      this.showCompanyDialog = false;
     },
   },
 };

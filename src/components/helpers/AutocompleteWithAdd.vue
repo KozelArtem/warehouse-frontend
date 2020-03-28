@@ -11,6 +11,7 @@
     :item-value="value"
     :item-text="text"
     hide-details
+    :clearable="clearable"
     :menu-props="menuProps"
     @change="$emit('change', selected)"
   >
@@ -68,6 +69,10 @@ export default {
       type: [Number, String],
       required: true,
       default: '0',
+    },
+    clearable: {
+      type: Boolean,
+      default: false,
     },
   },
 

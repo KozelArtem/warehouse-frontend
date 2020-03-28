@@ -22,9 +22,30 @@
       </v-flex>
       <v-flex xs12>
         <v-toolbar dark color="purple darken-2">
-          <v-toolbar-title v-if="$vuetify.breakpoint.smAndUp">Накладные</v-toolbar-title>
+          <v-toolbar-title>Накладные</v-toolbar-title>
+          <v-divider vertical class="mx-4"></v-divider>
+          <span class="d-flex w-100">
+            <v-select
+              class="mx-2"
+              :items="months"
+              v-model="selectedMonthId"
+              dense
+              dark
+              hide-details
+            ></v-select>
+          </span>
+          <span class="d-flex w-100">
+            <v-divider vertical class="mx-2"></v-divider>
+            <v-select
+              :items="years"
+              v-model="selectedYearId"
+              dense
+              dark
+              hide-details
+            ></v-select>
+          </span>
           <v-spacer></v-spacer>
-          <span :class="['d-flex', {
+          <span v-if="$vuetify.breakpoint.smAndUp" :class="['d-flex', {
             'w-200': $vuetify.breakpoint.smAndUp,
             'w-100': $vuetify.breakpoint.xs,
             }
@@ -34,7 +55,6 @@
               hide-details v-model="search"></v-text-field>
           </span>
         </v-toolbar>
-        <v-divider></v-divider>
         <v-progress-linear
           :active="loading"
           indeterminate
@@ -42,11 +62,12 @@
           height="7px"
           opacity="0.3"
         ></v-progress-linear>
+        <v-divider></v-divider>
       </v-flex>
       <v-flex xs12>
-        <MonthTabs :value="selectedMonthId" @change="month => selectedMonthId = month" />
-      </v-flex>
-      <v-flex xs12>
+        <v-alert type="info" :value="showAlert" class="text-center">
+          Нет накладных за выбранный период
+        </v-alert>
         <v-simple-table
           fixed-header
           dense
@@ -55,13 +76,17 @@
           <template v-slot:default>
             <tbody>
               <tr v-for="company in localItems" :key="`company${company.id}`">
-                <td>{{ company.name }}</td>
-                <td v-for="i in waybillsCount" :key="`waybill${company.id}-${i}`">
+                <td width="300px">{{ company.name }}</td>
+                <td class="pa-0"
+                  v-for="i in waybillsCount"
+                  :key="`waybill${company.id}-${i}`"
+                  width="150px">
                   <WaybillCard
                     v-if="company.waybills[i - 1]"
                     :waybill="company.waybills[i - 1]"
                   />
                 </td>
+                <td></td>
               </tr>
             </tbody>
           </template>
@@ -94,7 +119,6 @@ const { getWaybillList, isAdmin } = api;
 
 export default {
   components: {
-    MonthTabs: () => import('../helpers/MonthTabs.vue'),
     WaybillForm: () => import('./WaybillForm.vue'),
     WaybillCard: () => import('./WaybillCard.vue'),
   },
@@ -105,6 +129,7 @@ export default {
     loading: false,
 
     selectedMonthId: moment().month(),
+    selectedYearId: moment().year(),
 
     items: [],
     waybillsCount: 1,
@@ -137,10 +162,34 @@ export default {
           };
         });
     },
+    months() {
+      return moment.months().map((month, i) => ({
+        text: month,
+        value: i,
+      }));
+    },
+    years() {
+      const years = [];
+      const dateStart = moment().subtract(1, 'y');
+      const dateEnd = moment();
+
+      while (dateEnd.diff(dateStart, 'years') >= 0) {
+        years.push(dateStart.year());
+        dateStart.add(1, 'year');
+      }
+
+      return years;
+    },
+    showAlert() {
+      return !this.items.length;
+    },
   },
 
   watch: {
     selectedMonthId() {
+      this.loadWaybills();
+    },
+    selectedYearId() {
       this.loadWaybills();
     },
   },
@@ -151,15 +200,15 @@ export default {
       this.loading = true;
 
       const query = {
-        dateFrom: moment().month(this.selectedMonthId).startOf('month'),
-        dateTo: moment().month(this.selectedMonthId).endOf('month'),
+        dateFrom: moment().year(this.selectedYearId).month(this.selectedMonthId).startOf('month'),
+        dateTo: moment().year(this.selectedYearId).month(this.selectedMonthId).endOf('month'),
         byCompany: true,
       };
 
       const { data } = await getWaybillList(query);
 
       this.items = data;
-      this.waybillsCount = this.items[0].waybills.length;
+      this.waybillsCount = ((this.items[0] || {}).waybills || []).length;
       this.loading = false;
     },
 

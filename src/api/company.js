@@ -1,4 +1,4 @@
-import { METHODS, request } from './axiosWrapper';
+import httpClient from './httpClient';
 
 import {
   company,
@@ -9,7 +9,7 @@ import {
 
 const getCompaniesWithItems = async () => {
   try {
-    const response = await request(METHODS.GET, companyListItems);
+    const response = await httpClient.get(companyListItems);
 
     return response.data || [];
   } catch (err) {
@@ -19,7 +19,7 @@ const getCompaniesWithItems = async () => {
 
 const getShortCompanyList = async () => {
   try {
-    const response = await request(METHODS.GET, companyList);
+    const response = await httpClient.get(companyList);
 
     return response.data || [];
   } catch (err) {
@@ -29,7 +29,7 @@ const getShortCompanyList = async () => {
 
 const getCompanyInfo = async (id) => {
   try {
-    const response = await request(METHODS.GET, companyInfo(id));
+    const response = await httpClient.get(companyInfo(id));
 
     return response.data || {};
   } catch (err) {
@@ -39,7 +39,7 @@ const getCompanyInfo = async (id) => {
 
 const createCompany = async (data) => {
   try {
-    const response = await request(METHODS.POST, company, data);
+    const response = await httpClient.post(company, data);
 
     return response.data || {};
   } catch (err) {
@@ -49,7 +49,7 @@ const createCompany = async (data) => {
 
 const updateCompany = async (id, data) => {
   try {
-    const response = await request(METHODS.PUT, companyInfo(id), data);
+    const response = await httpClient.put(companyInfo(id), data);
 
     return response.data || {};
   } catch (err) {
@@ -59,7 +59,7 @@ const updateCompany = async (id, data) => {
 
 const removeCompany = async (id) => {
   try {
-    const response = await request(METHODS.DELETE, companyInfo(id));
+    const response = await httpClient.delete(companyInfo(id));
 
     return response.data || false;
   } catch (err) {

@@ -1,4 +1,4 @@
-import { METHODS, request } from './axiosWrapper';
+import httpClient from './httpClient';
 
 import {
   category,
@@ -8,7 +8,7 @@ import {
 
 const getBaseCategories = async () => {
   try {
-    const response = await request(METHODS.GET, category);
+    const response = await httpClient.get(category);
 
     return response.data || [];
   } catch (err) {
@@ -18,7 +18,7 @@ const getBaseCategories = async () => {
 
 const getShortCategoryList = async () => {
   try {
-    const response = await request(METHODS.GET, categoryList);
+    const response = await httpClient.get(categoryList);
 
     return response.data || [];
   } catch (err) {
@@ -28,7 +28,7 @@ const getShortCategoryList = async () => {
 
 const getCategoryInfo = async (id) => {
   try {
-    const response = await request(METHODS.GET, categoryInfo(id));
+    const response = await httpClient.get(categoryInfo(id));
 
     return response.data || { items: [], categories: [] };
   } catch (err) {
@@ -39,7 +39,7 @@ const getCategoryInfo = async (id) => {
 
 const createCategory = async (data) => {
   try {
-    const response = await request(METHODS.POST, category, data);
+    const response = await httpClient.post(category, data);
 
     return response.data || {};
   } catch (err) {
@@ -49,7 +49,7 @@ const createCategory = async (data) => {
 
 const updateCategory = async (id, data) => {
   try {
-    const response = await request(METHODS.PUT, categoryInfo(id), data);
+    const response = await httpClient.put(categoryInfo(id), data);
 
     return response.data || {};
   } catch (err) {
@@ -59,7 +59,7 @@ const updateCategory = async (id, data) => {
 
 const removeCategory = async (id) => {
   try {
-    const response = await request(METHODS.DELETE, categoryInfo(id));
+    const response = await httpClient.delete(categoryInfo(id));
 
     return response.data || false;
   } catch (err) {

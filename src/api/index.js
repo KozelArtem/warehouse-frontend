@@ -1,8 +1,4 @@
-import jwt from 'jsonwebtoken';
-
-import config from '../config/config.json';
-
-import { METHODS, request } from './axiosWrapper';
+import httpClient from './httpClient';
 
 import category from './category';
 import company from './company';
@@ -31,19 +27,17 @@ const isAdmin = () => {
     return false;
   }
 
-  const token = localStorage.getItem('token').split(' ')[1];
-  const jwtData = jwt.verify(token, config.secretKey);
-
-  return jwtData.role === config.adminRoleId;
+  return !!localStorage.getItem('isAdmin');
 };
 
 const login = async (payload) => {
   try {
-    const response = await request(METHODS.POST, loginURL, payload);
+    const response = await httpClient.post(loginURL, payload);
     const data = response.data || {};
 
     if (data.token) {
       localStorage.setItem('token', `Bearer ${data.token}`);
+      localStorage.setItem('isAdmin', data.isAdmin);
     }
 
     return true;
@@ -59,7 +53,7 @@ const loadDistributionPlaces = async (query = {}) => {
 
     const url = `${distributionPlaces}?${queryString}`;
 
-    const response = await request(METHODS.GET, url);
+    const response = await httpClient.get(url);
     const count = response.headers['x-total-count'];
 
     return { data: response.data || [], count };
@@ -70,7 +64,7 @@ const loadDistributionPlaces = async (query = {}) => {
 
 const createDistributionPlace = async (data) => {
   try {
-    const response = await request(METHODS.POST, distributionPlaces, data);
+    const response = await httpClient.post(distributionPlaces, data);
 
     return response.data || {};
   } catch (err) {
@@ -80,7 +74,7 @@ const createDistributionPlace = async (data) => {
 
 const createItemDistribution = async (itemId, data) => {
   try {
-    const response = await request(METHODS.POST, itemDistribution(itemId), data);
+    const response = await httpClient.post(itemDistribution(itemId), data);
 
     return response.data || {};
   } catch (err) {
@@ -90,7 +84,7 @@ const createItemDistribution = async (itemId, data) => {
 
 const updateItemDistribution = async (itemId, id, data) => {
   try {
-    const response = await request(METHODS.PUT, itemDistributionInfo(itemId, id), data);
+    const response = await httpClient.put(itemDistributionInfo(itemId, id), data);
 
     return response.data || {};
   } catch (err) {
@@ -100,7 +94,7 @@ const updateItemDistribution = async (itemId, id, data) => {
 
 const getItemDistributionInfo = async (itemId, distId) => {
   try {
-    const response = await request(METHODS.GET, itemDistributionInfo(itemId, distId));
+    const response = await httpClient.get(itemDistributionInfo(itemId, distId));
 
     return response.data || {};
   } catch (err) {
@@ -111,7 +105,7 @@ const getItemDistributionInfo = async (itemId, distId) => {
 const loadPlaceServices = async (distId, completed = false) => {
   try {
     const url = `${placeServiceList(distId)}?completed=${completed}`;
-    const response = await request(METHODS.GET, url);
+    const response = await httpClient.get(url);
 
     return response.data || {};
   } catch (err) {
@@ -121,7 +115,7 @@ const loadPlaceServices = async (distId, completed = false) => {
 
 const createPlaceService = async (distId, data) => {
   try {
-    const response = await request(METHODS.POST, placeServiceList(distId), data);
+    const response = await httpClient.post(placeServiceList(distId), data);
 
     return response.data || {};
   } catch (err) {
@@ -131,7 +125,7 @@ const createPlaceService = async (distId, data) => {
 
 const updatePlaceService = async (distId, id, data) => {
   try {
-    const response = await request(METHODS.PUT, placeService(distId, id), data);
+    const response = await httpClient.put(placeService(distId, id), data);
 
     return response.data || {};
   } catch (err) {
@@ -141,7 +135,7 @@ const updatePlaceService = async (distId, id, data) => {
 
 const removePlaceService = async (distId, id) => {
   try {
-    const response = await request(METHODS.DELETE, placeService(distId, id));
+    const response = await httpClient.delete(placeService(distId, id));
 
     return response.data || {};
   } catch (err) {
@@ -156,7 +150,7 @@ const getOrders = async (query = {}) => {
 
     const url = `${order}?${queryString}`;
 
-    const response = await request(METHODS.GET, url);
+    const response = await httpClient.get(url);
     const count = response.headers['x-total-count'];
 
     return { data: response.data || [], count };
@@ -167,7 +161,7 @@ const getOrders = async (query = {}) => {
 
 const getActiveOrders = async () => {
   try {
-    const response = await request(METHODS.GET, activeOrders);
+    const response = await httpClient.get(activeOrders);
 
     return response.data || {};
   } catch (err) {
@@ -178,7 +172,7 @@ const getActiveOrders = async () => {
 const getOrdersByIds = async (strIds) => {
   try {
     const url = `${order}?ids=${strIds}`;
-    const response = await request(METHODS.GET, url);
+    const response = await httpClient.get(url);
 
     return response.data || [];
   } catch (err) {
@@ -188,7 +182,7 @@ const getOrdersByIds = async (strIds) => {
 
 const createOrder = async (data) => {
   try {
-    const response = await request(METHODS.POST, order, data);
+    const response = await httpClient.post(order, data);
 
     return response.data || [];
   } catch (err) {
@@ -198,7 +192,7 @@ const createOrder = async (data) => {
 
 const updateOrder = async (id, data) => {
   try {
-    const response = await request(METHODS.PUT, orderById(id), data);
+    const response = await httpClient.put(orderById(id), data);
 
     return response.data || {};
   } catch (err) {
@@ -208,7 +202,7 @@ const updateOrder = async (id, data) => {
 
 const removeOrder = async (id) => {
   try {
-    await request(METHODS.DELETE, orderById(id));
+    await httpClient.delete(orderById(id));
 
     return true;
   } catch (err) {

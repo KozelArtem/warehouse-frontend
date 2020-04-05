@@ -1,4 +1,4 @@
-import { METHODS, request } from './axiosWrapper';
+import httpClient from './httpClient';
 
 import {
   itemInfo,
@@ -11,7 +11,7 @@ import {
 
 const getItemList = async () => {
   try {
-    const response = await request(METHODS.GET, itemList);
+    const response = await httpClient.get(itemList);
 
     return response.data || [];
   } catch (err) {
@@ -21,7 +21,7 @@ const getItemList = async () => {
 
 const getItemShortInfo = async (id) => {
   try {
-    const response = await request(METHODS.GET, itemShortInfo(id));
+    const response = await httpClient.get(itemShortInfo(id));
 
     return response.data || {};
   } catch (err) {
@@ -31,7 +31,7 @@ const getItemShortInfo = async (id) => {
 
 const getItemInfo = async (id) => {
   try {
-    const response = await request(METHODS.GET, itemInfo(id));
+    const response = await httpClient.get(itemInfo(id));
 
     return response.data || {};
   } catch (err) {
@@ -41,7 +41,7 @@ const getItemInfo = async (id) => {
 
 const searchItems = async (search) => {
   try {
-    const response = await request(METHODS.GET, itemSearch(search));
+    const response = await httpClient.get(itemSearch(search));
 
     return response.data || [];
   } catch (err) {
@@ -51,7 +51,7 @@ const searchItems = async (search) => {
 
 const createItem = async (data) => {
   try {
-    const response = await request(METHODS.POST, item, data);
+    const response = await httpClient.post(item, data);
 
     return response.data || {};
   } catch (err) {
@@ -61,7 +61,7 @@ const createItem = async (data) => {
 
 const updateItem = async (id, data) => {
   try {
-    const response = await request(METHODS.PUT, itemInfo(id), data);
+    const response = await httpClient.put(itemInfo(id), data);
 
     return response.data || {};
   } catch (err) {
@@ -71,7 +71,7 @@ const updateItem = async (id, data) => {
 
 const removeItem = async (id) => {
   try {
-    await request(METHODS.DELETE, itemInfo(id));
+    await httpClient.delete(itemInfo(id));
 
     return true;
   } catch (err) {

@@ -1,8 +1,6 @@
-import {
-  request,
-  METHODS,
-  buildUrl,
-} from './axiosWrapper';
+import httpClient from './httpClient';
+
+import { buildUrl } from './helper';
 
 const MACHINES = '/machines';
 const MACHINE_BY_ID = '/machines/:machineId';
@@ -13,7 +11,7 @@ const loadMachines = async (query) => {
   try {
     const url = buildUrl(MACHINES, query);
 
-    const response = await request(METHODS.GET, url);
+    const response = await httpClient.get(url);
     const count = response.headers['x-total-count'];
 
     return { data: response.data || [], count };
@@ -24,7 +22,7 @@ const loadMachines = async (query) => {
 
 const createMachine = async (data) => {
   try {
-    const response = await request(METHODS.POST, MACHINES, data);
+    const response = await httpClient.post(MACHINES, data);
 
     return { data: response.data || {} };
   } catch (err) {
@@ -35,7 +33,7 @@ const createMachine = async (data) => {
 const updateMachine = async (machineId, data) => {
   try {
     const url = MACHINE_BY_ID.replace(':machineId', machineId);
-    const response = await request(METHODS.PUT, url, data);
+    const response = await httpClient.put(url, data);
 
     return { data: response.data || {} };
   } catch (err) {
@@ -47,7 +45,7 @@ const loadMachineInfo = async (machineId, query = {}) => {
   try {
     const url = buildUrl(MACHINE_BY_ID.replace(':machineId', machineId), query);
 
-    const response = await request(METHODS.GET, url);
+    const response = await httpClient.get(url);
 
     return { data: response.data || {} };
   } catch (err) {
@@ -59,7 +57,7 @@ const loadMachineServices = async (machineId, query) => {
   try {
     const url = buildUrl(MACHINE_SERVICES.replace(':machineId', machineId), query);
 
-    const response = await request(METHODS.GET, url);
+    const response = await httpClient.get(url);
     const count = response.headers['x-total-count'];
 
     return { data: response.data || [], count };
@@ -70,7 +68,7 @@ const loadMachineServices = async (machineId, query) => {
 
 const createMachineService = async (machineId, data) => {
   try {
-    const response = await request(METHODS.POST, MACHINE_SERVICES.replace(':machineId', machineId), data);
+    const response = await httpClient.post(MACHINE_SERVICES.replace(':machineId', machineId), data);
 
     return { data: response.data || [] };
   } catch (err) {
@@ -82,7 +80,7 @@ const updateMachineService = async (machineId, id, data) => {
   try {
     const url = MACHINE_SERVICE_ID.replace(':machineId', machineId).replace(':id', id);
 
-    const response = await request(METHODS.PUT, url, data);
+    const response = await httpClient.put(url, data);
 
     return { data: response.data || [] };
   } catch (err) {
@@ -94,7 +92,7 @@ const deleteMachineService = async (machineId, id) => {
   try {
     const url = MACHINE_SERVICE_ID.replace(':machineId', machineId).replace(':id', id);
 
-    const response = await request(METHODS.DELETE, url);
+    const response = await httpClient.delete(url);
 
     return { data: response.data || [] };
   } catch (err) {

@@ -1,4 +1,6 @@
-import { METHODS, request, buildUrl } from './axiosWrapper';
+import httpClient from './httpClient';
+
+import { buildUrl } from './helper';
 
 const WAYBILLS = '/waybills';
 const WAYBILL_BY_ID = '/waybills/:waybillId';
@@ -6,7 +8,7 @@ const WAYBILL_BY_ID = '/waybills/:waybillId';
 const getWaybillList = async (query) => {
   try {
     const url = buildUrl(WAYBILLS, query);
-    const response = await request(METHODS.GET, url);
+    const response = await httpClient.get(url);
     const count = response.headers['x-total-count'];
 
     return { data: response.data || [], count };
@@ -18,7 +20,7 @@ const getWaybillList = async (query) => {
 const getWaybillInfo = async (id) => {
   try {
     const url = WAYBILL_BY_ID.replace(':waybillId', id);
-    const response = await request(METHODS.GET, url);
+    const response = await httpClient.get(url);
 
     return { data: response.data || {} };
   } catch (err) {
@@ -29,7 +31,7 @@ const getWaybillInfo = async (id) => {
 const createWaybill = async (data) => {
   try {
     const url = WAYBILLS;
-    const response = await request(METHODS.POST, url, data);
+    const response = await httpClient.post(url, data);
 
     return response.data || {};
   } catch (err) {
@@ -40,7 +42,7 @@ const createWaybill = async (data) => {
 const updateWaybill = async (id, data) => {
   try {
     const url = WAYBILL_BY_ID.replace(':waybillId', id);
-    const response = await request(METHODS.PUT, url, data);
+    const response = await httpClient.put(url, data);
 
     return response.data || {};
   } catch (err) {
@@ -52,7 +54,7 @@ const removeWaybill = async (id) => {
   try {
     const url = WAYBILL_BY_ID.replace(':waybillId', id);
 
-    await request(METHODS.DELETE, url);
+    await httpClient.delete(url);
 
     return true;
   } catch (err) {

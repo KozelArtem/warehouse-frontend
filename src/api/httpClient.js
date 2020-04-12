@@ -1,11 +1,14 @@
 import axios from 'axios';
 
+import store from '../store';
+
 const httpClient = axios.create({
-  baseURL: process.env.API_URL,
+  baseURL: process.env.API_URL || 'http://localhost:3000',
   timeout: 5000,
 });
 
-const getAuthToken = () => localStorage.getItem('token');
+
+const getAuthToken = () => store.getters['Auth/token'];
 
 const authInterceptor = (config) => {
   config.headers.Authorization = getAuthToken();
@@ -13,39 +16,10 @@ const authInterceptor = (config) => {
   return config;
 };
 
-const errorInterceptor = (error) => {
-  // all the error responses
-  switch (error.response.status) {
-    case 400:
-      console.error(error.response.status, error.message);
-      break;
-
-    case 401: // authentication error, logout the user
-      localStorage.removeItem('token');
-      break;
-
-    default:
-      console.error(error.response.status, error.message);
-  }
-  return Promise.reject(error);
-};
-
-// Interceptor for responses
-const responseInterceptor = (response) => {
-  switch (response.status) {
-    case 200:
-      // yay!
-      break;
-      // any other cases
-    default:
-      // default case
-  }
-
-  return response;
-};
-
-httpClient.interceptors.response.use(responseInterceptor, errorInterceptor);
+const errorInterceptor = error => store.dispatch('handleError', error.response);
+const responseInterceptor = response => response;
 
 httpClient.interceptors.request.use(authInterceptor);
+httpClient.interceptors.response.use(responseInterceptor, errorInterceptor);
 
 export default httpClient;

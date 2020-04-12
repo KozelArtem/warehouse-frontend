@@ -1,9 +1,7 @@
 import Vue from 'vue';
 import VueRouter from 'vue-router';
 
-import api from '../api';
-
-import OrderListTable from '../views/OrderListTable.vue';
+import store from '../store';
 
 Vue.use(VueRouter);
 
@@ -12,7 +10,7 @@ const routes = [
     path: '/',
     name: 'orderList',
     meta: { title: 'Заказы' },
-    component: OrderListTable,
+    component: () => import('../views/OrderListTable.vue'),
   },
   {
     path: '/warehouse',
@@ -84,15 +82,19 @@ const routes = [
 
 const router = new VueRouter({
   routes,
+  mode: 'history',
 });
 
-router.beforeEach((to, from, next) => {
+router.beforeEach(async (to, from, next) => {
+  await store.dispatch('Auth/getUserData');
+
   if (to.path === '/login') {
     next();
 
     return;
   }
-  if (api.isLoggedIn()) {
+
+  if (store.getters['Auth/isLoggedIn']) {
     next();
 
     return;

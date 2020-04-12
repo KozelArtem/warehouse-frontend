@@ -4,10 +4,24 @@
     <v-content>
       <router-view/>
     </v-content>
+    <v-bottom-sheet left :value="alert.show" inset hide-overlay @input="closeAlert">
+      <v-alert
+        text
+        dismissible
+        class="ma-0"
+        border="left"
+        :type="alert.type"
+        :value="alert.show"
+        @input="closeAlert"
+      >
+        {{ alert.message }}
+      </v-alert>
+    </v-bottom-sheet>
   </v-app>
 </template>
 
 <script>
+import { mapGetters, mapMutations } from 'vuex';
 
 import AppHeader from './components/helpers/AppHeader.vue';
 
@@ -15,6 +29,12 @@ export default {
   name: 'App',
   components: {
     AppHeader,
+  },
+  computed: {
+    ...mapGetters(['alert']),
+  },
+  methods: {
+    ...mapMutations({ closeAlert: 'CLOSE_ALERT' }),
   },
 };
 </script>

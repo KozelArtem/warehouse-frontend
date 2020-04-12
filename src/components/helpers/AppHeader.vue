@@ -22,18 +22,18 @@
         </v-tooltip>
       </v-toolbar-items>
       <v-spacer />
-      <v-icon v-if="!isLoggedIn" color="green" icon @click="signIn" dark>mdi-login</v-icon>
+      <v-icon v-if="!isLoggedIn" color="green" icon @click="$router.push('/login')" dark>
+        mdi-login
+      </v-icon>
       <v-icon v-else color="red" class="mr-4" icon @click="signOut" dark>mdi-logout</v-icon>
     </v-toolbar>
   </v-card>
 </template>
 
 <script>
-import api from '../../api';
+import { mapGetters, mapActions } from 'vuex';
 
-const {
-  isLoggedIn,
-} = api;
+import { AUTH_NAMESPACE } from '../../store/namespaces';
 
 export default {
   data: () => ({
@@ -90,19 +90,15 @@ export default {
   }),
 
   computed: {
-    isLoggedIn() {
-      return isLoggedIn();
-    },
+    ...mapGetters(AUTH_NAMESPACE, ['isLoggedIn']),
   },
 
   methods: {
-    signIn() {
-      this.$router.push('/login');
-    },
+    ...mapActions(AUTH_NAMESPACE, ['logout']),
 
     signOut() {
-      localStorage.removeItem('token');
-      window.location.reload(true);
+      this.logout();
+      this.$router.push('/login');
     },
   },
 };

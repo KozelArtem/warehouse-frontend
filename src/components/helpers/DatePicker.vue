@@ -22,6 +22,7 @@
       @input="menu = false"
       :min="min"
       :max="max"
+      first-day-of-week="1"
       locale="ru-RU"
     />
   </v-menu>
@@ -38,10 +39,10 @@ const today = moment().format('YYYY-MM-DD');
 
 export default {
   props: {
-    initDate: {
-      type: [Date, String],
+    value: {
+      type: [Date, String, Number],
       required: false,
-      default: today,
+      default: Date.now(),
     },
     label: {
       type: String,
@@ -66,15 +67,15 @@ export default {
   }),
 
   beforeMount() {
-    this.date = this.initDate;
+    this.date = formatDate(this.value, DATE_FORMAT);
   },
 
   watch: {
     date() {
-      this.$emit('update', this.date);
+      this.$emit('input', this.date);
     },
-    initDate() {
-      this.initDate = formatDate(this.initDate, DATE_FORMAT);
+    value() {
+      this.date = formatDate(this.value, DATE_FORMAT);
     },
   },
 };

@@ -1,0 +1,65 @@
+<template>
+  <div>
+    <v-toolbar :color="color">
+      <v-toolbar-title v-if="$vuetify.breakpoint.smAndUp">{{ title }}</v-toolbar-title>
+      <v-divider v-if="$vuetify.breakpoint.smAndUp" class="mx-4" inset vertical></v-divider>
+      <slot name="afterTitle"></slot>
+      <v-spacer></v-spacer>
+      <span :class="['d-flex', {
+        'w-200': $vuetify.breakpoint.smAndUp,
+        'w-100': $vuetify.breakpoint.xs,
+        }
+      ]">
+        <v-text-field
+          v-model="search"
+          label="Поиск"
+          dense
+          hide-details
+          append-icon="mdi-magnify"
+        />
+      </span>
+    </v-toolbar>
+    <v-divider></v-divider>
+    <v-progress-linear
+      :active="loading"
+      indeterminate
+      :color="color"
+      height="7px"
+      opacity="0.3"
+    ></v-progress-linear>
+  </div>
+</template>
+
+<script>
+export default {
+  props: {
+    title: {
+      type: String,
+      required: true,
+      default: '',
+    },
+    color: {
+      type: String,
+      required: true,
+      default: 'white',
+    },
+    loading: {
+      type: Boolean,
+      required: true,
+      default: true,
+    },
+  },
+  data: () => ({
+    search: null,
+  }),
+  watch: {
+    search() {
+      this.$emit('search', this.search);
+    },
+  },
+};
+</script>
+
+<style lang="scss" scoped>
+
+</style>

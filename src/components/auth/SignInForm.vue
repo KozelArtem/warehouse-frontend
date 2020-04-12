@@ -1,19 +1,13 @@
 <template>
-  <v-container fluid fill-height full-width>
+  <v-container>
     <v-layout row wrap>
       <v-flex xs12>
-        <v-alert
-          v-if="alert !== null"
-          v-model="showAlert"
-          dismissible
-          elevation="2"
-          type="error"
-          >{{ alert }}</v-alert
-        >
         <v-card class="elevation-12">
-          <v-toolbar dark color="primary"></v-toolbar>
+          <v-card-title dark class="primary white--text" primary-title>
+            Авторизация
+          </v-card-title>
           <v-card-text>
-            <v-form v-model="valid">
+            <v-form v-model="valid" @submit="login(user)">
               <v-text-field
                 v-model="user.username"
                 prepend-icon="mdi-account"
@@ -39,8 +33,9 @@
               color="primary"
               :disabled="!valid"
               :loading="loading"
-              @click.prevent="onClick"
-              >Войти</v-btn
+              >
+                Войти
+              </v-btn
             >
           </v-card-actions>
         </v-card>
@@ -50,12 +45,9 @@
 </template>
 
 <script>
-import api from '@/api';
+import { mapActions, mapGetters } from 'vuex';
 
-const {
-  isLoggedIn,
-  login,
-} = api;
+import { AUTH_NAMESPACE } from '../../store/namespaces';
 
 export default {
   data: () => ({
@@ -65,7 +57,7 @@ export default {
     },
 
     valid: false,
-    // TODO use formValidationRules
+
     usernameRules: [
       value => !!value || 'Логин обязателен',
       value => (value && value.length >= 2) || 'Минимальная длина - 2 символа',
@@ -75,32 +67,20 @@ export default {
       value => !!value || 'Пароль обязателен',
       value => (value && value.length >= 6) || 'Пароль слишком короткий',
     ],
-    loading: false,
-
-    showAlert: false,
-    alert: null,
   }),
 
-  methods: {
-    async onClick() {
-      this.loading = true;
+  computed: {
+    ...mapGetters(AUTH_NAMESPACE, ['isLoggedIn']),
+  },
 
-      const success = await login(this.user);
-
-      this.loading = false;
-
-      if (!success) {
-        this.showAlert = true;
-        this.alert = 'Проверьте правильность введенных данных';
-
-        return;
-      }
-
-      if (isLoggedIn()) {
-        this.$router.push('/');
-        window.location.reload(true);
-      }
+  watch: {
+    isLoggedIn() {
+      this.$router.push('/');
     },
+  },
+
+  methods: {
+    ...mapActions(AUTH_NAMESPACE, ['login']),
   },
 };
 </script>

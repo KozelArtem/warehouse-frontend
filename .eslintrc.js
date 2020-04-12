@@ -6,10 +6,11 @@ module.exports = {
   },
 
   rules: {
-    'no-console': process.env.NODE_ENV === 'production' ? 'error' : 'off',
-    'no-debugger': process.env.NODE_ENV === 'production' ? 'error' : 'off',
-    'no-param-reassign': ['error', { props: false }],
+    'no-console': process.env.NODE_ENV === 'production' ? 'warn' : 'off',
+    'no-debugger': process.env.NODE_ENV === 'production' ? 'warn' : 'off',
+    'no-param-reassign': ['warn', { props: false }],
     quotes: [2, 'single', { avoidEscape: true }],
+    'import/prefer-default-export': 'off',
   },
 
   parserOptions: {

@@ -5,6 +5,9 @@ const buildUrl = (url, query) => {
   return `${url}?${queryString}`;
 };
 
+const getTotalCountFromHeaders = response => +response.headers['x-total-count'];
+
 export {
   buildUrl,
+  getTotalCountFromHeaders,
 };

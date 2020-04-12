@@ -8,7 +8,7 @@
       <v-card-title :style="company.style" class="green lighten-2 white--text">
         <span class="headline">Карта партнера</span>
         <v-spacer></v-spacer>
-        <v-icon @click="$emit('close')">{{ icons.close }}</v-icon>
+        <v-icon @click="$emit('close')">mdi-close</v-icon>
       </v-card-title>
       <v-card-text>
         <v-list dense>
@@ -113,8 +113,9 @@
 </template>
 
 <script>
-import api from '../../api';
-import constants from '../../constants/data.json';
+import { mapActions } from 'vuex';
+
+import { COMPANY_NAMESPACE } from '../../store/namespaces';
 
 export default {
   props: {
@@ -127,21 +128,11 @@ export default {
       type: [Number, String],
       required: true,
       default: 0,
+      validator: val => val > 0,
     },
   },
 
   data: () => ({
-    ...constants,
-    headers: [
-      { name: 'Адрес', prop: 'location' },
-      { name: 'Контактное лицо', prop: 'person' },
-      { name: 'Сайт', prop: 'website' },
-      { name: 'Email', prop: 'email' },
-      {
-        name: 'Телефоны', prop: 'phones', array: true, itemProp: 'data',
-      },
-
-    ],
     company: {},
   }),
 
@@ -156,16 +147,10 @@ export default {
   },
 
   methods: {
+    ...mapActions(COMPANY_NAMESPACE, ['getCompanyById']),
+
     async loadCompany() {
-      if (this.companyId <= 0) {
-        this.company = {};
-
-        return;
-      }
-
-      if (this.company.id !== this.companyId) {
-        this.company = await api.getCompanyInfo(this.companyId);
-      }
+      this.company = await this.getCompanyById(this.companyId);
 
       this.company.style = `background: ${this.company.color}`;
     },

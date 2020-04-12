@@ -4,7 +4,7 @@
       <v-card-title class="purple white--text darken-3">
         <span class="headline"></span>
         <v-spacer></v-spacer>
-        <v-icon color="red" @click="$emit('close')">{{icons.close}}</v-icon>
+        <v-icon color="red" @click="$emit('close')">mdi-close</v-icon>
       </v-card-title>
       <v-card-text>
         <v-form v-model="valid">
@@ -13,7 +13,7 @@
               <v-flex>
                 <AutocompleteWithAdd
                   label="Категория"
-                  :items="categories"
+                  :items="categoryList"
                   :loading="categoriesLoading"
                   :slotButtonDisabled="creatingCategory"
                   :selectedItemId="item.categoryId || -1"
@@ -48,22 +48,17 @@
 </template>
 
 <script>
+import { mapActions, mapGetters } from 'vuex';
 import api from '../../api';
-import constants from '../../constants/data.json';
 
 import rules from '../../helpers/validationRules';
 
 import AutocompleteWithAdd from '../helpers/AutocompleteWithAdd.vue';
+import { ITEM_NAMESPACE, CATEGORY_NAMESPACE } from '../../store/namespaces';
 
 const {
-  createItem,
   createCategory,
-  getShortCategoryList,
 } = api;
-
-const {
-  icons,
-} = constants;
 
 export default {
   components: {
@@ -81,15 +76,9 @@ export default {
       required: false,
       default: '',
     },
-    categoryName: {
-      type: String,
-      required: false,
-      default: '',
-    },
   },
 
   data: () => ({
-    icons,
     ...rules,
 
     loading: false,
@@ -104,54 +93,38 @@ export default {
     creatingCategory: false,
 
     categoriesLoading: false,
-    categories: [],
   }),
 
   async beforeMount() {
     this.item = this.itemTemplate;
-    await this.loadCategoriesList();
+    this.fetchCategories();
+  },
+
+  computed: {
+    ...mapGetters(ITEM_NAMESPACE, ['itemList']),
+    ...mapGetters(CATEGORY_NAMESPACE, ['categoryList']),
   },
 
   watch: {
     name() {
-      this.item = { ...this.itemTemplate };
-      this.item.name = this.name;
-    },
-
-    categoryName() {
-      const category = this.categories.find(cat => cat.name === this.categoryName);
-
-      this.item.categoryId = (category || {}).id;
+      this.item = { ...this.itemTemplate, name: this.name };
     },
   },
 
   methods: {
+    ...mapActions(ITEM_NAMESPACE, ['createItem']),
+    ...mapActions(CATEGORY_NAMESPACE, ['createCategory', 'fetchCategories']),
     async onSaveClick() {
       const data = { ...this.item, amount: 0 };
 
-      this.loading = true;
-
-      const result = await createItem(data);
-
-      this.loading = false;
-
-      if (!result.id) {
-        // TODO add handler
-        return;
-      }
+      const result = await this.createItem(data);
 
       result.categoryName = this.categories
         .find(category => category.id === result.categoryId)
         .name;
 
-      this.item = this.itemTemplate;
+      this.item = { ...this.itemTemplate };
       this.$emit('submit', result);
-    },
-
-    async loadCategoriesList() {
-      this.categoriesLoading = false;
-      this.categories = await getShortCategoryList();
-      this.categoriesLoading = false;
     },
 
     async createCategory(inputedName) {

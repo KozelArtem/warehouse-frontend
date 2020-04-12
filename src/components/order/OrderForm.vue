@@ -1,21 +1,23 @@
 <template>
   <v-dialog v-model="dialog" persistent max-width="600px">
     <QuickCreateItemModal
+      v-show="newItemDialog"
       :dialog="newItemDialog"
       :name="inputName"
       @close="newItemDialog = false"
       @submit="onNewItem"
     />
     <CompanyModal
+      v-show="showCompanyDialog"
       :dialog="showCompanyDialog"
       @close="showCompanyDialog = false"
       @submit="onNewCompany"
     />
     <v-card>
-      <v-card-title class="purple darken-3 white--text">
-        <span class="headline">Заказы</span>
+      <v-card-title class="green lighten-3">
+        <span class="headline">{{ title }}</span>
         <v-spacer></v-spacer>
-        <v-icon color="red" @click="onClose()">{{icons.close}}</v-icon>
+        <v-icon color="red" @click="onClose()">mdi-close</v-icon>
       </v-card-title>
       <v-card-text>
         <v-form v-model="valid">
@@ -51,34 +53,12 @@
                   hide-details
                   dense
                   type="number"
-                  :rules="[required, positiveNumber]"
+                  required
+                  min="0"
                 />
               </v-flex>
               <v-flex>
-                <v-menu
-                v-model="datePickerMenu"
-                :close-on-content-click="false"
-                :nudge-right="40"
-                transition="scale-transition"
-                offset-y
-                min-width="290px"
-                >
-                  <template v-slot:activator="{ on }">
-                    <v-text-field
-                      v-model="order.date"
-                      label="Дата"
-                      hide-details
-                      dense
-                      readonly
-                      v-on="on"
-                    />
-                  </template>
-                  <v-date-picker
-                    v-model="order.date"
-                    @input="datePickerMenu = false"
-                    locale="ru-RU"
-                  />
-                </v-menu>
+                <DatePicker v-model="order.date" />
               </v-flex>
             </v-layout>
           </v-container>
@@ -89,44 +69,33 @@
         <v-btn
           small
           color="success"
-          :dark="valid"
-          :loading="formLoading"
+          :loading="loading"
           :disabled="!valid"
           @click="onSave()"
-        >Сохранить</v-btn>
+        >
+          Сохранить
+        </v-btn>
       </v-card-actions>
     </v-card>
   </v-dialog>
 </template>
 
 <script>
-import api from '../../api';
-import constants from '../../constants/data.json';
+import { mapActions, mapGetters } from 'vuex';
+import { ITEM_NAMESPACE, COMPANY_NAMESPACE } from '../../store/namespaces';
 
 import { format as formatDate } from '../../helpers/dates';
 import rules from '../../helpers/validationRules';
 
 import AutocompleteWithAdd from '../helpers/AutocompleteWithAdd.vue';
-import QuickCreateItemModal from '../item/QuickCreateItemModal.vue';
-import CompanyModal from '../company/CompanyModal.vue';
-
-const {
-  updateItem,
-  createOrder,
-  getItemList,
-  getItemShortInfo,
-  getShortCompanyList,
-} = api;
-
-const {
-  icons,
-} = constants;
+import DatePicker from '../helpers/DatePicker.vue';
 
 export default {
   components: {
     AutocompleteWithAdd,
-    QuickCreateItemModal,
-    CompanyModal,
+    DatePicker,
+    QuickCreateItemModal: () => import('../item/QuickCreateItemModal.vue'),
+    CompanyModal: () => import('../company/CompanyModal.vue'),
   },
 
   props: {
@@ -135,42 +104,44 @@ export default {
       required: true,
       default: false,
     },
+    title: {
+      type: String,
+      required: false,
+      default: 'Добавление нового заказа',
+    },
+    inputOrder: {
+      type: Object,
+      required: false,
+      default: () => {},
+    },
   },
 
   data: () => ({
-    icons,
     ...rules,
 
-    itemsLoading: false,
     newItemDialog: false,
     showCompanyDialog: false,
     inputName: null,
 
-    loadingItems: false,
-    items: [],
-
-    loadingCompanies: false,
-    companies: [],
-
     orderTemplate: {
       itemId: 0,
       companyId: 0,
-      date: formatDate(Date.now(), 'YYYY-MM-DD'),
+      date: Date.now(),
       amount: 0,
     },
 
     order: {},
-    datePickerMenu: false,
     valid: false,
 
     loading: false,
-    formLoading: false,
   }),
 
   computed: {
+    ...mapGetters(ITEM_NAMESPACE, { loadingItems: 'isLoading', items: 'itemList' }),
+    ...mapGetters(COMPANY_NAMESPACE, { loadingCompanies: 'isLoading', companies: 'companyList' }),
+
     itemsNames() {
       return this.items.map(value => ({
-        // TODO show category on hover
         id: value.id,
         name: `${value.categoryName} - ${value.name}`,
       }));
@@ -180,64 +151,74 @@ export default {
   async beforeMount() {
     this.order = { ...this.orderTemplate };
 
-    this.loadItemList();
-    this.loadCompanyList();
+    this.fetchItems();
+    this.fetchCompanies();
+  },
+
+  watch: {
+    inputOrder() {
+      if (!this.inputOrder) {
+        return;
+      }
+
+      const {
+        item: {
+          id: itemId,
+          companyId,
+        },
+      } = this.inputOrder;
+
+      this.order = {
+        itemId,
+        companyId,
+        ...this.inputOrder,
+      };
+    },
   },
 
   methods: {
     formatDate,
+    ...mapActions(ITEM_NAMESPACE, ['fetchItems', 'updateItem']),
+    ...mapActions(COMPANY_NAMESPACE, ['fetchCompanies']),
 
-    async loadItemList() {
-      this.itemsLoading = true;
-      this.items = await getItemList();
-      this.itemsLoading = false;
-    },
-
-    async loadCompanyList() {
-      this.loadingCompanies = true;
-      this.companies = await getShortCompanyList();
-      this.loadingCompanies = false;
-    },
-
-    async onNewItem(newItem) {
-      const item = await getItemShortInfo(newItem.id);
-      this.items.push(item);
-      this.order.itemId = item.id;
-      this.order.companyId = item.companyId || 0;
+    onNewItem(newItem) {
+      this.getItemById(newItem.id);
+      this.order.itemId = newItem.id;
+      this.order.companyId = newItem.companyId || 0;
       this.newItemDialog = false;
     },
 
     async onNewCompany(company) {
       this.companies.push(company);
-      await updateItem(this.order.itemId, { companyId: company.id });
+      this.updateItem(this.order.itemId, { companyId: company.id });
 
       this.order.companyId = company.id;
       this.showCompanyDialog = false;
     },
 
     onItemSelect(itemId) {
-      const item = this.items.filter(value => value.id === itemId)[0] || {};
+      const item = this.items.find(value => value.id === itemId) || {};
 
       this.order.itemId = itemId;
       this.order.companyId = item.companyId || 0;
     },
 
     async onSave() {
-      this.formLoading = true;
+      this.loading = true;
 
-      const item = this.items.filter(value => value.id === this.order.itemId)[0] || {};
+      const item = this.items.find(value => value.id === this.order.itemId) || {};
       const newCompanyId = this.order.companyId;
 
       if (newCompanyId !== item.companyId) {
-        await updateItem(this.order.itemId, { companyId: newCompanyId });
+        this.updateItem(this.order.itemId, { companyId: newCompanyId });
       }
 
       delete this.order.companyId;
 
-      await createOrder(this.order);
+      this.emit('submit', this.order);
 
       this.order = { ...this.orderTemplate };
-      this.formLoading = false;
+      this.loading = false;
 
       this.$emit('submit');
     },

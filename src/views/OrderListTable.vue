@@ -2,41 +2,26 @@
   <v-container>
     <v-layout row wrap>
       <v-flex xs12>
-        <v-toolbar color="green lighten-3">
-          <v-toolbar-title v-if="$vuetify.breakpoint.smAndUp">{{ title }}</v-toolbar-title>
-          <v-divider v-if="$vuetify.breakpoint.smAndUp" class="mx-4" inset vertical></v-divider>
-          <span style="width: 200px">
-            <v-select
-              v-model="activeOrderSortId"
-              :items="statuses"
-              menu-props="auto"
-              label="Статус"
-              hide-details
-              item-value="id"
-              item-text="name"
-              prepend-icon="mdi-sort"
-              single-line
-            ></v-select>
-          </span>
-          <v-spacer></v-spacer>
-          <span :class="['d-flex', {
-            'w-200': $vuetify.breakpoint.smAndUp,
-            'w-100': $vuetify.breakpoint.xs,
-            }
-          ]">
-            <v-text-field append-icon="mdi-magnify"
-              dense label="Поиск"
-              hide-details v-model="search"></v-text-field>
-          </span>
-        </v-toolbar>
-        <v-divider></v-divider>
-        <v-progress-linear
-          :active="loading"
-          indeterminate
+        <Toolbar
           color="green lighten-3"
-          height="7px"
-          opacity="0.3"
-        ></v-progress-linear>
+          :loading="isLoading"
+          title="Заказы"
+          @search="onSearchChange"
+        >
+          <template v-slot:afterTitle>
+            <span style="width: 200px">
+              <v-select
+                v-model="active"
+                :items="statuses"
+                menu-props="auto"
+                label="Статус"
+                hide-details
+                prepend-icon="mdi-sort"
+                single-line
+              ></v-select>
+            </span>
+          </template>
+        </Toolbar>
         <v-simple-table
           fixed-header
           dense
@@ -56,64 +41,58 @@
               </tr>
             </thead>
             <tbody>
-              <tr v-for="(order, i) in sortedOrders" :key="order.id">
-                <td v-if="headers[0].breakpoint()">{{ offset + i + 1 }}</td>
+              <tr v-for="(order, i) in purchaseList" :key="order.id">
+                <td v-if="headers[0].breakpoint()">{{ getIndex(i) }}</td>
                 <td>
                   {{ order.item.name }}
-                  <span class="show-on-hover" v-if="isAdmin()">
+                  <span class="show-on-hover" v-if="isAdmin">
                     <v-icon @click="editOrder(order)" color="gray" small>mdi-lead-pencil</v-icon>
                   </span>
                 </td>
                 <td>{{ order.amount || 0 }} / {{ order.orderAmount }}</td>
                 <td>{{ order.date | date }}</td>
                 <td>
+                  <v-icon v-if="order.active" color="orange" small>mdi-calendar-clock</v-icon>
+                  <v-icon v-else color="green" small>mdi-check</v-icon>
+
                   <v-icon
+                    v-if="order.item.companyId"
                     color="green"
                     small
-                    @click.stop="companyId = order.item.companyId; companyDialog = true"
+                    @click.stop="openCompanyInfo(order)"
                   >
                     mdi-information
                   </v-icon>
-                  <v-icon :color="order.status.color" small>{{ order.status.icon }}</v-icon>
                 </td>
               </tr>
             </tbody>
             <tfoot class="green lighten-3">
-              <tr>
-                <td :colspan="headers.length">
-                   <v-pagination
-                      v-if="totalPages > 1"
-                      bottom
-                      color="dark green"
-                      v-model="page"
-                      :length="totalPages"
-                      :total-visible="7"
-                    ></v-pagination>
-                </td>
-              </tr>
+              <TablePagination
+                :headersLength="headers.length"
+                :totalPages="totalPages"
+                @change="pageChange"
+              />
             </tfoot>
           </template>
         </v-simple-table>
       </v-flex>
       <CompanyInfoModal
-        :companyId="companyId || 0"
-        :dialog="companyDialog"
-        @close="companyDialog = false"
-      />
-      <EditOrderFormModal
-        :order="editedOrder"
-        :dialog="editOrderDialog"
-        @submit="onEditSubmit"
-        @close="editOrderDialog = false"
+        v-if="companyInfo.id > 0"
+        :companyId="companyInfo.id || 0"
+        :dialog="companyInfo.dialog"
+        @close="companyInfo.dialog = false"
       />
       <OrderForm
-        :dialog="dialog"
-        @submit="onSubmit"
-        @close="dialog = false"
+        if="orderForm.dialog"
+        :dialog="orderForm.dialog"
+        :title="orderForm.title"
+        :inputOrder="orderForm.order"
+        @submit="onOrderFormSubmit"
+        @close="closeOrderForm"
       />
     </v-layout>
     <v-btn
-      v-if="isAdmin()"
+      v-if="isAdmin"
       small
       fixed
       dark
@@ -121,7 +100,7 @@
       bottom
       right
       color="green"
-      @click="dialog = true"
+      @click="orderForm.dialog = true"
     >
       <v-icon>mdi-plus</v-icon>
     </v-btn>
@@ -129,50 +108,28 @@
 </template>
 
 <script>
-import api from '../api';
-import constants from '../constants/data.json';
-import { sortDesc } from '../helpers/dates';
+import { mapGetters, mapActions } from 'vuex';
 
-import OrderForm from '../components/order/OrderForm.vue';
-import EditOrderFormModal from '../components/order/EditOrderFormModal.vue';
-import CompanyInfoModal from '../components/company/CompanyInfoModal.vue';
-
-const {
-  isAdmin,
-  getOrders,
-  removeOrder,
-} = api;
-
-const orderStatuses = {
-  active: {
-    id: 0,
-    value: true,
-    name: 'В ожидании',
-    icon: 'mdi-calendar-clock',
-    color: 'orange',
-  },
-  completed: {
-    id: 1,
-    value: false,
-    name: 'Завершенные',
-    icon: 'mdi-check',
-    color: 'green',
-  },
-};
+import { PURCHASE_NAMESPACE, AUTH_NAMESPACE } from '../store/namespaces';
 
 export default {
   components: {
-    OrderForm,
-    EditOrderFormModal,
-    CompanyInfoModal,
+    Toolbar: () => import('../components/helpers/Toolbar.vue'),
+    TablePagination: () => import('../components/helpers/TablePagination.vue'),
+    OrderForm: () => import('../components/order/OrderForm.vue'),
+    CompanyInfoModal: () => import('../components/company/CompanyInfoModal.vue'),
   },
 
   data: vm => ({
-    selectedRow: null,
-    editRow: false,
-    search: '',
-    constants,
-    activeOrderSortId: orderStatuses.active.id,
+    query: {
+      search: '',
+      active: true,
+      limit: 10,
+      offset: 0,
+    },
+
+    active: true,
+    page: 1,
 
     headers: [
       { text: '№', width: '5%', breakpoint: () => vm.$vuetify.breakpoint.smAndUp },
@@ -181,139 +138,85 @@ export default {
       { text: 'Дата', width: '10%', breakpoint: () => true },
       { text: 'Статус', width: '5%', breakpoint: () => true },
     ],
+    statuses: [
+      { text: 'В ожидании', value: true },
+      { text: 'Завершенные', value: false },
+    ],
 
-    page: 1,
-    limit: 20,
-    timeout: null,
-    totalPages: 1,
+    orderForm: {
+      dialog: false,
+    },
 
-    title: 'Заказы',
-
-    loading: false,
-    orders: [],
-    selected: [],
-
-    dialog: false,
-
-    companyId: -1,
-    companyDialog: false,
-
-    editedOrder: {},
-    editOrderDialog: false,
+    companyInfo: {
+      id: -1,
+      dialog: false,
+    },
   }),
 
   computed: {
-    statuses() {
-      return Object.values(orderStatuses);
-    },
-
-    sortedOrders() {
-      return this.orders.slice(0)
-        .sort(sortDesc)
-        .map((value) => {
-          const data = {
-            ...value,
-            status: this.getStatus(value),
-          };
-
-          return data;
-        });
-    },
-
-    offset() {
-      return this.limit * (this.page - 1);
-    },
+    ...mapGetters(PURCHASE_NAMESPACE, ['totalPages', 'purchaseList', 'isLoading']),
+    ...mapGetters(AUTH_NAMESPACE, ['isAdmin']),
   },
 
   beforeMount() {
-    this.loadOrders();
+    this.fetchPurchases(this.query);
   },
 
   watch: {
-    page() {
-      this.loadOrders();
+    query: {
+      deep: true,
+      handler() {
+        this.fetchPurchases(this.query);
+      },
     },
-    activeOrderSortId() {
-      this.page = 1;
-      this.loadOrders();
-    },
-    search() {
-      this.page = 1;
-      this.loadOrders();
+    active() {
+      this.query.active = this.active;
     },
   },
 
   methods: {
-    isAdmin,
+    ...mapActions(PURCHASE_NAMESPACE, ['fetchPurchases', 'createPurchase', 'updatePurchase']),
 
-    async loadOrders() {
-      const query = {
-        offset: this.offset,
-        limit: this.limit,
-        active: this.statuses[this.activeOrderSortId].value,
-        search: this.search,
-      };
+    onSearchChange(search) {
+      this.query.search = search;
+    },
 
-      if (this.timeout) {
-        clearTimeout(this.timeout);
-      }
-
-      this.timeout = setTimeout(async () => {
-        this.loading = true;
-        const { data, count } = await getOrders(query);
-
-        this.orders = data;
-        this.totalPages = Math.ceil(+count / this.limit);
-        this.loading = false;
-      }, 300);
+    getIndex(i) {
+      return this.query.limit * (this.page - 1) + i + 1;
     },
 
     editOrder(order) {
-      this.editedOrder = order;
-      this.editOrderDialog = true;
+      this.orderForm = {
+        edit: true,
+        order,
+        title: 'Редактирование заказа',
+        dialog: true,
+      };
     },
 
-    getStatus(item) {
-      if (!item.amount) {
-        return orderStatuses.active;
-      }
-
-      return orderStatuses.completed;
+    openCompanyInfo(order) {
+      this.companyInfo = {
+        id: order.item.companyId,
+        dialog: true,
+      };
     },
 
-    async onSubmit() {
-      this.dialog = false;
-
-      this.loadOrders();
+    closeOrderForm() {
+      this.orderForm = { dialog: false };
     },
 
-    onEditSubmit(order) {
-      const copy = [...this.orders];
-      const index = this.orders.findIndex(value => value.id === order.id);
+    onOrderFormSubmit(purchase) {
+      if (this.orderForm.edit) {
+        this.updatePurchase(purchase.id, purchase);
+      }
 
-      copy[index] = order;
-      this.orders = copy;
-      this.editedOrder = {};
-      this.editOrderDialog = false;
-      this.loadOrders();
+      this.createPurchase(purchase);
+      this.closeOrderForm();
     },
 
-    async deleteOrder(order) {
-      if (!isAdmin()) {
-        return;
-      }
-      // eslint-disable-next-line no-restricted-globals
-      const result = confirm(`Вы дейстивительно хотите удалить ${order.item.name}?`);
-
-      if (!result) {
-        return;
-      }
-
-      const success = await removeOrder(order.id);
-
-      if (success) {
-        this.orders = this.orders.filter(value => value.id !== order.id);
-      }
+    pageChange({ limit, offset, page }) {
+      this.page = page;
+      this.query = { ...this.query, limit, offset };
     },
   },
 };

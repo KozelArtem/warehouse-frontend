@@ -16,7 +16,7 @@
               <v-text-field label="Название" v-model="task.name"></v-text-field>
               <DatePicker
                 label="Дата добавления"
-                @update="date => task.addedAt = date"
+                v-model="task.addedAt"
               />
               <v-switch
                 v-model="task.isTO"

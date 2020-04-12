@@ -7,7 +7,7 @@
       @close="newItemDialog = false"
       @submit="onNewItem"
     />
-    <CompanyModal
+    <CompanyForm
       v-show="showCompanyDialog"
       :dialog="showCompanyDialog"
       @close="showCompanyDialog = false"
@@ -95,7 +95,7 @@ export default {
     AutocompleteWithAdd,
     DatePicker,
     QuickCreateItemModal: () => import('../item/QuickCreateItemModal.vue'),
-    CompanyModal: () => import('../company/CompanyModal.vue'),
+    CompanyForm: () => import('../company/CompanyForm.vue'),
   },
 
   props: {

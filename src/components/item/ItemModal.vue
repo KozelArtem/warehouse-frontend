@@ -9,7 +9,7 @@
         <v-icon color="red" @click="$emit('close')">{{icons.close}}</v-icon>
       </v-card-title>
       <v-card-text>
-        <CompanyModal
+        <CompanyForm
           :dialog="showCompanyDialog"
           @close="showCompanyDialog = false"
           @submit="onNewCompany"
@@ -145,7 +145,7 @@ const {
 export default {
   components: {
     AutocompleteWithAdd: () => import('../helpers/AutocompleteWithAdd.vue'),
-    CompanyModal: () => import('../company/CompanyModal.vue'),
+    CompanyForm: () => import('../company/CompanyForm.vue'),
   },
 
   props: {

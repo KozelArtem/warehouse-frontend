@@ -8,7 +8,7 @@
       @submit="addOrder"
     />
 
-    <CompanyModal
+    <CompanyForm
       :dialog="showCompanyDialog"
       @close="showCompanyDialog = false"
       @submit="onNewCompany"
@@ -137,7 +137,7 @@ const {
 export default {
   components: {
     OrderForm: () => import('../order/OrderForm.vue'),
-    CompanyModal: () => import('../company/CompanyModal.vue'),
+    CompanyForm: () => import('../company/CompanyForm.vue'),
     AutocompleteWithAdd: () => import('../helpers/AutocompleteWithAdd.vue'),
   },
 

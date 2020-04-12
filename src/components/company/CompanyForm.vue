@@ -104,8 +104,6 @@
 </template>
 
 <script>
-import api from '../../api';
-
 const addIcon = 'mdi-plus';
 const removeIcon = 'mdi-close';
 
@@ -188,19 +186,16 @@ export default {
     },
 
     async onSaveClick() {
-      this.loading = true;
       let companyRes = null;
 
       if ((this.data || {}).id) {
-        companyRes = await api.updateCompany(this.company.id, this.company);
+        companyRes = await this.updateCompany(this.company.id, this.company);
       } else {
-        companyRes = await api.createCompany(this.company);
+        companyRes = await this.createCompany(this.company);
       }
 
-      this.loading = false;
-
-      if (!companyRes.id) {
-        return;
+      if (companyRes) {
+        this.$emit('submit', companyRes);
       }
 
       this.company = { ...this.companyTemplate, phones: [''] };

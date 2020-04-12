@@ -1,137 +1,38 @@
 <template>
   <v-container>
+    <CompanyForm
+      v-if="isAdmin && companyModal.dialog"
+      :dialog="companyModal.dialog"
+      :data="companyModal.data"
+      @submit="onCompanyModalSubmit"
+      @close="closeCompanyModal"
+    />
+    <DeleteModal
+      v-if="deleteModal.dialog"
+      :dialog="deleteModal.dialog"
+      :title="deleteModal.title"
+      :description="deleteModal.description"
+      @click="deleteModalResult"
+    />
     <v-layout row wrap>
       <v-flex xs12>
-        <v-toolbar class="blue lighten-3">
-          <v-toolbar-title>Список компаний</v-toolbar-title>
-          <v-spacer></v-spacer>
-          <span :class="['d-flex', {
-            'w-200': $vuetify.breakpoint.smAndUp,
-            'w-100': $vuetify.breakpoint.xs,
-            }
-          ]">
-            <v-text-field
-              label="Поиск"
-              append-icon="mdi-magnify"
-              dense hide-details
-              v-model="search"></v-text-field>
-          </span>
-        </v-toolbar>
-        <v-divider></v-divider>
-        <v-progress-linear
-          :active="loading"
-          indeterminate
+        <Toolbar
+          title="Список компаний"
           color="blue lighten-3"
-          height="7px"
-          opacity="0.3"
-        ></v-progress-linear>
+          :loading="isLoading"
+          @search="updateSearch"
+        />
       </v-flex>
-      <v-flex xs12 v-for="company in localCompanies" :key="company.id">
-        <v-card :color="company.color">
-          <v-card-title primary-title class="pb-0 lh-0">
-            <div class="d-flex subtitle-2">{{ company.name }} | {{ company.person }}</div>
-            <v-spacer></v-spacer>
-            <div v-if="isAdmin()" class="float-right active-buttons">
-              <v-icon small color="primary" @click="editCompany(company)">mdi-pencil</v-icon>
-              <v-icon small color="red" @click="removeCompany(company)">mdi-delete</v-icon>
-            </div>
-          </v-card-title>
-          <v-card-text class="pb-0">
-            <blockquote class="caption">{{ company.description }}</blockquote>
-            <v-list v-if="company.showInfo" dense>
-              <v-list-item dense>
-                <v-list-item-icon>
-                  <v-icon color="indigo">mdi-account</v-icon>
-                </v-list-item-icon>
-
-                <v-list-item-content>
-                  <v-list-item-title class="subtitle-2">{{ company.person }}</v-list-item-title>
-                </v-list-item-content>
-              </v-list-item>
-
-              <v-divider inset></v-divider>
-
-              <v-list-item v-for="(phone, pi) in company.phones" :key="`phone${pi}`">
-                <v-list-item-icon>
-                  <v-icon color="indigo" v-if="pi === 0">mdi-phone</v-icon>
-                </v-list-item-icon>
-
-                <v-list-item-content>
-                  <v-list-item-title class="subtitle-2">
-                    <a :href="`tel:${phone.data}`">
-                      {{ phone.data }}
-                    </a>
-                  </v-list-item-title>
-                </v-list-item-content>
-              </v-list-item>
-
-              <v-divider inset></v-divider>
-
-              <v-list-item dense>
-                <v-list-item-icon>
-                  <v-icon color="indigo">mdi-web</v-icon>
-                </v-list-item-icon>
-
-                <v-list-item-content>
-                  <v-list-item-title class="subtitle-2">
-                    <a :href="company.website" target="_blank" rel="noopener noreferrer">
-                      {{ company.website }}
-                    </a>
-                  </v-list-item-title>
-                </v-list-item-content>
-              </v-list-item>
-
-              <v-divider inset></v-divider>
-
-              <v-list-item dense>
-                <v-list-item-icon>
-                  <v-icon color="indigo">mdi-email</v-icon>
-                </v-list-item-icon>
-
-                <v-list-item-content>
-                  <v-list-item-title class="subtitle-2">
-                    <a :href="`mailto:${company.email}`">
-                      {{ company.email }}
-                    </a>
-                  </v-list-item-title>
-                </v-list-item-content>
-              </v-list-item>
-
-              <v-divider inset></v-divider>
-
-              <v-list-item dense>
-                <v-list-item-icon>
-                  <v-icon color="indigo">mdi-map-marker</v-icon>
-                </v-list-item-icon>
-
-                <v-list-item-content>
-                  <v-list-item-title class="subtitle-2">{{ company.location }}</v-list-item-title>
-                </v-list-item-content>
-              </v-list-item>
-
-            </v-list>
-          </v-card-text>
-          <v-card-actions>
-            <v-btn
-              @click="company.showInfo = !company.showInfo"
-              text color="primary" small
-            >
-              {{ company.showInfo ? 'Скрыть' : 'Показать' }} контактные данные
-            </v-btn>
-          </v-card-actions>
-        </v-card>
-      </v-flex>
-      <v-flex xs12>
-        <CompanyModal
-          v-if="isAdmin() && (newCompanyModal || editCompanyModal)"
-          :dialog="newCompanyModal || editCompanyModal"
-          :data="editCompanyModal ? selectedCompany : {}"
-          @submit="onCompanyModalSubmit"
-          @close="newCompanyModal = false; editCompanyModal = false"
+      <v-flex xs12 v-for="company in companies" :key="company.id">
+        <CompanyCard
+          :company="company"
+          :canManage="isAdmin"
+          @update="showEditModal"
+          @remove="showDeleteModal"
         />
       </v-flex>
       <v-btn
-        v-if="isAdmin()"
+        v-if="isAdmin"
         small
         fixed
         dark
@@ -139,7 +40,7 @@
         bottom
         right
         color="gray"
-        @click="newCompanyModal = true"
+        @click="companyModal.dialog = true"
       >
         <v-icon>mdi-plus</v-icon>
       </v-btn>
@@ -148,43 +49,52 @@
 </template>
 
 <script>
-import api from '../../api';
+import { mapActions, mapGetters, mapMutations } from 'vuex';
 
-const {
-  isAdmin,
-  getCompaniesWithItems,
-  removeCompany,
-} = api;
-
+import { COMPANY_NAMESPACE, AUTH_NAMESPACE } from '../../store/namespaces';
 
 export default {
   components: {
-    CompanyModal: () => import('./CompanyModal.vue'),
+    Toolbar: () => import('../helpers/Toolbar.vue'),
+    DeleteModal: () => import('../helpers/DeleteModal.vue'),
+    CompanyCard: () => import('./CompanyCard.vue'),
+    CompanyForm: () => import('./CompanyForm.vue'),
   },
 
   data: () => ({
-    companies: [],
-    localCompanies: [],
-    selectedCompany: null,
-    newCompanyModal: false,
-    editCompanyModal: false,
+    companyModal: {
+      dialog: false,
+    },
+    deleteModal: {
+      dialog: false,
+      title: 'Удаление компании',
+      description: '',
+    },
     search: null,
-    loading: true,
+    activeCompany: null,
   }),
 
   beforeMount() {
     this.loadData();
   },
 
+  computed: {
+    ...mapGetters(AUTH_NAMESPACE, ['isAdmin']),
+    ...mapGetters(COMPANY_NAMESPACE, {
+      companies: 'extendedSearchList',
+      isLoading: 'isLoading',
+    }),
+  },
+
   watch: {
     search() {
-      this.filterCompanies();
+      this.updateSearch(this.search);
     },
   },
 
   methods: {
-    isAdmin,
-
+    ...mapMutations(COMPANY_NAMESPACE, { updateSearch: 'UPDATE_SEARCH' }),
+    ...mapActions(COMPANY_NAMESPACE, ['fetchExtendedCompanies', 'deleteCompany']),
     filterCompanies() {
       const searchValue = this.search.trim().toLowerCase();
       this.localCompanies = this.companies
@@ -192,13 +102,7 @@ export default {
     },
 
     async loadData() {
-      this.loading = true;
-
-      const data = await getCompaniesWithItems();
-
-      this.companies = data.map(company => ({ ...company, showInfo: false }));
-      this.localCompanies = this.companies;
-      this.loading = false;
+      this.fetchExtendedCompanies();
     },
 
     onCompanyModalSubmit() {
@@ -208,24 +112,35 @@ export default {
       this.loadData();
     },
 
-    editCompany(company) {
-      this.selectedCompany = company;
-      this.editCompanyModal = true;
+    closeCompanyModal() {
+      this.companyModal = { dialog: false };
     },
 
-    async removeCompany(company) {
-      const message = `Вы действительно хотите удалить компанию"${company.name}"?`;
-      // eslint-disable-next-line no-restricted-globals
-      const result = confirm(message);
+    showEditModal(company) {
+      this.companyModal = {
+        dialog: true,
+        data: { ...company },
+      };
+    },
 
-      if (!result) {
-        return;
+    showDeleteModal(company) {
+      const title = 'Удаление компании';
+      const description = `Вы действительно хотите удалить компанию "${company.name}"?`;
+
+      this.activeCompany = { ...company };
+      this.deleteModal = {
+        title,
+        description,
+        dialog: true,
+      };
+    },
+
+    deleteModalResult(result) {
+      if (result) {
+        this.deleteCompany(this.activeCompany.id);
       }
 
-      await removeCompany(company.id);
-
-      this.companies = this.companies.filter(value => value.id !== company.id);
-      this.selectedCompany = null;
+      this.deleteModal = { dialog: false };
     },
   },
 };

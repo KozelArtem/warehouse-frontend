@@ -43,7 +43,7 @@ export default {
 .pointer {
   cursor: pointer;
 };
-tr, .v-toolbar__title {
+tr, span {
   .show-on-hover {
     display: none;
   }

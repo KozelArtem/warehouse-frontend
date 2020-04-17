@@ -9,6 +9,7 @@ const USER_URL = '/user';
 const initialState = () => ({
   user: {},
   token: localStorage.getItem('token'),
+  loading: false,
 });
 
 const localState = initialState();
@@ -20,6 +21,9 @@ const getters = {
   isLoggedIn(state) {
     return !!(state.user.id && state.token);
   },
+  isLoading(state) {
+    return state.loading;
+  },
   token(state) {
     return state.token;
   },
@@ -27,17 +31,24 @@ const getters = {
 
 const actions = {
   async login({ commit }, data) {
+    commit('SET_LOADING', true);
+
     const response = await httpClient.post(LOGIN_URL, data);
 
     if (response) {
       commit('SET_TOKEN', response.data.token);
       commit('SET_USER_DATA', response.data.user);
     }
+
+    commit('SET_LOADING', false);
   },
   async logout({ commit }) {
+    commit('SET_LOADING', true);
+
     const response = await httpClient.get(LOGOUT_URL);
 
     commit('RESET_USER_DATA', response.data);
+    commit('SET_LOADING', false);
   },
   async getUserData({ state, commit }) {
     if (state.user.id) {
@@ -65,6 +76,9 @@ const mutations = {
     localStorage.removeItem('token');
     state.user = {};
     state.token = null;
+  },
+  SET_LOADING(state, payload) {
+    state.loading = payload;
   },
 };
 

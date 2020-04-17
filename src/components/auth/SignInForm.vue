@@ -7,7 +7,7 @@
             Авторизация
           </v-card-title>
           <v-card-text>
-            <v-form v-model="valid" @submit="login(user)">
+            <v-form v-model="valid">
               <v-text-field
                 v-model="user.username"
                 prepend-icon="mdi-account"
@@ -29,11 +29,11 @@
           <v-card-actions>
             <v-spacer />
             <v-btn
-              type="submit"
+              @click="login(user)"
               color="primary"
               :disabled="!valid"
-              :loading="loading"
-              >
+              :loading="isLoading"
+            >
                 Войти
               </v-btn
             >
@@ -70,7 +70,7 @@ export default {
   }),
 
   computed: {
-    ...mapGetters(AUTH_NAMESPACE, ['isLoggedIn']),
+    ...mapGetters(AUTH_NAMESPACE, ['isLoggedIn', 'isLoading']),
   },
 
   watch: {

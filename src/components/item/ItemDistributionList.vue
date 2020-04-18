@@ -23,10 +23,11 @@
                   />
                 </v-flex>
                 <v-flex>
-                 <v-autocomplete
+                  <v-autocomplete
                     v-model="itemDistribution.waybillId"
                     :items="waybills"
                     :loading="waybillsLoading"
+                    item-value="id"
                     hide-no-data
                     hide-details
                     clearable
@@ -273,7 +274,7 @@ export default {
     },
 
     async loadWaybills() {
-      const data = await getWaybillList({ itemId: this.itemId });
+      const { data } = await getWaybillList({ itemId: this.itemId });
 
       this.waybills = data.map(item => ({
         id: item.id,

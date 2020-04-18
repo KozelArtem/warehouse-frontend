@@ -1,8 +1,15 @@
 <template>
   <v-app>
     <AppHeader />
+    <Sidebar />
     <v-content>
-      <router-view/>
+      <v-container fill-height fluid wrap>
+        <v-layout row wrap>
+          <v-flex offset-xs1 xs10>
+            <router-view />
+          </v-flex>
+        </v-layout>
+      </v-container>
     </v-content>
     <v-bottom-sheet left :value="alert.show" inset hide-overlay @input="closeAlert">
       <v-alert
@@ -24,12 +31,15 @@
 import { mapGetters, mapMutations } from 'vuex';
 
 import AppHeader from './components/helpers/AppHeader.vue';
+import Sidebar from './components/helpers/Sidebar.vue';
 
 export default {
   name: 'App',
   components: {
     AppHeader,
+    Sidebar,
   },
+
   computed: {
     ...mapGetters(['alert']),
   },

@@ -2,7 +2,6 @@
   <v-card v-if="item">
     <DeleteModal
       v-if="removeModal"
-      :dialog="removeModal"
       title="Удаление элемента"
       :description="removeModalDescription"
       @click="closeRemoveModal"

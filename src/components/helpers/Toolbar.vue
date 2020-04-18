@@ -1,23 +1,27 @@
 <template>
   <div>
     <v-toolbar :color="color">
-      <v-toolbar-title v-if="$vuetify.breakpoint.smAndUp">{{ title }}</v-toolbar-title>
+      <slot name="title">
+        <v-toolbar-title>{{ title }}</v-toolbar-title>
+      </slot>
       <v-divider v-if="$vuetify.breakpoint.smAndUp" class="mx-4" inset vertical></v-divider>
       <slot name="afterTitle"></slot>
       <v-spacer></v-spacer>
-      <span :class="['d-flex', {
-        'w-200': $vuetify.breakpoint.smAndUp,
-        'w-100': $vuetify.breakpoint.xs,
-        }
-      ]">
-        <v-text-field
-          v-model="search"
-          label="Поиск"
-          dense
-          hide-details
-          append-icon="mdi-magnify"
-        />
-      </span>
+      <slot name="right" v-if="showSearch">
+        <span :class="['d-flex', {
+          'w-200': $vuetify.breakpoint.smAndUp,
+          'w-100': $vuetify.breakpoint.xs,
+          }
+        ]">
+          <v-text-field
+            v-model="search"
+            label="Поиск"
+            dense
+            hide-details
+            append-icon="mdi-magnify"
+          />
+        </span>
+      </slot>
     </v-toolbar>
     <v-divider></v-divider>
     <v-progress-linear
@@ -46,6 +50,11 @@ export default {
     loading: {
       type: Boolean,
       required: true,
+      default: true,
+    },
+    showSearch: {
+      type: Boolean,
+      required: false,
       default: true,
     },
   },

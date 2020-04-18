@@ -70,6 +70,7 @@
               <TablePagination
                 :headersLength="headers.length"
                 :totalPages="totalPages"
+                color="dark green"
                 @change="pageChange"
               />
             </tfoot>

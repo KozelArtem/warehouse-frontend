@@ -7,7 +7,7 @@
     <v-tab
       v-for="(month, i) in months"
       :key="month"
-      @change="$emit('change', i)"
+      @change="$emit('input', i)"
     >
       {{ month }}
     </v-tab>
@@ -30,5 +30,11 @@ export default {
     months: moment.months(),
     selectedMonthId: vm.value,
   }),
+
+  watch: {
+    value() {
+      this.selectedMonthId = this.value;
+    },
+  },
 };
 </script>

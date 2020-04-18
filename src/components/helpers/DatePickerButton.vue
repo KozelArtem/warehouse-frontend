@@ -8,22 +8,23 @@
     min-width="290px"
   >
     <template v-slot:activator="{ on }">
-      <v-text-field
-        v-model="date"
-        :label="label"
-        hide-details
-        dense
-        clearable
-        readonly
+      <v-btn
+        v-if="!date"
+        small text :color="color"
         v-on="on"
-      />
+      >
+        {{ emptyDateText }}
+      </v-btn>
+      <v-btn small text :color="color" v-on="on" v-else>
+        {{ date | date }}
+      </v-btn>
     </template>
     <v-date-picker
+      :color="bgColor"
+      first-day-of-week="1"
+      :max="max"
       v-model="date"
       @input="menu = false"
-      :min="min"
-      :max="max"
-      first-day-of-week="1"
       locale="ru-RU"
     />
   </v-menu>
@@ -45,11 +46,6 @@ export default {
       required: false,
       default: Date.now(),
     },
-    label: {
-      type: String,
-      required: false,
-      default: 'Дата',
-    },
     min: {
       type: [Date, String],
       required: false,
@@ -59,6 +55,21 @@ export default {
       type: [Date, String],
       required: false,
       default: today,
+    },
+    emptyDateText: {
+      type: String,
+      required: false,
+      default: 'Выбрать дату',
+    },
+    bgColor: {
+      type: String,
+      required: false,
+      default: 'white',
+    },
+    color: {
+      type: String,
+      required: false,
+      default: 'black',
     },
   },
 

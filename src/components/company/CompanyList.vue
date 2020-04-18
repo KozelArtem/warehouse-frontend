@@ -9,7 +9,6 @@
     />
     <DeleteModal
       v-if="deleteModal.dialog"
-      :dialog="deleteModal.dialog"
       :title="deleteModal.title"
       :description="deleteModal.description"
       @click="deleteModalResult"

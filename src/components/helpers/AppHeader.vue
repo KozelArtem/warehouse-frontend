@@ -70,7 +70,7 @@ export default {
       },
       {
         id: 5,
-        link: '/distribution',
+        link: '/machines',
         icon: 'mdi-bulldozer',
         title: 'Журнал работ',
       },

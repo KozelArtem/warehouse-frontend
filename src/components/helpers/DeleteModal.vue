@@ -1,6 +1,6 @@
 <template>
   <v-layout row justify-center>
-    <v-dialog v-model="dialog" persistent max-width="600">
+    <v-dialog :value="true" persistent max-width="600">
       <v-card>
         <v-card-title class="headline">{{ title }}</v-card-title>
         <v-card-text class="subtitle-1">{{ description }}</v-card-text>
@@ -25,11 +25,6 @@
 <script>
 export default {
   props: {
-    dialog: {
-      type: Boolean,
-      required: true,
-      default: false,
-    },
     title: {
       type: String,
       required: true,

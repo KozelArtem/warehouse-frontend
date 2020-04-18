@@ -1,24 +1,27 @@
 <template>
   <tr>
-    <td :colspan="headersLength - 2">
-      <v-pagination
-        bottom
-        color="dark green"
-        v-model="page"
-        :length="totalPages"
-        :total-visible="7"
-      ></v-pagination>
-    </td>
-    <td colspan="2">
-      <v-select
-        class="py-3"
-        v-model="limit"
-        :items="limits"
-        menu-props="auto"
-        hide-details
-        label="Элементов на страницe"
-        dense
-      ></v-select>
+    <td :colspan="headersLength">
+      <v-row no-gutters align="center">
+        <v-col cols="10">
+          <v-pagination
+            bottom
+            :color="color"
+            v-model="page"
+            :length="totalPages"
+            :total-visible="7"
+          ></v-pagination>
+        </v-col>
+        <v-col cols="2">
+          <v-select
+            class="ma-2"
+            v-model="limit"
+            :items="limits"
+            menu-props="auto"
+            hide-details
+            label="Элементов на страницe"
+          ></v-select>
+        </v-col>
+      </v-row>
     </td>
   </tr>
 </template>
@@ -35,6 +38,11 @@ export default {
       type: Number,
       required: true,
       default: 1,
+    },
+    color: {
+      type: String,
+      required: true,
+      default: 'black',
     },
   },
   data: () => ({

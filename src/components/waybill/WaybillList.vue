@@ -1,5 +1,5 @@
 <template>
-  <v-container grid-list-md>
+  <div>
     <v-layout row wrap>
       <v-flex xs12>
         <v-dialog
@@ -107,7 +107,7 @@
     >
       <v-icon>mdi-plus</v-icon>
     </v-btn>
-  </v-container>
+  </div>
 </template>
 
 <script>

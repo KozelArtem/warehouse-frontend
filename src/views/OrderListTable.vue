@@ -1,5 +1,5 @@
 <template>
-  <v-container>
+  <div>
     <v-layout row wrap>
       <v-flex xs12>
         <Toolbar
@@ -105,7 +105,7 @@
     >
       <v-icon>mdi-plus</v-icon>
     </v-btn>
-  </v-container>
+  </div>
 </template>
 
 <script>

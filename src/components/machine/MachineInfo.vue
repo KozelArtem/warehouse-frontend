@@ -1,5 +1,5 @@
 <template>
-  <v-container>
+  <div>
     <DeleteModal
       v-if="deleteTask.dialog"
       :title="deleteTask.title"
@@ -109,7 +109,7 @@
     >
       <v-icon>mdi-plus</v-icon>
     </v-btn>
-  </v-container>
+  </div>
 </template>
 
 <script>

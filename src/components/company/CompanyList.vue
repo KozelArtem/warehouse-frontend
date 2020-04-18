@@ -1,5 +1,5 @@
 <template>
-  <v-container>
+  <div>
     <CompanyForm
       v-if="isAdmin && companyModal.dialog"
       :dialog="companyModal.dialog"
@@ -44,7 +44,7 @@
         <v-icon>mdi-plus</v-icon>
       </v-btn>
     </v-layout>
-  </v-container>
+  </div>
 </template>
 
 <script>

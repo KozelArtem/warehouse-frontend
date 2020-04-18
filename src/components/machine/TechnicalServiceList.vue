@@ -1,5 +1,5 @@
 <template>
-  <v-container>
+  <div>
     <v-layout row wrap>
       <v-flex xs12>
         <Toolbar
@@ -69,7 +69,7 @@
         </v-simple-table>
       </v-flex>
     </v-layout>
-  </v-container>
+  </div>
 </template>
 
 <script>

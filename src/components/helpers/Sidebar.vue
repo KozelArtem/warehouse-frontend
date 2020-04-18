@@ -6,13 +6,13 @@
     app
   >
     <v-toolbar color="teal" dark dense>
-      <v-app-bar-nav-icon></v-app-bar-nav-icon>
+      <v-app-bar-nav-icon @click="mini = !mini"></v-app-bar-nav-icon>
       <v-toolbar-title>MPP</v-toolbar-title>
     </v-toolbar>
 
     <v-list nav dense v-if="isLoggedIn">
       <v-list-item-group v-model="item" color="primary">
-        <v-list-item v-for="(item, i) in items" :key="i" :to="item.link">
+        <v-list-item v-for="(item, i) in items" :key="i" :to="item.link" exact>
           <v-list-item-icon>
             <v-icon v-text="item.icon"></v-icon>
           </v-list-item-icon>
@@ -42,6 +42,7 @@ export default {
       { link: '/tools', icon: 'mdi-hammer-wrench', title: 'Инструменты' },
       { link: '/waybill', icon: 'mdi-file', title: 'Накладные' },
       { link: '/machines', icon: 'mdi-bulldozer', title: 'Журнал работ' },
+      { link: '/machines/to', icon: 'mdi-tools', title: 'График ТО' },
       { link: '/company', icon: 'mdi-domain', title: 'Компании' },
     ],
   }),

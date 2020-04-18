@@ -1,5 +1,5 @@
 <template>
-  <v-container>
+  <div>
     <v-layout row wrap>
       <v-flex>
         <MachineForm
@@ -71,17 +71,7 @@
     >
       <v-icon>mdi-plus</v-icon>
     </v-btn>
-    <v-btn
-      small
-      fixed
-      fab
-      bottom
-      left
-      @click="$router.push({ name: 'machinesTO' })"
-    >
-      <v-icon>mdi-tools</v-icon>
-    </v-btn>
-  </v-container>
+  </div>
 </template>
 
 <script>

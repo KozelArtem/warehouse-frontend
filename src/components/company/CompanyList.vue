@@ -2,7 +2,6 @@
   <div>
     <CompanyForm
       v-if="isAdmin && companyModal.dialog"
-      :dialog="companyModal.dialog"
       :data="companyModal.data"
       @submit="onCompanyModalSubmit"
       @close="closeCompanyModal"
@@ -144,21 +143,3 @@ export default {
   },
 };
 </script>
-
-<style lang="scss" scoped>
-.v-card {
-  .active-buttons {
-    display: none;
-  }
-
-  &:hover {
-    .active-buttons {
-      display: inline;
-    }
-  }
-}
-
-.lh-0 {
-  line-height: 0 !important;
-}
-</style>

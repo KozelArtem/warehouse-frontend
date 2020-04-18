@@ -1,6 +1,6 @@
 <template>
   <v-dialog
-    v-model="dialog"
+    :value="true"
     scrollable
     persistent
     max-width="500px"
@@ -109,11 +109,6 @@ const removeIcon = 'mdi-close';
 
 export default {
   props: {
-    dialog: {
-      type: Boolean,
-      required: true,
-      default: false,
-    },
     data: {
       type: Object,
       default: () => {},

@@ -124,5 +124,15 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+.v-card {
+  .active-buttons {
+    display: none;
+  }
 
+  &:hover {
+    .active-buttons {
+      display: block;
+    }
+  }
+}
 </style>

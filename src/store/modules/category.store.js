@@ -18,8 +18,8 @@ const getters = {
 };
 
 const actions = {
-  async fetchCategories({ commit, state }) {
-    if (state.categories.length) {
+  async fetchCategories({ commit, state }, needLoad = false) {
+    if (state.categories.length && !needLoad) {
       return;
     }
 
@@ -28,6 +28,24 @@ const actions = {
 
     commit('SET_CATEGORIES', response.data);
     commit('SET_LOADING', false);
+  },
+  async createCategory({ commit, dispatch }, data) {
+    commit('SET_LOADING', true);
+    const response = await httpClient.post(URL, data);
+
+    commit('SET_LOADING', false);
+    dispatch('fetchCategories', true);
+
+    return response.data;
+  },
+  async updateCategory({ commit, dispatch }, { id, ...data }) {
+    commit('SET_LOADING', true);
+    const response = await httpClient.put(`${URL}/${id}`, data);
+
+    commit('SET_LOADING', false);
+    dispatch('fetchCategories', true);
+
+    return response.data;
   },
 
   async fetchCategoryInfo({ commit }, id) {

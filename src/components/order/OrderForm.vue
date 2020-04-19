@@ -1,17 +1,21 @@
 <template>
-  <v-dialog v-model="dialog" persistent max-width="600px">
+  <v-dialog :value="true" persistent max-width="600px">
     <QuickCreateItemModal
-      v-show="newItemDialog"
-      :dialog="newItemDialog"
+      v-if="newItemDialog"
       :name="inputName"
       @close="newItemDialog = false"
       @submit="onNewItem"
     />
     <CompanyForm
-      v-show="showCompanyDialog"
-      :dialog="showCompanyDialog"
+      v-if="showCompanyDialog"
       @close="showCompanyDialog = false"
       @submit="onNewCompany"
+    />
+    <DeleteModal
+      v-if="deleteModal.dialog"
+      :title="deleteModal.title"
+      :description="deleteModal.description"
+      @click="deleteModalResult"
     />
     <v-card>
       <v-card-title class="green lighten-3">
@@ -21,35 +25,33 @@
       </v-card-title>
       <v-card-text>
         <v-form v-model="valid">
-          <v-container grid-list-md>
+          <v-container grid-list-md fluid>
             <v-layout column wrap>
               <v-flex>
                 <AutocompleteWithAdd
+                  v-model="purchase.itemId"
                   label="Наименование"
                   :items="itemsNames"
                   :loading="loadingItems"
                   :slotButtonDisabled="newItemDialog"
-                  :selectedItemId="order.itemId"
                   @slotButtonClick="onAddNewItemClick"
-                  @change="onItemSelect"
                 />
               </v-flex>
               <v-flex>
                 <AutocompleteWithAdd
+                  v-model="purchase.companyId"
                   label="Компания"
                   :items="companies"
                   :loading="loadingCompanies"
                   :slotButtonDisabled="showCompanyDialog"
-                  :selectedItemId="order.companyId"
                   :requiredField="false"
                   @slotButtonClick="showCompanyDialog = true"
-                  @change="companyId => order.companyId = companyId"
                 />
               </v-flex>
               <v-flex>
                 <v-text-field
                   label="Количество"
-                  v-model="order.orderAmount"
+                  v-model="purchase.orderAmount"
                   hide-details
                   dense
                   type="number"
@@ -58,15 +60,25 @@
                 />
               </v-flex>
               <v-flex>
-                <DatePicker v-model="order.date" />
+                <DatePicker v-model="purchase.date" />
               </v-flex>
             </v-layout>
           </v-container>
         </v-form>
       </v-card-text>
       <v-card-actions>
+        <v-btn
+          v-if="input"
+          color="red lighten-1"
+          class="ml-6"
+          dark small
+          @click="showDeleteModal"
+        >
+          Удалить
+        </v-btn>
         <v-spacer></v-spacer>
         <v-btn
+          class="mr-6"
           small
           color="success"
           :loading="loading"
@@ -82,9 +94,8 @@
 
 <script>
 import { mapActions, mapGetters } from 'vuex';
-import { ITEM_NAMESPACE, COMPANY_NAMESPACE } from '../../store/namespaces';
+import { ITEM_NAMESPACE, COMPANY_NAMESPACE, PURCHASE_NAMESPACE } from '../../store/namespaces';
 
-import { format as formatDate } from '../../helpers/dates';
 import rules from '../../helpers/validationRules';
 
 import AutocompleteWithAdd from '../helpers/AutocompleteWithAdd.vue';
@@ -94,22 +105,18 @@ export default {
   components: {
     AutocompleteWithAdd,
     DatePicker,
+    DeleteModal: () => import('../helpers/DeleteModal.vue'),
     QuickCreateItemModal: () => import('../item/QuickCreateItemModal.vue'),
     CompanyForm: () => import('../company/CompanyForm.vue'),
   },
 
   props: {
-    dialog: {
-      type: Boolean,
-      required: true,
-      default: false,
-    },
     title: {
       type: String,
       required: false,
       default: 'Добавление нового заказа',
     },
-    inputOrder: {
+    input: {
       type: Object,
       required: false,
       default: () => {},
@@ -123,14 +130,17 @@ export default {
     showCompanyDialog: false,
     inputName: null,
 
-    orderTemplate: {
+    purchaseTemplate: {
       itemId: 0,
       companyId: 0,
       date: Date.now(),
       amount: 0,
     },
+    deleteModal: {
+      dialog: false,
+    },
 
-    order: {},
+    purchase: {},
     valid: false,
 
     loading: false,
@@ -148,90 +158,92 @@ export default {
     },
   },
 
-  async beforeMount() {
-    this.order = { ...this.orderTemplate };
+  beforeMount() {
+    if ((this.input || {}).item) {
+      const { id: itemId } = this.input.item || {};
+      this.purchase = {
+        ...this.purchaseTemplate,
+        ...this.input,
+        itemId,
+      };
+    } else {
+      this.purchase = { ...this.purchaseTemplate };
+    }
 
     this.fetchItems();
     this.fetchCompanies();
   },
 
   watch: {
-    inputOrder() {
-      if (!this.inputOrder) {
+    input() {
+      if (!(this.input || {}).item) {
         return;
       }
 
-      const {
-        item: {
-          id: itemId,
-          companyId,
-        },
-      } = this.inputOrder;
-
-      this.order = {
+      const { id: itemId } = this.input.item;
+      this.purchase = {
+        ...this.purchaseTemplate,
+        ...this.input,
         itemId,
-        companyId,
-        ...this.inputOrder,
       };
     },
   },
 
   methods: {
-    formatDate,
-    ...mapActions(ITEM_NAMESPACE, ['fetchItems', 'updateItem']),
+    ...mapActions(ITEM_NAMESPACE, ['fetchItems']),
     ...mapActions(COMPANY_NAMESPACE, ['fetchCompanies']),
+    ...mapActions(PURCHASE_NAMESPACE, ['createPurchase', 'updatePurchase', 'removePurchase']),
 
     onNewItem(newItem) {
-      this.getItemById(newItem.id);
-      this.order.itemId = newItem.id;
-      this.order.companyId = newItem.companyId || 0;
+      this.purchase.itemId = newItem.id;
       this.newItemDialog = false;
     },
 
     async onNewCompany(company) {
-      this.companies.push(company);
-      this.updateItem(this.order.itemId, { companyId: company.id });
-
-      this.order.companyId = company.id;
+      this.purchase.companyId = company.id;
       this.showCompanyDialog = false;
     },
 
-    onItemSelect(itemId) {
-      const item = this.items.find(value => value.id === itemId) || {};
-
-      this.order.itemId = itemId;
-      this.order.companyId = item.companyId || 0;
-    },
-
     async onSave() {
-      this.loading = true;
+      let result;
 
-      const item = this.items.find(value => value.id === this.order.itemId) || {};
-      const newCompanyId = this.order.companyId;
-
-      if (newCompanyId !== item.companyId) {
-        this.updateItem(this.order.itemId, { companyId: newCompanyId });
+      if (this.input) {
+        result = await this.updatePurchase(this.purchase);
+      } else {
+        result = await this.createPurchase(this.purchase);
       }
 
-      delete this.order.companyId;
-
-      this.emit('submit', this.order);
-
-      this.order = { ...this.orderTemplate };
-      this.loading = false;
-
-      this.$emit('submit');
+      this.$emit('submit', result);
     },
 
     onClose() {
-      this.order = { ...this.orderTemplate };
-
+      this.purchase = { ...this.purchaseTemplate };
       this.$emit('close');
     },
 
     onAddNewItemClick(input) {
       this.newItemDialog = true;
       this.inputName = input;
+    },
+
+    showDeleteModal() {
+      const title = 'Удаление заказа';
+      const description = `Вы действительно хотите удалить заказ "${this.purchase.item.name}"?`;
+
+      this.deleteModal = {
+        title,
+        description,
+        dialog: true,
+      };
+    },
+
+    deleteModalResult(result) {
+      if (result) {
+        this.removePurchase(this.purchase.id);
+      }
+
+      this.deleteModal = { dialog: false };
+      this.$emit('close');
     },
   },
 };

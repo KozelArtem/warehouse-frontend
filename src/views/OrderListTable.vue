@@ -56,7 +56,7 @@
                   <v-icon v-else color="green" small>mdi-check</v-icon>
 
                   <v-icon
-                    v-if="order.item.companyId"
+                    v-if="order.companyId"
                     color="green"
                     small
                     @click.stop="openCompanyInfo(order)"
@@ -78,16 +78,14 @@
         </v-simple-table>
       </v-flex>
       <CompanyInfoModal
-        v-if="companyInfo.id > 0"
+        v-if="companyInfo.dialog"
         :companyId="companyInfo.id || 0"
-        :dialog="companyInfo.dialog"
         @close="companyInfo.dialog = false"
       />
       <OrderForm
-        if="orderForm.dialog"
-        :dialog="orderForm.dialog"
+        v-if="orderForm.dialog"
         :title="orderForm.title"
-        :inputOrder="orderForm.order"
+        :input="orderForm.order"
         @submit="onOrderFormSubmit"
         @close="closeOrderForm"
       />
@@ -197,7 +195,7 @@ export default {
 
     openCompanyInfo(order) {
       this.companyInfo = {
-        id: order.item.companyId,
+        id: order.companyId,
         dialog: true,
       };
     },
@@ -206,12 +204,7 @@ export default {
       this.orderForm = { dialog: false };
     },
 
-    onOrderFormSubmit(purchase) {
-      if (this.orderForm.edit) {
-        this.updatePurchase(purchase.id, purchase);
-      }
-
-      this.createPurchase(purchase);
+    onOrderFormSubmit() {
       this.closeOrderForm();
     },
 

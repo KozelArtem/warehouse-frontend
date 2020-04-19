@@ -4,6 +4,8 @@ import { sortDesc } from '../../helpers/dates';
 
 const URL = '/purchases';
 
+let timeout = null;
+
 const initialState = () => ({
   purchases: [],
   totalCount: 0,
@@ -16,14 +18,14 @@ const initialState = () => ({
   },
 });
 
-const state = initialState();
+const localState = initialState();
 
 const getters = {
-  totalPages(_state) {
-    return Math.ceil(_state.totalCount / _state.query.limit);
-  },
-  purchaseList(_state) {
-    return _state.purchases
+  totalPages: state => Math.ceil(state.totalCount / state.query.limit),
+  isLoading: state => state.loading,
+
+  purchaseList(state) {
+    return state.purchases
       .slice(0)
       .sort(sortDesc)
       .filter(purchase => purchase.item)
@@ -32,18 +34,15 @@ const getters = {
         active: !value.amount,
       }));
   },
-  isLoading(_state) {
-    return _state.loading;
-  },
 };
 
 const actions = {
-  async fetchPurchases({ commit }, params) {
-    if (state.timeout) {
-      clearTimeout(state.timeout);
+  async fetchPurchases({ state, commit }, params) {
+    if (timeout) {
+      clearTimeout(timeout);
     }
 
-    this.timeout = setTimeout(async () => {
+    timeout = setTimeout(async () => {
       commit('SET_LOADING', true);
       commit('UPDATE_QUERY', params);
 
@@ -56,34 +55,56 @@ const actions = {
       commit('SET_LOADING', false);
     }, 300);
   },
-  async createPurchase({ dispatch }, data) {
-    await httpClient.post(URL, data);
+  async createPurchase({ commit, dispatch }, data) {
+    commit('SET_LOADING', true);
+
+    const response = await httpClient.post(URL, data);
 
     dispatch('fetchPurchases');
+    commit('SET_LOADING', false);
+
+    return response.data;
   },
-  async updatePurchase({ dispatch }, id, data) {
-    await httpClient.put(`${URL}/${id}`, data);
+  async updatePurchase({ commit, dispatch }, { id, ...data }) {
+    commit('SET_LOADING', true);
+
+    const response = await httpClient.put(`${URL}/${id}`, data);
 
     dispatch('fetchPurchases');
+    commit('SET_LOADING', false);
+
+    return response.data;
+  },
+  async removePurchase({ commit, dispatch }, id) {
+    if (id < 1) {
+      return;
+    }
+
+    commit('SET_LOADING', true);
+
+    await httpClient.delete(`${URL}/${id}`);
+
+    dispatch('fetchPurchases');
+    commit('SET_LOADING', false);
   },
 };
 
 const mutations = {
-  SET_PURCHASES(_state, response) {
-    _state.purchases = response.data;
-    _state.totalCount = getTotalCountFromHeaders(response);
+  SET_PURCHASES(state, response) {
+    state.purchases = response.data;
+    state.totalCount = getTotalCountFromHeaders(response);
   },
-  UPDATE_QUERY(_state, params) {
-    _state.query = { ...params };
+  UPDATE_QUERY(state, params) {
+    state.query = { ...state.query, ...params };
   },
-  SET_LOADING(_state, value) {
-    _state.loading = value;
+  SET_LOADING(state, value) {
+    state.loading = value;
   },
 };
 
 export default {
   namespaced: true,
-  state,
+  state: localState,
   getters,
   actions,
   mutations,

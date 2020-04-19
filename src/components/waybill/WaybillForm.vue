@@ -53,15 +53,14 @@
         </v-flex>
         <v-flex xs4>
           <AutocompleteWithAdd
+            v-model="waybill.companyId"
             label="Компания"
             :items="companies"
             :loading="loadingCompanies"
             :slotButtonDisabled="showCompanyDialog"
-            :selectedItemId="waybill.companyId"
             :requiredField="false"
             :clearable="true"
             @slotButtonClick="showCompanyDialog = true"
-            @change="companyId => waybill.companyId = companyId"
           />
         </v-flex>
         <v-flex xs12 class="elevation-4 pt-3">

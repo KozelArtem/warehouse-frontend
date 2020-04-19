@@ -28,13 +28,12 @@
               </v-flex>
               <v-flex v-else>
                 <AutocompleteWithAdd
+                  v-model="item.categoryId"
                   label="Категория"
                   :items="categories"
                   :loading="categoriesLoading"
                   :slotButtonDisabled="creatingCategory"
-                  :selectedItemId="item.categoryId || -1"
                   @slotButtonClick="createCategory"
-                  @change="categoryId => item.category.id = categoryId"
                 />
               </v-flex>
               <v-flex>
@@ -66,14 +65,13 @@
               </v-flex>
               <v-flex>
                 <AutocompleteWithAdd
+                  v-model="item.companyId"
                   label="Компания"
                   :items="companies"
                   :loading="companiesLoading"
                   :requiredField="false"
                   :slotButtonDisabled="showCompanyDialog"
-                  :selectedItemId="item.companyId || -1"
                   @slotButtonClick="showCompanyDialog = true"
-                  @change="companyId => item.companyId = companyId"
                 />
               </v-flex>
               <v-flex>

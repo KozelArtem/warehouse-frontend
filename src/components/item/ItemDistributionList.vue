@@ -13,13 +13,12 @@
               <v-layout column>
                 <v-flex>
                   <AutocompleteWithAdd
+                    v-model="itemDistribution.placeId"
                     label="Наименование"
                     :items="distributionPlaces"
                     :loading="placesLoading"
                     :slotButtonDisabled="creatingPlace"
-                    :selectedItemId="itemDistribution.placeId"
                     @slotButtonClick="newItem"
-                    @change="placeId => itemDistribution.placeId = placeId"
                   />
                 </v-flex>
                 <v-flex>

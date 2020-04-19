@@ -3,17 +3,18 @@
     :label="label"
     :items="localItems"
     :loading="loading"
+    :disabled="loading"
     :search-input.sync="search"
     :rules="rules"
     v-model="selected"
     dense
     :allow-overflow="false"
-    :item-value="value"
-    :item-text="text"
+    :item-value="itemKey"
+    :item-text="itemText"
     hide-details
     :clearable="clearable"
     :menu-props="menuProps"
-    @change="$emit('change', selected)"
+    @change="$emit('input', selected)"
   >
     <template v-slot:no-data>
       <v-btn
@@ -53,11 +54,11 @@ export default {
       required: true,
       default: false,
     },
-    value: {
+    itemKey: {
       type: String,
       default: 'id',
     },
-    text: {
+    itemText: {
       type: String,
       default: 'name',
     },
@@ -65,7 +66,7 @@ export default {
       type: Boolean,
       default: true,
     },
-    selectedItemId: {
+    value: {
       type: [Number, String],
       required: true,
       default: '0',
@@ -89,7 +90,7 @@ export default {
   }),
 
   beforeMount() {
-    this.selected = this.selectedItemId;
+    this.selected = this.value;
   },
 
   computed: {
@@ -103,8 +104,8 @@ export default {
   },
 
   watch: {
-    selectedItemId() {
-      this.selected = this.selectedItemId;
+    value() {
+      this.selected = this.value;
     },
     search() {
       this.$emit('search', this.search);

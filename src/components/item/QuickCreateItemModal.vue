@@ -1,5 +1,5 @@
 <template>
-  <v-dialog v-model="dialog" persistent max-width="600px">
+  <v-dialog :value="true" persistent max-width="600px">
     <v-card>
       <v-card-title class="purple white--text darken-3">
         <span class="headline"></span>
@@ -12,13 +12,12 @@
             <v-layout column wrap>
               <v-flex>
                 <AutocompleteWithAdd
+                  v-model="item.categoryId"
                   label="Категория"
                   :items="categoryList"
                   :loading="categoriesLoading"
                   :slotButtonDisabled="creatingCategory"
-                  :selectedItemId="item.categoryId || -1"
                   @slotButtonClick="showCompanyDialog = true"
-                  @change="categoryId => item.categoryId = categoryId"
                 />
               </v-flex>
               <v-flex>
@@ -27,7 +26,7 @@
                   label="Наименование"
                   dense
                   :rules="[required, minLength]"
-                  hide-details
+                  :hint="itemsExistTitle"
                 />
               </v-flex>
             </v-layout>
@@ -44,33 +43,27 @@
         >Сохранить</v-btn>
       </v-card-actions>
     </v-card>
+    <CompanyForm
+      v-if="showCompanyDialog"
+      @submit="onCompanyFormSubmit"
+      @close="showCompanyDialog = false"
+    />
   </v-dialog>
 </template>
 
 <script>
 import { mapActions, mapGetters } from 'vuex';
-import api from '../../api';
+
+import { ITEM_NAMESPACE, CATEGORY_NAMESPACE } from '../../store/namespaces';
 
 import rules from '../../helpers/validationRules';
 
-import AutocompleteWithAdd from '../helpers/AutocompleteWithAdd.vue';
-import { ITEM_NAMESPACE, CATEGORY_NAMESPACE } from '../../store/namespaces';
-
-const {
-  createCategory,
-} = api;
-
 export default {
   components: {
-    AutocompleteWithAdd,
+    AutocompleteWithAdd: () => import('../helpers/AutocompleteWithAdd.vue'),
   },
 
   props: {
-    dialog: {
-      type: Boolean,
-      required: true,
-      default: false,
-    },
     name: {
       type: String,
       required: false,
@@ -89,6 +82,8 @@ export default {
       name: '',
     },
 
+    showCompanyDialog: false,
+
     search: null,
     creatingCategory: false,
 
@@ -96,32 +91,43 @@ export default {
   }),
 
   async beforeMount() {
-    this.item = this.itemTemplate;
+    this.item = { ...this.itemTemplate, name: this.name };
     this.fetchCategories();
   },
 
   computed: {
-    ...mapGetters(ITEM_NAMESPACE, ['itemList']),
+    ...mapGetters(ITEM_NAMESPACE, ['itemList', 'itemsCountByInput']),
     ...mapGetters(CATEGORY_NAMESPACE, ['categoryList']),
+
+    itemsExistTitle() {
+      return (this.itemsCountByInput && `${this.itemsCountByInput} элементов с таким именем уже присутсвует`) || '';
+    },
   },
 
   watch: {
     name() {
       this.item = { ...this.itemTemplate, name: this.name };
     },
+    item: {
+      deep: true,
+      handler() {
+        const name = this.item.name.trim();
+        console.log('--->name', name);
+        if (name) {
+          this.countItemsByName(name);
+        }
+      },
+    },
   },
 
   methods: {
-    ...mapActions(ITEM_NAMESPACE, ['createItem']),
+    ...mapActions(ITEM_NAMESPACE, ['createItem', 'countItemsByName']),
     ...mapActions(CATEGORY_NAMESPACE, ['createCategory', 'fetchCategories']),
+
     async onSaveClick() {
       const data = { ...this.item, amount: 0 };
 
       const result = await this.createItem(data);
-
-      result.categoryName = this.categories
-        .find(category => category.id === result.categoryId)
-        .name;
 
       this.item = { ...this.itemTemplate };
       this.$emit('submit', result);
@@ -134,15 +140,18 @@ export default {
 
       this.creatingCategory = true;
 
-      const data = await createCategory({ name: inputedName });
+      const data = await this.createCategory({ name: inputedName });
 
       if (data) {
-        this.categories.push(data);
         this.item.categoryId = data.id;
       }
 
       this.creatingCategory = false;
     },
+
+    // async onCompanyFormSubmit(company) {
+
+    // },
   },
 };
 </script>

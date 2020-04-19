@@ -3,7 +3,7 @@ import axios from 'axios';
 import store from '../store';
 
 const httpClient = axios.create({
-  baseURL: process.env.API_URL || 'http://localhost:3000',
+  baseURL: 'https://mpp-dev.herokuapp.com/',
   timeout: 5000,
 });
 

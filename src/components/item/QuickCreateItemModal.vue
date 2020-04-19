@@ -17,7 +17,7 @@
                   :items="categoryList"
                   :loading="categoriesLoading"
                   :slotButtonDisabled="creatingCategory"
-                  @slotButtonClick="showCompanyDialog = true"
+                  @slotButtonClick="onCreateCategory"
                 />
               </v-flex>
               <v-flex>
@@ -43,11 +43,6 @@
         >Сохранить</v-btn>
       </v-card-actions>
     </v-card>
-    <CompanyForm
-      v-if="showCompanyDialog"
-      @submit="onCompanyFormSubmit"
-      @close="showCompanyDialog = false"
-    />
   </v-dialog>
 </template>
 
@@ -82,8 +77,6 @@ export default {
       name: '',
     },
 
-    showCompanyDialog: false,
-
     search: null,
     creatingCategory: false,
 
@@ -112,7 +105,7 @@ export default {
       deep: true,
       handler() {
         const name = this.item.name.trim();
-        console.log('--->name', name);
+
         if (name) {
           this.countItemsByName(name);
         }
@@ -133,25 +126,17 @@ export default {
       this.$emit('submit', result);
     },
 
-    async createCategory(inputedName) {
+    async onCreateCategory(inputedName) {
       if (!inputedName) {
         return;
       }
-
-      this.creatingCategory = true;
 
       const data = await this.createCategory({ name: inputedName });
 
       if (data) {
         this.item.categoryId = data.id;
       }
-
-      this.creatingCategory = false;
     },
-
-    // async onCompanyFormSubmit(company) {
-
-    // },
   },
 };
 </script>

@@ -94,7 +94,7 @@
         <v-spacer></v-spacer>
         <v-btn
           dark small color="green"
-          :loading="loading"
+          :loading="isLoading"
           :disabled="!valid"
           @click="onSaveClick()"
         >Сохранить</v-btn>
@@ -104,6 +104,10 @@
 </template>
 
 <script>
+import { mapActions, mapGetters } from 'vuex';
+
+import { COMPANY_NAMESPACE } from '../../store/namespaces';
+
 const addIcon = 'mdi-plus';
 const removeIcon = 'mdi-close';
 
@@ -129,12 +133,15 @@ export default {
     },
 
     valid: false,
-    loading: false,
   }),
 
   beforeMount() {
-    this.company = { ...this.companyTemplate };
+    this.company = { ...this.companyTemplate, ...this.data };
     this.processData();
+  },
+
+  computed: {
+    ...mapGetters(COMPANY_NAMESPACE, ['isLoading']),
   },
 
   watch: {
@@ -144,6 +151,8 @@ export default {
   },
 
   methods: {
+    ...mapActions(COMPANY_NAMESPACE, ['createCompany', 'updateCompany']),
+
     processData() {
       if ((this.data || {}).id) {
         const phones = this.data.phones.map(phone => phone.data);
@@ -184,7 +193,7 @@ export default {
       let companyRes = null;
 
       if ((this.data || {}).id) {
-        companyRes = await this.updateCompany(this.company.id, this.company);
+        companyRes = await this.updateCompany(this.company);
       } else {
         companyRes = await this.createCompany(this.company);
       }
@@ -192,9 +201,6 @@ export default {
       if (companyRes) {
         this.$emit('submit', companyRes);
       }
-
-      this.company = { ...this.companyTemplate, phones: [''] };
-      this.$emit('submit', companyRes);
     },
 
     onClose() {

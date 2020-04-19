@@ -3,7 +3,7 @@
     <CompanyForm
       v-if="isAdmin && companyModal.dialog"
       :data="companyModal.data"
-      @submit="onCompanyModalSubmit"
+      @submit="closeCompanyModal"
       @close="closeCompanyModal"
     />
     <DeleteModal
@@ -73,7 +73,7 @@ export default {
   }),
 
   beforeMount() {
-    this.loadData();
+    this.fetchExtendedCompanies();
   },
 
   computed: {
@@ -93,22 +93,6 @@ export default {
   methods: {
     ...mapMutations(COMPANY_NAMESPACE, { updateSearch: 'UPDATE_SEARCH' }),
     ...mapActions(COMPANY_NAMESPACE, ['fetchExtendedCompanies', 'deleteCompany']),
-    filterCompanies() {
-      const searchValue = this.search.trim().toLowerCase();
-      this.localCompanies = this.companies
-        .filter(company => company.name.toLowerCase().includes(searchValue));
-    },
-
-    async loadData() {
-      this.fetchExtendedCompanies();
-    },
-
-    onCompanyModalSubmit() {
-      this.newCompanyModal = false;
-      this.editCompanyModal = false;
-      this.selectedCompany = null;
-      this.loadData();
-    },
 
     closeCompanyModal() {
       this.companyModal = { dialog: false };

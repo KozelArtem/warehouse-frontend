@@ -135,4 +135,7 @@ export default {
     }
   }
 }
+.lh-0 {
+  line-height: 0 !important;
+}
 </style>

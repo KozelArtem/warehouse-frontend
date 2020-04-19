@@ -1,11 +1,14 @@
 <template>
   <v-dialog
-    v-model="dialog"
+    :value="true"
     max-width="500px"
     transition="dialog-transition"
   >
     <v-card class="elevation-5">
-      <v-card-title :style="company.style" class="green lighten-2 white--text">
+      <v-card-title
+        :style="{ 'background': this.company.color }"
+        class="green lighten-2 white--text"
+      >
         <span class="headline">Карта партнера</span>
         <v-spacer></v-spacer>
         <v-icon @click="$emit('close')">mdi-close</v-icon>
@@ -113,17 +116,12 @@
 </template>
 
 <script>
-import { mapActions } from 'vuex';
+import { mapActions, mapGetters } from 'vuex';
 
 import { COMPANY_NAMESPACE } from '../../store/namespaces';
 
 export default {
   props: {
-    dialog: {
-      type: Boolean,
-      required: true,
-      default: false,
-    },
     companyId: {
       type: [Number, String],
       required: true,
@@ -132,32 +130,22 @@ export default {
     },
   },
 
-  data: () => ({
-    company: {},
-  }),
+  computed: {
+    ...mapGetters(COMPANY_NAMESPACE, { company: 'companyInfo' }),
+  },
 
   watch: {
     companyId() {
-      this.loadCompany();
+      this.getCompanyById(this.companyId);
     },
   },
 
   beforeMount() {
-    this.loadCompany();
+    this.getCompanyById(this.companyId);
   },
 
   methods: {
     ...mapActions(COMPANY_NAMESPACE, ['getCompanyById']),
-
-    async loadCompany() {
-      this.company = await this.getCompanyById(this.companyId);
-
-      this.company.style = `background: ${this.company.color}`;
-    },
   },
 };
 </script>
-
-<style lang="scss" scoped>
-
-</style>

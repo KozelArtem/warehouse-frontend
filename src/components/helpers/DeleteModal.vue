@@ -6,15 +6,15 @@
         <v-card-text class="subtitle-1">{{ description }}</v-card-text>
         <v-card-actions>
           <v-spacer></v-spacer>
-          <v-btn color="red" text small dark
-            @click="$emit('click', true)"
-          >
-            {{ acceptText }}
-          </v-btn>
-          <v-btn color="green" text small dark
+          <v-btn color="red" outlined small dark
             @click="$emit('click', false)"
           >
             {{ declineText }}
+          </v-btn>
+          <v-btn color="green" outlined small dark
+            @click="$emit('click', true)"
+          >
+            {{ acceptText }}
           </v-btn>
         </v-card-actions>
       </v-card>
@@ -38,12 +38,12 @@ export default {
     acceptText: {
       type: String,
       required: false,
-      default: 'Подтвердить',
+      default: 'Удалить',
     },
     declineText: {
       type: String,
       required: false,
-      default: 'Отменить',
+      default: 'Отмена',
     },
   },
 };

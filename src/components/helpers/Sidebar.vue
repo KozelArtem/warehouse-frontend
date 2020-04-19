@@ -1,9 +1,12 @@
 <template>
   <v-navigation-drawer
     :mini-variant="mini"
-    :expand-on-hover="mini"
+    :expand-on-hover="mini && $vuetify.breakpoint.smAndUp"
     fixed
     app
+    :value="true"
+    permanent
+    stateless
   >
     <v-toolbar color="teal" dark dense>
       <v-app-bar-nav-icon @click="mini = !mini"></v-app-bar-nav-icon>
@@ -52,7 +55,3 @@ export default {
   },
 };
 </script>
-
-<style lang="scss" scoped>
-
-</style>

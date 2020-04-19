@@ -4,7 +4,7 @@
       <slot name="title">
         <v-toolbar-title>{{ title }}</v-toolbar-title>
       </slot>
-      <v-divider v-if="$vuetify.breakpoint.smAndUp" class="mx-4" inset vertical></v-divider>
+      <v-divider class="mx-4" inset vertical></v-divider>
       <slot name="afterTitle"></slot>
       <v-spacer></v-spacer>
       <slot name="right" v-if="showSearch">

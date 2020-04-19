@@ -65,9 +65,7 @@ export default new Vuex.Store({
     },
   },
   getters: {
-    alert(state) {
-      return state.alert;
-    },
+    alert: state => state.alert,
   },
   strict: debug,
   plugins: debug ? [createLogger()] : [],

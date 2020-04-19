@@ -21,51 +21,32 @@
         </v-dialog>
       </v-flex>
       <v-flex xs12>
-        <v-toolbar dark color="purple darken-2">
-          <v-toolbar-title>Накладные</v-toolbar-title>
-          <v-divider vertical class="mx-4"></v-divider>
-          <span class="d-flex w-100">
-            <v-select
-              class="mx-2"
-              :items="months"
-              v-model="selectedMonthId"
-              dense
-              dark
-              hide-details
-            ></v-select>
-          </span>
-          <span class="d-flex w-100">
-            <v-divider vertical class="mx-2"></v-divider>
-            <v-select
-              :items="years"
-              v-model="selectedYearId"
-              dense
-              dark
-              hide-details
-            ></v-select>
-          </span>
-          <v-spacer></v-spacer>
-          <span v-if="$vuetify.breakpoint.smAndUp" :class="['d-flex', {
-            'w-200': $vuetify.breakpoint.smAndUp,
-            'w-100': $vuetify.breakpoint.xs,
-            }
-          ]">
-            <v-text-field dark append-icon="mdi-magnify"
-              dense label="Поиск"
-              hide-details v-model="search"></v-text-field>
-          </span>
-        </v-toolbar>
-        <v-progress-linear
-          :active="loading"
-          indeterminate
-          color="purple darken-2"
-          height="7px"
-          opacity="0.3"
-        ></v-progress-linear>
+        <Toolbar
+          title="Накладные"
+          color="orange"
+          :loading="loading"
+          @search="updateSearch"
+        />
+        <v-btn block color="primary" @click="datePicker = !datePicker">
+          Период {{ period.join(' ~ ') }}
+        </v-btn>
         <v-divider></v-divider>
       </v-flex>
-      <v-flex xs12>
-        <v-alert type="info" :value="showAlert" class="text-center">
+      <v-flex xs12 lg3 v-if="datePicker">
+        <v-date-picker
+          v-model="dateRange"
+          type="month"
+          color="black"
+          :max="today"
+          landscape
+          full-width
+          no-title
+          multiple
+          range
+        ></v-date-picker>
+      </v-flex>
+      <v-flex :lg12="!datePicker" :lg9="datePicker" xs12>
+        <v-alert type="info" dense :value="showAlert" class="text-center">
           Нет накладных за выбранный период
         </v-alert>
         <v-simple-table
@@ -119,6 +100,7 @@ const { getWaybillList, isAdmin } = api;
 
 export default {
   components: {
+    Toolbar: () => import('../helpers/Toolbar.vue'),
     WaybillForm: () => import('./WaybillForm.vue'),
     WaybillCard: () => import('./WaybillCard.vue'),
   },
@@ -134,6 +116,11 @@ export default {
     items: [],
     waybillsCount: 1,
     search: '',
+
+    today: moment().format(),
+
+    datePicker: false,
+    dateRange: [moment().format('YYYY-MM')],
   }),
 
   beforeMount() {
@@ -141,6 +128,10 @@ export default {
   },
 
   computed: {
+    period() {
+      return this.dateRange.slice(0).sort((a, b) => moment(a).diff(moment(b)));
+    },
+
     localItems() {
       return (this.items || [])
         .filter(item => !!item)
@@ -189,7 +180,7 @@ export default {
     selectedMonthId() {
       this.loadWaybills();
     },
-    selectedYearId() {
+    period() {
       this.loadWaybills();
     },
   },
@@ -200,8 +191,8 @@ export default {
       this.loading = true;
 
       const query = {
-        dateFrom: moment().year(this.selectedYearId).month(this.selectedMonthId).startOf('month'),
-        dateTo: moment().year(this.selectedYearId).month(this.selectedMonthId).endOf('month'),
+        dateFrom: this.period[0],
+        dateTo: this.period[1],
         byCompany: true,
       };
 
@@ -215,6 +206,10 @@ export default {
     onWaybillFormSubmit() {
       this.newWaybillDialog = false;
       this.loadWaybills();
+    },
+
+    updateSearch(search) {
+      this.search = search;
     },
   },
 };

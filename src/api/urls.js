@@ -1,4 +1,4 @@
-const baseURL = 'https://warehouse-mpp.herokuapp.com/';
+const baseURL = 'https://mpp-dev.herokuapp.com/';
 
 const login = '/login';
 

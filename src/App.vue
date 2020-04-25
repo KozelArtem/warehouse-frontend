@@ -1,11 +1,10 @@
 <template>
   <v-app>
-    <AppHeader />
-    <Sidebar />
+    <AppWrapper />
     <v-content>
       <v-container fill-height fluid wrap>
         <v-layout row wrap>
-          <v-flex offset-xs1 xs10>
+          <v-flex class="px-4">
             <router-view />
           </v-flex>
         </v-layout>
@@ -30,14 +29,12 @@
 <script>
 import { mapGetters, mapMutations } from 'vuex';
 
-import AppHeader from './components/helpers/AppHeader.vue';
-import Sidebar from './components/helpers/Sidebar.vue';
+import AppWrapper from './components/helpers/AppWrapper.vue';
 
 export default {
   name: 'App',
   components: {
-    AppHeader,
-    Sidebar,
+    AppWrapper,
   },
 
   computed: {

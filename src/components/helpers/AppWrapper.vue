@@ -1,0 +1,89 @@
+<template>
+  <div>
+    <v-app-bar
+      color="teal"
+      dense
+      dark
+      clipped-left
+      app
+    >
+      <v-app-bar-nav-icon @click="mini = !mini"></v-app-bar-nav-icon>
+      <v-toolbar-title>{{ $route.meta.title }}</v-toolbar-title>
+      <v-spacer></v-spacer>
+      <v-badge right color="primary" content="10" overlap>
+        <v-icon>mdi-bell</v-icon>
+      </v-badge>
+    </v-app-bar>
+
+    <v-navigation-drawer
+      :mini-variant="mini"
+      clipped
+      app
+      :value="true"
+    >
+      <v-list nav dense v-if="isLoggedIn">
+        <v-list-item-group v-model="item" color="primary">
+          <v-list-item v-for="(item, i) in items" :key="i" :to="item.link" exact>
+            <v-list-item-icon>
+              <v-icon v-text="item.icon"></v-icon>
+            </v-list-item-icon>
+
+            <v-list-item-content>
+              <v-list-item-title v-text="item.title"></v-list-item-title>
+            </v-list-item-content>
+          </v-list-item>
+        </v-list-item-group>
+      </v-list>
+
+      <template v-slot:append>
+        <v-list-item @click="signOut()" v-if="isLoggedIn" class="elevation-10 grey lighten-1">
+          <v-list-item-icon>
+            <v-icon>mdi-logout-variant</v-icon>
+          </v-list-item-icon>
+
+          <v-list-item-content>
+            <v-list-item-title>Выйти</v-list-item-title>
+          </v-list-item-content>
+        </v-list-item>
+      </template>
+    </v-navigation-drawer>
+  </div>
+</template>
+
+<script>
+import { mapGetters, mapActions } from 'vuex';
+
+import { AUTH_NAMESPACE } from '../../store/namespaces';
+
+export default {
+  data: () => ({
+    mini: false,
+    item: 0,
+    items: [
+      { link: '/', icon: 'mdi-calendar', title: 'Заказы' },
+      { link: '/warehouse', icon: 'mdi-warehouse', title: 'Склад' },
+      { link: '/equipments', icon: 'mdi-printer-settings', title: 'Оборудование и техника' },
+      { link: '/tools', icon: 'mdi-hammer-wrench', title: 'Инструменты' },
+      { link: '/waybill', icon: 'mdi-file', title: 'Накладные' },
+      { link: '/machines', icon: 'mdi-bulldozer', title: 'Журнал работ' },
+      { link: '/machines/to', icon: 'mdi-tools', title: 'График ТО' },
+      { link: '/company', icon: 'mdi-domain', title: 'Компании' },
+    ],
+    showSearch: false,
+    search: '',
+  }),
+
+  computed: {
+    ...mapGetters(AUTH_NAMESPACE, ['isLoggedIn']),
+  },
+
+  methods: {
+    ...mapActions(AUTH_NAMESPACE, ['logout']),
+
+    signOut() {
+      this.logout();
+      this.$router.push('/login');
+    },
+  },
+};
+</script>

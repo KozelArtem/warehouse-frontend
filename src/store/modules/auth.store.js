@@ -45,9 +45,9 @@ const actions = {
   async logout({ commit }) {
     commit('SET_LOADING', true);
 
-    const response = await httpClient.get(LOGOUT_URL);
+    await httpClient.get(LOGOUT_URL);
 
-    commit('RESET_USER_DATA', response.data);
+    commit('RESET_USER_DATA');
     commit('SET_LOADING', false);
   },
   async getUserData({ state, commit }) {

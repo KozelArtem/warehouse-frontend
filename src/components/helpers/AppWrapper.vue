@@ -7,7 +7,7 @@
       clipped-left
       app
     >
-      <v-app-bar-nav-icon @click="mini = !mini"></v-app-bar-nav-icon>
+      <v-app-bar-nav-icon @click="updateVisible"></v-app-bar-nav-icon>
       <v-toolbar-title>{{ $route.meta.title }}</v-toolbar-title>
       <v-spacer></v-spacer>
       <v-badge right color="primary" content="10" overlap>
@@ -17,9 +17,10 @@
 
     <v-navigation-drawer
       :mini-variant="mini"
+      mobile-break-point="900"
       clipped
       app
-      :value="true"
+      v-model="visible"
     >
       <v-list nav dense v-if="isLoggedIn">
         <v-list-item-group v-model="item" color="primary">
@@ -57,6 +58,7 @@ import { AUTH_NAMESPACE } from '../../store/namespaces';
 
 export default {
   data: () => ({
+    visible: true,
     mini: false,
     item: 0,
     items: [
@@ -79,6 +81,14 @@ export default {
 
   methods: {
     ...mapActions(AUTH_NAMESPACE, ['logout']),
+
+    updateVisible() {
+      if (this.visible && this.$vuetify.breakpoint.smAndUp) {
+        this.mini = !this.mini;
+      } else {
+        this.visible = !this.visible;
+      }
+    },
 
     signOut() {
       this.logout();

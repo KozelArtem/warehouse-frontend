@@ -7,7 +7,7 @@
     :search-input.sync="search"
     :rules="rules"
     v-model="selected"
-    dense
+    :dense="dense"
     :allow-overflow="false"
     :item-value="itemKey"
     :item-text="itemText"
@@ -74,6 +74,10 @@ export default {
     clearable: {
       type: Boolean,
       default: false,
+    },
+    dense: {
+      type: Boolean,
+      default: true,
     },
   },
 

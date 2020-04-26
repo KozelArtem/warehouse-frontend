@@ -40,6 +40,13 @@ const routes = [
     component: () => import('../components/waybill/WaybillList.vue'),
     children: [
       {
+        path: 'add',
+        name: 'waybillForm',
+        meta: { title: 'Накладные' },
+        component: () => import('../components/waybill/WaybillForm.vue'),
+        props: true,
+      },
+      {
         path: ':id',
         name: 'waybillInfo',
         meta: { title: 'Накладные' },

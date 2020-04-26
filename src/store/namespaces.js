@@ -4,6 +4,7 @@ const COMPANY_NAMESPACE = 'Company';
 const ITEM_NAMESPACE = 'Item';
 const AUTH_NAMESPACE = 'Auth';
 const MACHINE_NAMESPACE = 'Machine';
+const WAYBILL_NAMESPACE = 'Waybill';
 
 export {
   PURCHASE_NAMESPACE,
@@ -12,4 +13,5 @@ export {
   ITEM_NAMESPACE,
   AUTH_NAMESPACE,
   MACHINE_NAMESPACE,
+  WAYBILL_NAMESPACE,
 };

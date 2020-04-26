@@ -1,58 +1,42 @@
 <template>
   <div>
-    <v-layout row wrap>
-      <v-flex xs12>
-        <v-dialog
-          v-model="newWaybillDialog"
-          scrollable fullscreen
-          persistent no-click-animation
-          transition="dialog-transition"
-        >
-          <v-card>
-            <v-card-title class="purple white--text darken-3">
-              <span class="headline">Добавление накладной</span>
-              <v-spacer></v-spacer>
-              <v-icon color="red" @click="newWaybillDialog = false">mdi-close</v-icon>
-            </v-card-title>
-            <v-card-text>
-              <WaybillForm @submit="onWaybillFormSubmit"/>
-            </v-card-text>
-          </v-card>
-        </v-dialog>
-      </v-flex>
+    <router-view></router-view>
+    <v-layout row wrap v-if="viewMode">
       <v-flex xs12>
         <Toolbar
           title="Накладные"
-          color="orange"
-          :loading="loading"
+          color="white"
+          :loading="isLoading"
           @search="updateSearch"
         />
-        <v-btn block color="primary" @click="datePicker = !datePicker">
-          Период {{ period.join(' ~ ') }}
-        </v-btn>
+        <v-menu offset-y left bottom :close-on-content-click="false">
+          <template v-slot:activator="{ on }">
+            <v-btn block color="primary" v-on="on">
+              Период {{ period.join(' ~ ') }}
+            </v-btn>
+          </template>
+          <v-date-picker
+            v-model="dateRange"
+            type="month"
+            color="black"
+            :max="today"
+            landscape
+            no-title
+            multiple
+            range
+          ></v-date-picker>
+        </v-menu>
+
         <v-divider></v-divider>
       </v-flex>
-      <v-flex xs12 lg3 v-if="datePicker">
-        <v-date-picker
-          v-model="dateRange"
-          type="month"
-          color="black"
-          :max="today"
-          landscape
-          full-width
-          no-title
-          multiple
-          range
-        ></v-date-picker>
-      </v-flex>
-      <v-flex :lg12="!datePicker" :lg9="datePicker" xs12>
+      <v-flex xs12>
         <v-alert type="info" dense :value="showAlert" class="text-center">
           Нет накладных за выбранный период
         </v-alert>
         <v-simple-table
           fixed-header
           dense
-          class="elevation-10 inner"
+          class="elevation-10"
         >
           <template v-slot:default>
             <tbody>
@@ -76,7 +60,7 @@
       <router-view></router-view>
     </v-layout>
     <v-btn
-      v-if="isAdmin()"
+      v-if="isAdmin && viewMode"
       small
       fixed
       dark
@@ -84,7 +68,7 @@
       bottom
       right
       color="purple darken-2"
-      @click="newWaybillDialog = true"
+      @click="$router.push('waybill/add')"
     >
       <v-icon>mdi-plus</v-icon>
     </v-btn>
@@ -93,33 +77,22 @@
 
 <script>
 import moment from 'moment';
+import { mapGetters, mapActions } from 'vuex';
 
-import api from '../../api';
-
-const { getWaybillList, isAdmin } = api;
+import { WAYBILL_NAMESPACE, AUTH_NAMESPACE } from '../../store/namespaces';
 
 export default {
   components: {
     Toolbar: () => import('../helpers/Toolbar.vue'),
-    WaybillForm: () => import('./WaybillForm.vue'),
     WaybillCard: () => import('./WaybillCard.vue'),
   },
 
   data: () => ({
-    newWaybillDialog: false,
-
-    loading: false,
-
-    selectedMonthId: moment().month(),
-    selectedYearId: moment().year(),
-
     items: [],
-    waybillsCount: 1,
     search: '',
 
     today: moment().format(),
 
-    datePicker: false,
     dateRange: [moment().format('YYYY-MM')],
   }),
 
@@ -128,14 +101,19 @@ export default {
   },
 
   computed: {
+    ...mapGetters(AUTH_NAMESPACE, ['isAdmin']),
+    ...mapGetters(WAYBILL_NAMESPACE, ['isLoading', 'waybillList']),
+
+    viewMode() {
+      return this.$route.path === '/waybill';
+    },
+
     period() {
       return this.dateRange.slice(0).sort((a, b) => moment(a).diff(moment(b)));
     },
 
     localItems() {
-      return (this.items || [])
-        .filter(item => !!item)
-        .sort((a, b) => b.waybills.length - a.waybills.length)
+      return (this.waybillList || [])
         .map((item) => {
           const waybills = item.waybills
             .filter((waybill) => {
@@ -151,61 +129,37 @@ export default {
             ...item,
             waybills,
           };
-        });
+        })
+        .filter(item => item.waybills.length);
     },
-    months() {
-      return moment.months().map((month, i) => ({
-        text: month,
-        value: i,
-      }));
-    },
-    years() {
-      const years = [];
-      const dateStart = moment().subtract(1, 'y');
-      const dateEnd = moment();
 
-      while (dateEnd.diff(dateStart, 'years') >= 0) {
-        years.push(dateStart.year());
-        dateStart.add(1, 'year');
-      }
-
-      return years;
-    },
     showAlert() {
-      return !this.items.length;
+      return !this.waybillList.length;
+    },
+
+    waybillsCount() {
+      return (this.waybillList[0] && this.waybillList[0].waybills.length) || 1;
     },
   },
 
   watch: {
-    selectedMonthId() {
-      this.loadWaybills();
-    },
     period() {
       this.loadWaybills();
     },
   },
 
   methods: {
-    isAdmin,
-    async loadWaybills() {
-      this.loading = true;
+    ...mapActions(WAYBILL_NAMESPACE, ['fetchWaybills']),
 
+    async loadWaybills() {
+      const [start, end] = this.period;
       const query = {
-        dateFrom: this.period[0],
-        dateTo: this.period[1],
+        dateFrom: moment(start).startOf('month').format(),
+        dateTo: moment(end || start).endOf('month').format(),
         byCompany: true,
       };
 
-      const { data } = await getWaybillList(query);
-
-      this.items = data;
-      this.waybillsCount = ((this.items[0] || {}).waybills || []).length;
-      this.loading = false;
-    },
-
-    onWaybillFormSubmit() {
-      this.newWaybillDialog = false;
-      this.loadWaybills();
+      this.fetchWaybills(query);
     },
 
     updateSearch(search) {

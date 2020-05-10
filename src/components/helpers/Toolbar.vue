@@ -44,7 +44,7 @@ export default {
     },
     color: {
       type: String,
-      required: true,
+      required: false,
       default: 'white',
     },
     loading: {

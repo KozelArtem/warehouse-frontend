@@ -1,20 +1,15 @@
 <template>
-  <v-dialog v-model="dialog" persistent max-width="600px">
-    <v-card>
-      <v-card-title class="purple white--text darken-3">
-        <span class="headline">
-          {{ (category || {}).name ? 'Добавление нового' : 'Редактирование' }} элемента
-        </span>
-        <v-spacer></v-spacer>
-        <v-icon color="red" @click="$emit('close')">{{icons.close}}</v-icon>
-      </v-card-title>
-      <v-card-text>
-        <CompanyForm
-          :dialog="showCompanyDialog"
-          @close="showCompanyDialog = false"
-          @submit="onNewCompany"
-        />
-        <v-form v-model="valid">
+  <div>
+    <v-dialog :value="true" persistent max-width="600px">
+      <v-card>
+        <v-card-title>
+          <span class="headline">
+            {{ (category || {}).name ? 'Добавление нового' : 'Редактирование' }} элемента
+          </span>
+          <v-spacer></v-spacer>
+          <v-icon color="red" @click="$emit('close')">mdi-close</v-icon>
+        </v-card-title>
+        <v-card-text>
           <v-container grid-list-md>
             <v-layout column wrap>
               <v-flex v-if="(category || {}).name">
@@ -32,8 +27,8 @@
                   label="Категория"
                   :items="categories"
                   :loading="categoriesLoading"
-                  :slotButtonDisabled="creatingCategory"
-                  @slotButtonClick="createCategory"
+                  :slotButtonDisabled="categoriesLoading"
+                  @slotButtonClick="onNewCategoryClick"
                 />
               </v-flex>
               <v-flex>
@@ -41,7 +36,6 @@
                   v-model="item.name"
                   label="Наименование"
                   dense
-                  :rules="[required, minLength]"
                   hide-details
                 />
               </v-flex>
@@ -51,7 +45,8 @@
                   label="Количество"
                   dense
                   type="number"
-                  :rules="[required, positiveNumber]"
+                  :min="0"
+                  required
                   hide-details
                 />
               </v-flex>
@@ -61,18 +56,13 @@
                   label="Изображение"
                   dense
                   hide-details
-                />
-              </v-flex>
-              <v-flex>
-                <AutocompleteWithAdd
-                  v-model="item.companyId"
-                  label="Компания"
-                  :items="companies"
-                  :loading="companiesLoading"
-                  :requiredField="false"
-                  :slotButtonDisabled="showCompanyDialog"
-                  @slotButtonClick="showCompanyDialog = true"
-                />
+                >
+                  <template v-slot:prepend>
+                    <v-avatar size="30">
+                      <ImageWithFullView v-if="item.imagePath" :src="item.imagePath" />
+                    </v-avatar>
+                  </template>
+                </v-text-field>
               </v-flex>
               <v-flex>
                 <v-textarea
@@ -82,11 +72,11 @@
                   hide-details
                 />
               </v-flex>
-              <v-flex v-for="(_, i) in item.urls" :key="`url${i}`">
+              <v-flex v-for="(_, i) in urls" :key="`url${i}`">
                 <v-layout row wrap>
                   <v-flex xs6>
                     <v-text-field
-                      v-model="item.urls[i].name"
+                      v-model="urls[i].name"
                       :label="`Название ${i + 1}`"
                       dense
                       hide-details
@@ -94,7 +84,7 @@
                   </v-flex>
                   <v-flex xs6>
                     <v-text-field
-                      v-model="item.urls[i].data"
+                      v-model="urls[i].data"
                       :label="`Ссылка ${i + 1}`"
                       dense
                       hide-details
@@ -106,52 +96,30 @@
               </v-flex>
             </v-layout>
           </v-container>
-        </v-form>
-      </v-card-text>
-      <v-card-actions>
-        <v-spacer></v-spacer>
-        <v-btn small color="green"
-          :dark="valid"
-          :loading="loading"
-          :disabled="!valid"
-          @click="onSaveClick()"
-        >Сохранить</v-btn>
-      </v-card-actions>
-    </v-card>
-  </v-dialog>
+        </v-card-text>
+        <v-card-actions>
+          <v-spacer></v-spacer>
+          <v-btn small color="green"
+            :dark="isValid"
+            :loading="loading"
+            :disabled="!isValid"
+            @click="onSaveClick()"
+          >
+            Сохранить
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+  </div>
 </template>
 
 <script>
-import api from '../../api';
-import constants from '../../constants/data.json';
+import { mapActions, mapGetters } from 'vuex';
 
-import rules from '../../helpers/validationRules';
-
-const {
-  createItem,
-  updateItem,
-
-  getShortCategoryList,
-  createCategory,
-  getShortCompanyList,
-} = api;
-
-const {
-  icons,
-} = constants;
+import { ITEM_NAMESPACE, CATEGORY_NAMESPACE } from '../../store/namespaces';
 
 export default {
-  components: {
-    AutocompleteWithAdd: () => import('../helpers/AutocompleteWithAdd.vue'),
-    CompanyForm: () => import('../company/CompanyForm.vue'),
-  },
-
   props: {
-    dialog: {
-      type: Boolean,
-      required: true,
-      default: false,
-    },
     category: {
       type: Object,
       default: () => {},
@@ -162,13 +130,22 @@ export default {
     },
   },
 
-  data: () => ({
-    icons,
-    ...rules,
-    // ...constants,
+  components: {
+    ImageWithFullView: () => import('../helpers/ImageWithFullView.vue'),
+    AutocompleteWithAdd: () => import('../helpers/AutocompleteWithAdd.vue'),
+  },
 
-    loading: false,
-    valid: false,
+  beforeMount() {
+    this.item = { ...this.itemTemplate, ...this.data };
+
+    if (this.data.urls.length) {
+      this.urls = this.data.urls.map(url => ({ ...url }));
+    }
+
+    this.fetchCategories();
+  },
+
+  data: () => ({
     item: {},
     itemTemplate: {
       categoryId: -1,
@@ -176,60 +153,52 @@ export default {
       amount: 0,
       imagePath: '',
       note: '',
-      urls: [{
+    },
+    urls: [
+      {
         name: '',
         data: '',
-      }],
-    },
-
-    search: null,
-    creatingCategory: false,
-
-    categoriesLoading: false,
-    categories: [],
-
-    companySearch: null,
-    showCompanyDialog: false,
-    companiesLoading: false,
-    companies: [],
+      },
+    ],
   }),
 
-  beforeMount() {
-    this.item = { ...this.itemTemplate };
-    this.loadCompanyList();
-  },
+  computed: {
+    ...mapGetters(CATEGORY_NAMESPACE, { categoriesLoading: 'isLoading', categories: 'categoryList' }),
+    ...mapGetters(ITEM_NAMESPACE, { loading: 'isLoading' }),
 
-  watch: {
-    category() {
-      this.item.category = this.category;
-    },
+    isValid() {
+      const { name, categoryId, amount } = this.item;
 
-    async data() {
-      if (!this.categories.length) {
-        await this.loadCategoriesList();
+      if (!categoryId) {
+        return false;
       }
 
-      this.item = {
-        ...this.itemTemplate,
-        ...this.data,
-        categoryId: (this.data.category || {}).id,
-      };
+      if (name.trim().length < 2) {
+        return false;
+      }
 
-      this.item.urls = this.item.urls.length ? this.item.urls : [{ name: '', data: '' }];
+      if (amount < 0) {
+        return false;
+      }
+
+      return true;
     },
   },
 
   methods: {
+    ...mapActions(ITEM_NAMESPACE, ['createItem', 'updateItem']),
+    ...mapActions(CATEGORY_NAMESPACE, ['createCategory', 'fetchCategories']),
+
     getOuterIcon(i) {
       const firstElement = i === 0;
-      const lastElement = i + 1 === this.item.urls.length;
+      const lastElement = i + 1 === this.urls.length;
 
       if (firstElement) {
-        return icons.addLink;
+        return 'mdi-link-plus';
       }
 
       if (lastElement) {
-        return icons.close;
+        return 'mdi-close';
       }
 
       return '';
@@ -238,47 +207,28 @@ export default {
     clickOuterIcon(i) {
       const outerIcon = this.getOuterIcon(i);
 
-      if (outerIcon === icons.close) {
-        this.item.urls.pop();
+      if (outerIcon === 'mdi-close') {
+        this.urls.pop();
       } else {
-        this.item.urls.push({ name: '', data: '' });
+        this.urls.push({ name: '', data: '' });
       }
     },
 
     async onSaveClick() {
-      const {
-        category,
-        name,
-        amount,
-        imagePath,
-        note,
-        companyId,
-        urls,
-      } = this.item;
-
-      const data = {
-        categoryId: category.id,
-        name,
-        amount: +amount,
-        imagePath,
-        note,
-        urls,
-        companyId,
-      };
-
       let result;
 
-      this.loading = true;
+      const data = {
+        ...this.item,
+        urls: this.urls,
+      };
 
       if ((this.category || {}).name) {
-        result = await createItem(data);
+        result = await this.createItem(data);
       } else {
-        result = await updateItem(this.data.id, data);
+        result = await this.updateItem(data);
       }
 
-      this.loading = false;
-
-      if (!result.id) {
+      if (!result) {
         // TODO add handler
         return;
       }
@@ -287,45 +237,17 @@ export default {
       this.$emit('submit', result.id);
     },
 
-    async loadCategoriesList() {
-      this.categoriesLoading = false;
-      this.categories = await getShortCategoryList();
-      this.categoriesLoading = false;
-    },
-
-    async createCategory(inputedName) {
+    async onNewCategoryClick(inputedName) {
       if (!inputedName) {
         return;
       }
-
-      this.creatingCategory = true;
-
-      const data = await createCategory({ name: inputedName });
+      const data = await this.createCategory({ name: inputedName });
 
       if (data) {
-        this.categories.push(data);
         this.item.categoryId = data.id;
+        this.item.category = data;
       }
-
-      this.creatingCategory = false;
-    },
-
-    async loadCompanyList() {
-      this.companiesLoading = true;
-      this.companies = await getShortCompanyList();
-      this.companiesLoading = false;
-    },
-
-    onNewCompany(company) {
-      this.companies.push(company);
-
-      this.item.companyId = company.id;
-      this.showCompanyDialog = false;
     },
   },
 };
 </script>
-
-<style lang="scss" scoped>
-
-</style>

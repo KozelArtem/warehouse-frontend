@@ -178,7 +178,7 @@ export default {
     ...mapActions(ITEM_NAMESPACE, ['loadItem', 'removeItem']),
 
     itemModalSubmit() {
-      this.editDialog = false;
+      this.editModal = false;
 
       this.loadItem(this.itemId);
     },

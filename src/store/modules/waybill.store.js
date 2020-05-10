@@ -19,6 +19,7 @@ const getters = {
   isLoading: state => state.loading,
   newWaybill: state => state.newWaybill,
 
+  waybills: state => state.waybills.slice(0),
   waybillList(state) {
     return state.waybills
       .slice(0)

@@ -1,124 +1,140 @@
 <template>
-  <v-card v-if="item">
+  <div>
     <DeleteModal
-      v-if="removeModal"
+      v-if="removeModal.dialog"
       title="Удаление элемента"
-      :description="removeModalDescription"
+      :description="removeModal.description"
       @click="closeRemoveModal"
     />
     <ItemModal
-      :dialog="editDialog"
-      :data="item"
-      @close="editDialog = false"
+      v-if="editModal"
+      :data="itemInfo"
+      @close="editModal = false"
       @submit="itemModalSubmit"
     />
-    <CompanyInfoModal
-      v-if="showCompanyInfo"
-      :dialog="showCompanyInfo"
-      :companyId="item.companyId || -1"
-      @close="showCompanyInfo = false"
-    />
-    <v-card-title class="subtitle-1 grey lighten-2 wrapper" primary-title>
-      <v-flex>
-        <span>{{ title }}</span>
-        <span class="control-panel" v-if="isAdmin()">
-          <v-icon @click="editDialog = true" color="primary">mdi-pencil</v-icon>
-          <v-icon @click="removeElement(item)" color="red">mdi-delete</v-icon>
-        </span>
-      </v-flex>
-      <v-flex class="text-right">
-      <span class="pa-0 ma-0" stype="right: 0; top: 0">
-        <v-tooltip bottom>
-          <template v-slot:activator="{ on }">
-            <v-icon
-              color="green"
-              size="20"
-              v-on="on"
-              @click.stop="showCompanyInfo = true"
-            >
-              mdi-information
-            </v-icon>
-          </template>
-          <span>Информация о компании</span>
-        </v-tooltip>
-        <v-icon class="text-right" size="20" color="red" @click="$emit('close')">mdi-close</v-icon>
-      </span>
-      </v-flex>
-    </v-card-title>
-    <v-img contain :src="item.imagePath || ''" height="200" style="cursor: pointer;"
-      @click="imageFullSizeDialog = true">
-      <v-dialog
-        v-model="imageFullSizeDialog"
-        scrollable
-        :overlay="false"
-        transition="dialog-transition"
+    <v-card>
+      <Toolbar
+        :title="title"
+        :loading="isLoading"
       >
-        <v-card>
-          <v-img :src="item.imagePath || ''" @click="imageFullSizeDialog = false"></v-img>
-        </v-card>
-      </v-dialog>
-    </v-img>
-    <v-card-text>
-    <v-divider color="green"></v-divider>
-      <div>
-      </div>
-      <v-tabs>
-        <v-tab>Заметка</v-tab>
-        <v-tab>Заказ</v-tab>
-        <v-tab>Расход</v-tab>
-        <v-tab>Ссылки</v-tab>
-        <v-spacer></v-spacer>
-        <v-chip class="headline font-weight-black white--text mt-2"
-          label readonly color="green">
-          {{ item.amount }}</v-chip>
-
-        <v-tab-item class="pa-4">
-          <span v-for="row in (item.note || '').split('\n')" :key="row" class="black--text">
-            {{ row }}
-            <br>
+        <template v-slot:title>
+          <router-link :to="`/categories/${itemInfo.categoryId}`" class="body-2">
+            {{ itemInfo.category && itemInfo.category.name }}
+          </router-link>
+        </template>
+        <template v-slot:afterTitle>
+          <span class="subtitle-2">{{ itemInfo.name }}</span>
+        </template>
+        <template v-slot:right>
+          <span
+            class="font-weight-bold headline"
+            :class="{
+              'green--text': itemInfo.amount > 10,
+              'orange--text': itemInfo.amount < 5 && itemInfo.amount > 0,
+              'red--text': itemInfo.amount < 1,
+            }"
+          >
+            {{ itemInfo.amount }}
           </span>
-        </v-tab-item>
-
-        <v-tab-item>
-          <ItemPurchaseList :items="item.purchases" />
-        </v-tab-item>
-        <v-tab-item>
-          <ItemDistributionList
-            :itemId="item.id"
-            :items="item.distributions"
-            @submit="newItemDistribution"
+          <v-divider vertical inset class="mx-2"></v-divider>
+          <DropdownMenu
+            v-if="isAdmin"
+            icon="mdi-dots-horizontal"
+            @update="editModal = true"
+            @remove="showRemoveModal"
           />
+        </template>
+      </Toolbar>
+      <v-tabs vertical icons-and-text>
+        <v-tab>
+          Информация
+          <v-icon>mdi-image</v-icon>
+        </v-tab>
+        <v-tab>
+          Заказы
+          <v-icon>mdi-file</v-icon>
+        </v-tab>
+        <v-tab>
+          Расходы
+          <v-icon>mdi-file-document</v-icon>
+        </v-tab>
+        <v-tab-item>
+          <v-card flat>
+            <div class="d-flex flex-wrap">
+              <div>
+                <v-avatar
+                  class="ma-3"
+                  size="200"
+                  tile
+                >
+                  <ImageWithFullView :src="itemInfo.imagePath" />
+                </v-avatar>
+              </div>
+              <div>
+                <v-card-title class="subtitle-1">Описание:</v-card-title>
+                <v-card-subtitle>
+                  <span v-for="row in (itemInfo.note || '').split('\n')" :key="row">
+                    {{ row }}
+                    <br>
+                  </span>
+                </v-card-subtitle>
+
+                <v-card-title class="subtitle-1">Ссылки:</v-card-title>
+                <v-card-subtitle>
+                  <ol>
+                    <li v-for="(url, ind) in itemInfo.urls" :key="`url${ind}`">
+                      <a :href="url.data" target="_blank">{{ url.name }}</a>
+                    </li>
+                  </ol>
+                </v-card-subtitle>
+              </div>
+            </div>
+          </v-card>
         </v-tab-item>
-        <v-tab-item class="pa-4">
-          <ol>
-            <li v-for="(url, ind) in item.urls" :key="`url${ind}`">
-              <a :href="url.data" target="_blank">{{ url.name }}</a>
-            </li>
-          </ol>
+        <v-tab-item>
+          <v-card flat>
+            <v-card-text>
+              <ItemPurchaseList
+                :items="itemInfo.purchases"
+              />
+            </v-card-text>
+          </v-card>
+        </v-tab-item>
+        <v-tab-item>
+          <v-card flat>
+            <v-card-text>
+              <ItemDistributionList
+                :itemId="itemInfo.id"
+                :items="itemInfo.distributions || []"
+                @submit="newItemDistribution"
+              />
+            </v-card-text>
+          </v-card>
         </v-tab-item>
       </v-tabs>
-    </v-card-text>
-  </v-card>
+    </v-card>
+  </div>
 </template>
 
 <script>
-import api from '../../api';
+import { mapGetters, mapActions } from 'vuex';
 
-import ItemPurchaseList from './ItemPurchaseList.vue';
-import ItemDistributionList from './ItemDistributionList.vue';
+import { ITEM_NAMESPACE, AUTH_NAMESPACE } from '../../store/namespaces';
 
-const {
-  isAdmin,
-  getItemInfo,
-  removeItem,
-} = api;
+import Toolbar from '../helpers/Toolbar.vue';
+import DropdownMenu from '../helpers/DropdownMenu.vue';
+import ImageWithFullView from '../helpers/ImageWithFullView.vue';
 
 export default {
   components: {
+    Toolbar,
+    DropdownMenu,
+    ImageWithFullView,
+
     ItemModal: () => import('./ItemModal.vue'),
-    ItemPurchaseList,
-    ItemDistributionList,
-    CompanyInfoModal: () => import('../company/CompanyInfoModal.vue'),
+    ItemPurchaseList: () => import('./ItemPurchaseList.vue'),
+    ItemDistributionList: () => import('./ItemDistributionList.vue'),
+
     DeleteModal: () => import('../helpers/DeleteModal.vue'),
   },
 
@@ -130,88 +146,65 @@ export default {
     },
   },
 
-  async beforeMount() {
-    this.localItemId = this.itemId;
-
-    await this.loadItem();
-  },
-
   data: () => ({
-    editDialog: false,
-    showCompanyInfo: false,
-    item: {},
-    localItemId: 0,
-    imageFullSizeDialog: false,
+    editModal: false,
 
-    removeModal: false,
-    removeModalDescription: null,
+    removeModal: {
+      dialog: false,
+      description: '',
+    },
   }),
 
   computed: {
+    ...mapGetters(AUTH_NAMESPACE, ['isAdmin']),
+    ...mapGetters(ITEM_NAMESPACE, ['isLoading', 'itemInfo']),
+
     title() {
-      return this.item.name ? `${this.item.category.name} - ${this.item.name}` : 'Загрузка...';
+      return this.itemInfo.name ? this.itemInfo.name : 'Загрузка...';
     },
   },
 
   watch: {
-    async itemId() {
-      if (this.itemId > 0) {
-        this.localItemId = this.itemId;
-
-        await this.loadItem();
-      }
+    itemId() {
+      this.loadItem(this.itemId);
     },
   },
 
+  beforeMount() {
+    this.loadItem(this.itemId);
+  },
+
   methods: {
-    isAdmin,
-    async loadItem() {
-      const data = await getItemInfo(this.localItemId);
+    ...mapActions(ITEM_NAMESPACE, ['loadItem', 'removeItem']),
 
-      this.item = data;
-    },
-
-    itemModalSubmit(itemId) {
-      this.localItemId = itemId;
+    itemModalSubmit() {
       this.editDialog = false;
-      this.loadItem();
+
+      this.loadItem(this.itemId);
     },
 
-    newItemDistribution(itemDist) {
-      this.item.distributions = this.item.distributions.filter(item => item.id !== itemDist.id);
-      this.item.distributions.unshift(itemDist);
-      this.item.amount -= itemDist.amount;
+    newItemDistribution() {
+      this.loadItem(this.itemId);
     },
 
-    removeElement() {
-      this.removeModal = true;
-      this.removeModalDescription = `Вы действительно хотите удалить ${this.item.name}?`;
+    showRemoveModal() {
+      this.removeModal = {
+        dialog: true,
+        description: `Вы действительно хотите удалить ${this.itemInfo.name}?`,
+      };
     },
 
-    async closeRemoveModal(result) {
+    closeRemoveModal(result) {
       if (result) {
-        await removeItem(this.item.id);
-        this.$emit('close');
-        this.item = {};
+        this.removeItem(this.itemId);
+        this.$router.push(`/categories/${this.itemInfo.categoryId}`);
       }
 
-      this.removeModal = false;
+      this.removeModal = {
+        dialog: false,
+        description: '',
+      };
     },
   },
 };
 </script>
-
-<style lang="scss">
-.wrapper {
-  .control-panel {
-    padding-left: 10px;
-    display: none;
-  }
-
-  &:hover {
-    .control-panel {
-      display: inline;
-    }
-  }
-}
-</style>

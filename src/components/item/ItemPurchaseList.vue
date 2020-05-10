@@ -1,7 +1,17 @@
 <template>
   <div>
-    <v-alert v-if="!mappedItems.length" type="info" dense outlined :value="true">
+    <v-alert v-if="!mappedItems.length" type="info" outlined :value="true">
       Нет заказов
+      <v-btn
+        v-if="isAdmin"
+        class="float-right"
+        small
+        color="success"
+        outlined
+        @click="$router.push('/')"
+      >
+        Добавить
+      </v-btn>
     </v-alert>
     <v-simple-table v-else dense class="elevation-10">
       <template v-slot:default>
@@ -38,6 +48,9 @@
 </template>
 
 <script>
+import { mapGetters } from 'vuex';
+
+import { AUTH_NAMESPACE } from '../../store/namespaces';
 
 export default {
   props: {
@@ -57,6 +70,8 @@ export default {
   }),
 
   computed: {
+    ...mapGetters(AUTH_NAMESPACE, ['isAdmin']),
+
     mappedItems() {
       return this.items.map((item, index) => {
         const amount = item.amount > 0 ? item.amount : item.orderAmount;

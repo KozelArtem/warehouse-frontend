@@ -12,9 +12,9 @@ const initialState = () => ({
 const localState = initialState();
 
 const getters = {
-  categoryList(state) {
-    return state.categories.slice(0);
-  },
+  categoryList: state => state.categories.slice(0),
+  isLoading: state => state.loading,
+  category: state => ({ ...state.category }),
 };
 
 const actions = {

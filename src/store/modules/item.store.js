@@ -6,6 +6,7 @@ const URL = '/items';
 let timeout = null;
 
 const initialState = () => ({
+  item: {},
   items: [],
   extendedItems: [],
   totalCount: 0,
@@ -16,6 +17,7 @@ const initialState = () => ({
 const localState = initialState();
 
 const getters = {
+  itemInfo: state => state.item,
   itemList: state => state.items.slice(0),
   isLoading: state => state.loading,
   itemsCountByInput: state => state.itemsCountByInput,
@@ -36,6 +38,15 @@ const actions = {
 
     commit('SET_LOADING', false);
   },
+  async loadItem({ commit }, id) {
+    commit('SET_LOADING', true);
+    commit('SET_ITEM', {});
+
+    const response = await httpClient.get(`${URL}/${id}`);
+
+    commit('SET_ITEM', response.data);
+    commit('SET_LOADING', false);
+  },
   async createItem({ commit, dispatch }, data) {
     commit('SET_LOADING', true);
     const response = await httpClient.post(URL, data);
@@ -50,6 +61,15 @@ const actions = {
     const response = await httpClient.put(`${URL}/${id}`, data);
 
     dispatch('fetchItems', true);
+    commit('SET_LOADING', false);
+
+    return response.data;
+  },
+  async removeItem({ commit }, id) {
+    commit('SET_LOADING', true);
+
+    const response = await httpClient.delete(`${URL}/${id}`);
+
     commit('SET_LOADING', false);
 
     return response.data;
@@ -71,6 +91,9 @@ const mutations = {
   SET_ITEMS(state, response) {
     state.items = response.data;
     state.totalCount = getTotalCountFromHeaders(response);
+  },
+  SET_ITEM(state, payload) {
+    state.item = payload;
   },
   SET_LOADING(state, value) {
     state.loading = value;

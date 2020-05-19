@@ -11,8 +11,12 @@
       </v-flex>
       <v-flex xs12>
         <v-list dense>
-          <v-list-item v-if="category.parentId" @click="openCategory(category.parentId)">
-            <v-list-item-avatar>
+          <v-list-item
+            v-if="category.parentId"
+            @click="openCategory(category.parentId)"
+            class="grey lighten-2"
+          >
+            <v-list-item-avatar size="20">
               <v-icon>mdi-chevron-double-up</v-icon>
             </v-list-item-avatar>
 
@@ -30,8 +34,6 @@
             icon="mdi-folder"
             @click="openCategory(item.id)"
           />
-
-          <v-divider inset></v-divider>
 
           <ItemLine
             v-for="item in category.items"

@@ -8,25 +8,11 @@
           color="white"
           :loading="isLoading"
           @search="updateSearch"
-        />
-        <v-menu offset-y left bottom :close-on-content-click="false">
-          <template v-slot:activator="{ on }">
-            <v-btn block color="primary" v-on="on">
-              Период {{ period.join(' ~ ') }}
-            </v-btn>
+        >
+          <template v-slot:afterTitle>
+            <DateRangePickerButton color="primary" buttonColor="black" v-model="period" />
           </template>
-          <v-date-picker
-            v-model="dateRange"
-            type="month"
-            color="black"
-            :max="today"
-            landscape
-            no-title
-            multiple
-            range
-          ></v-date-picker>
-        </v-menu>
-
+        </Toolbar>
         <v-divider></v-divider>
       </v-flex>
       <v-flex xs12>
@@ -84,6 +70,7 @@ import { WAYBILL_NAMESPACE, AUTH_NAMESPACE } from '../../store/namespaces';
 export default {
   components: {
     Toolbar: () => import('../helpers/Toolbar.vue'),
+    DateRangePickerButton: () => import('../helpers/DateRangePickerButton.vue'),
     WaybillCard: () => import('./WaybillCard.vue'),
   },
 
@@ -91,9 +78,7 @@ export default {
     items: [],
     search: '',
 
-    today: moment().format(),
-
-    dateRange: [moment().format('YYYY-MM')],
+    period: [moment().format('YYYY-MM')],
   }),
 
   beforeMount() {
@@ -106,10 +91,6 @@ export default {
 
     viewMode() {
       return this.$route.path === '/waybill';
-    },
-
-    period() {
-      return this.dateRange.slice(0).sort((a, b) => moment(a).diff(moment(b)));
     },
 
     localItems() {
@@ -152,10 +133,10 @@ export default {
     ...mapActions(WAYBILL_NAMESPACE, ['fetchWaybills']),
 
     async loadWaybills() {
-      const [start, end] = this.period;
+      const [dateFrom, dateTo] = this.period;
       const query = {
-        dateFrom: moment(start).startOf('month').format(),
-        dateTo: moment(end || start).endOf('month').format(),
+        dateFrom,
+        dateTo,
         byCompany: true,
       };
 

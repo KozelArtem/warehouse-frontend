@@ -157,8 +157,7 @@ export default {
       if (!addedAt) {
         return false;
       }
-      console.log(name, '--->name');
-      console.log(addedAt, '--->addedAt');
+
       return true;
     },
   },

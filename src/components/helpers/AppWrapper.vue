@@ -7,22 +7,20 @@
       clipped-left
       app
     >
-      <v-app-bar-nav-icon @click="updateVisible"></v-app-bar-nav-icon>
+      <v-app-bar-nav-icon  v-if="isLoggedIn" @click="updateVisible"></v-app-bar-nav-icon>
       <v-toolbar-title>{{ $route.meta.title }}</v-toolbar-title>
       <v-spacer></v-spacer>
-      <v-badge right color="primary" content="10" overlap>
-        <v-icon>mdi-bell</v-icon>
-      </v-badge>
     </v-app-bar>
 
     <v-navigation-drawer
+      v-if="isLoggedIn"
       :mini-variant="mini"
       mobile-break-point="900"
       clipped
       app
       v-model="visible"
     >
-      <v-list nav dense v-if="isLoggedIn">
+      <v-list nav dense>
         <v-list-item-group v-model="item" color="primary">
           <v-list-item v-for="(item, i) in items" :key="i" :to="item.link" exact>
             <v-list-item-icon>

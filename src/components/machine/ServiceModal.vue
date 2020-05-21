@@ -1,37 +1,99 @@
 <template>
    <v-dialog
     :value="true"
-    persistent :overlay="false"
-    max-width="500px"
+    persistent
+    :overlay="false"
+    max-width="800px"
     transition="dialog-transition"
   >
-    <v-card>
-      <v-card-title primary-title>
+    <v-card shaped>
+      <v-card-title primary-title class="grey lighten-2">
         {{ title }}
         <v-spacer />
         <v-icon @click="close()">mdi-close</v-icon>
       </v-card-title>
-      <v-card-text class="pb-0">
-        <v-form v-model="valid">
-          <v-text-field label="Название" v-model="task.name" required></v-text-field>
-          <DatePicker label="Дата добавления" v-model="task.addedAt" />
-          <v-spacer class="pb-4"></v-spacer>
-          <DatePicker label="Дата выполнения" v-model="task.completedAt" />
-          <v-switch v-model="task.isTO" label="TO" />
-        </v-form>
+      <v-card-text>
+        <v-container grid-list-sm>
+          <v-layout row wrap>
+            <v-flex xs11>
+              <v-text-field label="Название" v-model="task.name" />
+            </v-flex>
+            <v-flex xs1>
+              <v-switch v-model="task.isTO" label="TO" />
+            </v-flex>
+            <v-flex xs12>
+              <v-textarea
+                dense
+                label="Описание"
+                rows="2"
+                v-model="task.description"
+                />
+            </v-flex>
+            <v-flex xs6>
+              <v-textarea
+                dense
+                label="Диагостика"
+                rows="2"
+                v-model="task.diagnostic"
+              />
+            </v-flex>
+            <v-flex xs6>
+              <v-textarea
+                dense
+                label="Устранение(выполнение)"
+                rows="2"
+                v-model="task.elimination"
+              />
+            </v-flex>
+            <v-flex xs12>
+              <v-select
+                dense
+                label="Выполнил"
+                :items="workers"
+                v-model="task.doneWorkerId"
+                autocomplete
+                clearable
+              ></v-select>
+            </v-flex>
+            <v-flex xs6>
+              <DatePicker label="Дата добавления" v-model="task.addedAt" />
+            </v-flex>
+            <v-flex xs6>
+              <DatePicker label="Дата выполнения" v-model="task.completedAt" />
+            </v-flex>
+            <v-flex xs12 class="mt-5">
+              <v-btn
+                v-if="data"
+                small
+                dark
+                color="red"
+                @click="removeTask()"
+              >
+                Удалить
+              </v-btn>
+              <v-btn
+                class="float-right"
+                small
+                :dark="isValid"
+                color="green"
+                :disabled="!isValid"
+                @click="saveTask()"
+              >
+                Сохранить
+              </v-btn>
+            </v-flex>
+          </v-layout>
+        </v-container>
       </v-card-text>
-      <v-card-actions>
-        <v-spacer></v-spacer>
-        <v-btn color="success" @click="saveTask()" text>Сохранить</v-btn>
-      </v-card-actions>
     </v-card>
   </v-dialog>
 </template>
 
 <script>
-import { mapActions } from 'vuex';
+import { mapActions, mapGetters } from 'vuex';
 
-import { MACHINE_NAMESPACE } from '../../store/namespaces';
+import translate from '../../helpers/translate';
+import { MACHINE_NAMESPACE, WORKER_NAMESPACE } from '../../store/namespaces';
 
 export default {
   components: {
@@ -61,19 +123,67 @@ export default {
       isTO: false,
       addedAt: null,
       completedAt: null,
+      description: '',
+      diagnostic: '',
+      elimination: '',
+      doneWorkerId: null,
     },
   }),
 
   beforeMount() {
     this.task = { ...this.task, ...this.data };
+    this.fetchWorkers({ position: 'mechanic' });
+  },
+
+  computed: {
+    ...mapGetters(WORKER_NAMESPACE, ['workerList']),
+
+    workers() {
+      return this.workerList.map(i => ({
+        value: i.id,
+        text: `${i.surname} ${i.name} - ${translate(i.position)}`,
+      }));
+    },
+
+    isValid() {
+      const {
+        name,
+        addedAt,
+      } = this.task;
+
+      if (name.trim().length < 2) {
+        return false;
+      }
+      if (!addedAt) {
+        return false;
+      }
+      console.log(name, '--->name');
+      console.log(addedAt, '--->addedAt');
+      return true;
+    },
   },
 
   methods: {
-    ...mapActions(MACHINE_NAMESPACE, ['createMachineService', 'updateMachineService']),
+    ...mapActions(MACHINE_NAMESPACE, [
+      'createMachineService',
+      'updateMachineService',
+      'removeMachineService',
+    ]),
+    ...mapActions(WORKER_NAMESPACE, ['fetchWorkers']),
 
     close() {
       this.$emit('close');
     },
+    removeTask() {
+      const data = {
+        machineId: this.machineId,
+        id: this.task.id,
+      };
+      this.removeMachineService(data);
+
+      this.$emit('close');
+    },
+
     saveTask() {
       const data = {
         machineId: this.machineId,

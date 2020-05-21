@@ -6,6 +6,7 @@ const AUTH_NAMESPACE = 'Auth';
 const MACHINE_NAMESPACE = 'Machine';
 const WAYBILL_NAMESPACE = 'Waybill';
 const DISTRIBUTION_NAMESPACE = 'Distribution';
+const WORKER_NAMESPACE = 'Worker';
 
 export {
   PURCHASE_NAMESPACE,
@@ -16,4 +17,5 @@ export {
   MACHINE_NAMESPACE,
   WAYBILL_NAMESPACE,
   DISTRIBUTION_NAMESPACE,
+  WORKER_NAMESPACE,
 };

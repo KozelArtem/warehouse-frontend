@@ -70,6 +70,7 @@ export default {
       { link: '/machines', icon: 'mdi-bulldozer', title: 'Журнал работ' },
       { link: '/machines/to', icon: 'mdi-tools', title: 'График ТО' },
       { link: '/company', icon: 'mdi-domain', title: 'Компании' },
+      { link: '/repairItems', icon: 'mdi-cog-box', title: 'Валы на реставрацию' },
     ],
     showSearch: false,
     search: '',

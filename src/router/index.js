@@ -92,6 +92,12 @@ const routes = [
     props: true,
   },
   {
+    path: '/repairItems',
+    name: 'repairItemsList',
+    meta: { title: 'Валы на реставрацию' },
+    component: () => import('../components/repairItem/RepairItemList.vue'),
+  },
+  {
     path: '/login',
     name: 'login',
     meta: { title: 'Авторизация' },

@@ -7,6 +7,7 @@ const MACHINE_NAMESPACE = 'Machine';
 const WAYBILL_NAMESPACE = 'Waybill';
 const DISTRIBUTION_NAMESPACE = 'Distribution';
 const WORKER_NAMESPACE = 'Worker';
+const REPAIR_ITEM_NAMESPACE = 'RepairItem';
 
 export {
   PURCHASE_NAMESPACE,
@@ -18,4 +19,5 @@ export {
   WAYBILL_NAMESPACE,
   DISTRIBUTION_NAMESPACE,
   WORKER_NAMESPACE,
+  REPAIR_ITEM_NAMESPACE,
 };

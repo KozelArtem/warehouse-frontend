@@ -39,6 +39,7 @@
           <v-divider vertical inset class="mx-2"></v-divider>
           <DropdownMenu
             v-if="isAdmin"
+            color="black"
             icon="mdi-dots-horizontal"
             @update="editModal = true"
             @remove="showRemoveModal"

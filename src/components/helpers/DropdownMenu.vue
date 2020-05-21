@@ -2,14 +2,14 @@
   <v-menu bottom>
     <template v-slot:activator="{ on }">
       <v-btn small icon v-on="on">
-        <v-icon>{{ icon }}</v-icon>
+        <v-icon :color="color">{{ icon }}</v-icon>
       </v-btn>
     </template>
 
     <v-list dense>
       <v-list-item
         dense
-        v-for="(item, i) in items"
+        v-for="(item, i) in localItems"
         :key="i"
         @click="$emit(item.event)"
       >
@@ -33,10 +33,26 @@ export default {
       required: false,
       default: 'mdi-dots-horizontal',
     },
+    color: {
+      type: String,
+      required: false,
+      default: 'white',
+    },
+    fields: {
+      type: Array,
+      required: false,
+      default: () => ['update', 'remove'],
+    },
   },
 
   data: () => ({
     items: [
+      {
+        title: 'Добавить',
+        event: 'create',
+        color: 'green',
+        icon: 'mdi-plus',
+      },
       {
         title: 'Редактировать',
         event: 'update',
@@ -50,6 +66,13 @@ export default {
         icon: 'mdi-delete',
       },
     ],
+
   }),
+
+  computed: {
+    localItems() {
+      return this.items.slice(0).filter(i => this.fields.includes(i.event));
+    },
+  },
 };
 </script>

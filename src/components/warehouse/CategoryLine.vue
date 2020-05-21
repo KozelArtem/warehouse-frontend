@@ -8,10 +8,6 @@
       <v-list-item-content>
         <v-list-item-title>{{ value.name }}</v-list-item-title>
       </v-list-item-content>
-
-      <v-list-item-action class="my-0">
-        <DropdownMenu />
-      </v-list-item-action>
     </v-list-item>
     <v-divider></v-divider>
   </div>
@@ -25,10 +21,6 @@ export default {
       requred: true,
       default: () => {},
     },
-  },
-
-  components: {
-    DropdownMenu: () => import('../helpers/DropdownMenu.vue'),
   },
 
   methods: {

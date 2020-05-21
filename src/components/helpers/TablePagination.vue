@@ -23,6 +23,7 @@
         </v-col>
       </v-row>
     </td>
+    <slot name="right"></slot>
   </tr>
 </template>
 

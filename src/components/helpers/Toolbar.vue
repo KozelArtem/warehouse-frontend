@@ -2,7 +2,7 @@
   <div>
     <v-toolbar :color="color">
       <slot name="title">
-        <v-toolbar-title>{{ title }}</v-toolbar-title>
+        <v-toolbar-title class="font-weight-black headline">{{ title }}</v-toolbar-title>
       </slot>
       <v-divider class="mx-4" inset vertical></v-divider>
       <slot name="afterTitle"></slot>

@@ -54,9 +54,9 @@ tr, span {
   .show-on-hover {
     display: none;
   }
+
   &:hover {
     .show-on-hover {
-
       display: inline;
     }
   }
@@ -72,6 +72,25 @@ tr, span {
 
 input[type="button"]{
   outline: none !important;
+}
+
+.fixed-table__wrapper {
+  table {
+    width: 100%;
+    table-layout: fixed !important;
+    border-collapse: collapse;
+
+    .truncate {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    td, th {
+      border-right: thin solid rgba(0, 0, 0, 0.12) !important;
+      border-bottom: thin solid rgba(0, 0, 0, 0.12) !important;
+    }
+  }
 }
 
 </style>

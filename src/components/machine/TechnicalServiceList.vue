@@ -22,7 +22,7 @@
         </Toolbar>
       </v-flex>
       <v-flex xs12>
-        <v-simple-table dense class="elevation-10">
+        <v-simple-table dense class="elevation-10 fixed-table__wrapper">
           <template v-slot:default>
             <thead>
               <tr>
@@ -30,7 +30,7 @@
                   Наименование
                 </th>
                 <th
-                  class="text-center body-2 font-weight-bold"
+                  class="text-center body-2 font-weight-bold px-0"
                   v-for="i in PERIOD_IN_MONTHS"
                   :key="i"
                   :width="`${60 / PERIOD_IN_MONTHS}%`"
@@ -49,7 +49,7 @@
               <td
                 v-for="month in 12"
                 :key="`machine${month}`"
-                class="text-center"
+                class="text-center ma-0 pa-0"
                 :class="machine.servicesByMonth[month].class"
               >
                 <span v-if="!(machine.servicesByMonth[month].updatable && isAdmin)">
@@ -132,6 +132,7 @@ export default {
           id,
           machineId,
           name,
+          isTO: true,
           addedAt,
           completedAt: date,
         };
@@ -143,11 +144,6 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-td {
-  border-right: 1px solid black;
-  border-bottom: 1px solid black !important;
-}
-
 .color-green {
   background-color: lightgreen;
 }

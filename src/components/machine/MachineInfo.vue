@@ -97,7 +97,7 @@
                 @click="toggleView(service.id)"
               >
                 <td v-if="headers[0].breakpoint()">
-                  {{ i + 1 }}
+                  {{ getIndex(i) }}
                 </td>
                 <td :class="{ 'truncate': isActive(service.id) }" class="border-right">
                   <span>{{ service.name }}</span>
@@ -208,6 +208,7 @@ export default {
     range: [],
     limit: 10,
     offset: 0,
+    activeServicesCount: null,
 
     editing: false,
 
@@ -230,7 +231,7 @@ export default {
     ...mapGetters(MACHINE_NAMESPACE, ['isLoading', 'machine', 'machineServices', 'servicesTotalCount']),
 
     localMachine() {
-      const active = this.machineServices.filter(i => !i.completed).length;
+      const active = this.getActiveServicesCount();
 
       return {
         ...this.machine,
@@ -271,6 +272,18 @@ export default {
 
   methods: {
     ...mapActions(MACHINE_NAMESPACE, ['fetchMachineData', 'fetchMachineServices', 'updateMachine', 'removeMachine']),
+
+    getIndex(i) {
+      return this.offset + i + 1;
+    },
+
+    getActiveServicesCount() {
+      if (this.activeServicesCount === null) {
+        this.activeServicesCount = this.machineServices.filter(i => !i.completed).length;
+      }
+
+      return this.activeServicesCount;
+    },
 
     pageChange({ limit, offset, page }) {
       this.page = page;

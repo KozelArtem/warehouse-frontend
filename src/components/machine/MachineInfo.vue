@@ -278,7 +278,7 @@ export default {
     },
 
     getActiveServicesCount() {
-      if (this.activeServicesCount === null) {
+      if (!this.activeServicesCount) {
         this.activeServicesCount = this.machineServices.filter(i => !i.completed).length;
       }
 

@@ -11,7 +11,9 @@ const initialState = () => ({
   extendedItems: [],
   totalCount: 0,
   loading: false,
+  searchLoading: false,
   itemsCountByInput: 0,
+  foundItems: [],
 });
 
 const localState = initialState();
@@ -20,7 +22,9 @@ const getters = {
   itemInfo: state => state.item,
   itemList: state => state.items.slice(0),
   isLoading: state => state.loading,
+  searchLoading: state => state.searchLoading,
   itemsCountByInput: state => state.itemsCountByInput,
+  foundItems: state => state.foundItems,
 };
 
 const actions = {
@@ -85,6 +89,19 @@ const actions = {
       commit('SET_ITEMS_COUNT_BY_INPUT', response.data.count);
     }, 300);
   },
+  async searchItems({ commit }, search) {
+    if (timeout) {
+      clearTimeout(timeout);
+    }
+
+    commit('SET_SEARCH_LOADING', true);
+    timeout = setTimeout(async () => {
+      const response = await httpClient.get(`${URL}/search`, { params: { search } });
+
+      commit('SET_SEARCH_LOADING', false);
+      commit('SET_FOUND_ITEMS', response.data);
+    }, 300);
+  },
 };
 
 const mutations = {
@@ -98,8 +115,14 @@ const mutations = {
   SET_LOADING(state, value) {
     state.loading = value;
   },
+  SET_SEARCH_LOADING(state, value) {
+    state.searchLoading = value;
+  },
   SET_ITEMS_COUNT_BY_INPUT(state, value) {
     state.itemsCountByInput = value;
+  },
+  SET_FOUND_ITEMS(state, value) {
+    state.foundItems = value;
   },
 };
 

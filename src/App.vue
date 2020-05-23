@@ -93,4 +93,9 @@ input[type="button"]{
   }
 }
 
+.v-text-field.v-input--dense .v-input__prepend-inner .v-input__icon > .v-icon,
+.v-text-field.v-input--dense .v-input__append-inner .v-input__icon > .v-icon {
+  margin-top: 0 !important;
+}
+
 </style>

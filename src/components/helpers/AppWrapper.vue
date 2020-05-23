@@ -10,6 +10,8 @@
       <v-app-bar-nav-icon  v-if="isLoggedIn" @click="updateVisible"></v-app-bar-nav-icon>
       <v-toolbar-title>{{ $route.meta.title }}</v-toolbar-title>
       <v-spacer></v-spacer>
+      <SearchWithDropdown />
+      <v-spacer></v-spacer>
     </v-app-bar>
 
     <v-navigation-drawer
@@ -55,6 +57,10 @@ import { mapGetters, mapActions } from 'vuex';
 import { AUTH_NAMESPACE } from '../../store/namespaces';
 
 export default {
+  components: {
+    SearchWithDropdown: () => import('../helpers/SearchWithDropdown.vue'),
+  },
+
   data: () => ({
     visible: true,
     mini: false,

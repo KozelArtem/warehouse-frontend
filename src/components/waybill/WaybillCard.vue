@@ -4,6 +4,7 @@
     min-width="150px"
     class="pa-2 pointer mx-0 elevation-3"
     :to="`waybill/${waybill.id}`"
+    color="#FFCB9A"
   >
     <div class="overflow-hidden subtitle-2 text-truncate text-center">
       {{ waybill.number }}

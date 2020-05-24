@@ -1,10 +1,10 @@
 <template>
   <v-app>
     <AppWrapper />
-    <v-content>
+    <v-content style="background: linear-gradient(0deg, #2C3531, #116466);">
       <v-container fill-height fluid wrap>
         <v-layout row wrap>
-          <v-flex class="px-10">
+          <v-flex class="px-5">
             <router-view />
           </v-flex>
         </v-layout>
@@ -86,9 +86,26 @@ input[type="button"]{
       white-space: nowrap;
     }
 
-    td, th {
-      border-right: thin solid rgba(0, 0, 0, 0.12) !important;
-      border-bottom: thin solid rgba(0, 0, 0, 0.12) !important;
+    thead {
+      th {
+        border-right: thin solid rgba(255, 255, 255, 0.12) !important;
+        border-bottom: thin solid rgba(255, 255, 255, 0.12) !important;
+        background: #FFCB9A !important;
+        color: #D1E8E2;
+      }
+    }
+
+    td {
+      border-right: thin solid rgba(255, 255, 255, 0.12) !important;
+      border-bottom: thin solid rgba(255, 255, 255, 0.12) !important;
+      background: #2C3531;
+      color: #D1E8E2;
+    }
+
+    tfoot {
+      td, th {
+        background: #D9B08C ;
+      }
     }
   }
 }
@@ -96,6 +113,19 @@ input[type="button"]{
 .v-text-field.v-input--dense .v-input__prepend-inner .v-input__icon > .v-icon,
 .v-text-field.v-input--dense .v-input__append-inner .v-input__icon > .v-icon {
   margin-top: 0 !important;
+}
+
+.theme--light.v-pagination {
+  .v-pagination__item {
+    background: #FFCB9A !important;
+    color: rgba(0, 0, 0, 0.87);
+  }
+  .v-pagination__navigation {
+    background: transparent !important;
+  }
+  .v-pagination__item--active {
+    background: #2C3531 !important;
+  }
 }
 
 </style>

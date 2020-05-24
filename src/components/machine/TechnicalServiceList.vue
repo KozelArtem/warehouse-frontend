@@ -42,7 +42,7 @@
             <tbody>
               <tr v-for="machine in machineList" :key="machine.id">
               <td>
-                <router-link :to="`./${machine.id}`">
+                <router-link :to="`./${machine.id}`" style="color: #D1E8E2">
                   {{machine.name}}
                 </router-link>
               </td>
@@ -145,16 +145,16 @@ export default {
 
 <style lang="scss" scoped>
 .color-green {
-  background-color: lightgreen;
+  background-color: #14A76C;
 }
 
 .color-red {
   color: white;
-  background-color: #ff000085;
+  background-color: #FF652F;
 }
 
 .color-yellow {
   color: black;
-  background-color: yellow;
+  background-color: #FFE400;
 }
 </style>

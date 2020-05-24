@@ -1,30 +1,32 @@
 <template>
-  <tr>
-    <td :colspan="headersLength">
-      <v-row no-gutters align="center">
-        <v-col cols="10">
-          <v-pagination
-            bottom
-            :color="color"
-            v-model="page"
-            :length="totalPages"
-            :total-visible="7"
-          ></v-pagination>
-        </v-col>
-        <v-col cols="2">
-          <v-select
-            class="ma-2"
-            v-model="limit"
-            :items="limits"
-            menu-props="auto"
-            hide-details
-            label="Элементов на страницe"
-          ></v-select>
-        </v-col>
-      </v-row>
-    </td>
-    <slot name="right"></slot>
-  </tr>
+  <tfoot style="background-color: #D9B08C">
+    <tr>
+      <td :colspan="headersLength">
+        <v-row no-gutters align="center">
+          <v-col cols="10">
+            <v-pagination
+              bottom
+              color="#FFCB9A"
+              v-model="page"
+              :length="totalPages"
+              :total-visible="7"
+            ></v-pagination>
+          </v-col>
+          <v-col cols="2">
+            <v-select
+              class="ma-2"
+              v-model="limit"
+              :items="limits"
+              menu-props="auto"
+              hide-details
+              label="Элементов на страницe"
+            ></v-select>
+          </v-col>
+        </v-row>
+      </td>
+      <slot name="right"></slot>
+    </tr>
+  </tfoot>
 </template>
 
 <script>

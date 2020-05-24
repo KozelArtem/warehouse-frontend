@@ -1,14 +1,14 @@
 <template>
   <div>
     <v-app-bar
-      color="teal"
+      color="#116466"
       dense
       dark
       clipped-left
       app
     >
       <v-app-bar-nav-icon  v-if="isLoggedIn" @click="updateVisible"></v-app-bar-nav-icon>
-      <v-toolbar-title>{{ $route.meta.title }}</v-toolbar-title>
+      <v-toolbar-title></v-toolbar-title>
       <v-spacer></v-spacer>
       <SearchWithDropdown />
       <v-spacer></v-spacer>
@@ -20,10 +20,12 @@
       mobile-break-point="900"
       clipped
       app
+      style="background: linear-gradient(0deg, #2C3531, #116466); color: #D9B08C"
+      dark
       v-model="visible"
     >
       <v-list nav dense>
-        <v-list-item-group v-model="item" color="primary">
+        <v-list-item-group v-model="item" color="#D9B08C">
           <v-list-item v-for="(item, i) in items" :key="i" :to="item.link" exact>
             <v-list-item-icon>
               <v-icon v-text="item.icon"></v-icon>

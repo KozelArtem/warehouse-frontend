@@ -3,7 +3,6 @@
     <v-layout row wrap>
       <v-flex xs12>
         <Toolbar
-          color="green lighten-3"
           :loading="isLoading"
           title="Заказы"
           @search="onSearchChange"
@@ -25,7 +24,7 @@
         <v-simple-table
           fixed-header
           dense
-          class="elevation-10"
+          class="fixed-table__wrapper"
         >
           <template v-slot:default>
             <thead>
@@ -66,14 +65,11 @@
                 </td>
               </tr>
             </tbody>
-            <tfoot class="green lighten-3">
-              <TablePagination
-                :headersLength="headers.length"
-                :totalPages="totalPages"
-                color="dark green"
-                @change="pageChange"
-              />
-            </tfoot>
+            <TablePagination
+              :headersLength="headers.length"
+              :totalPages="totalPages"
+              @change="pageChange"
+            />
           </template>
         </v-simple-table>
       </v-flex>
@@ -132,10 +128,10 @@ export default {
 
     headers: [
       { text: '№', width: '5%', breakpoint: () => vm.$vuetify.breakpoint.smAndUp },
-      { text: 'Наименование', width: '70%', breakpoint: () => true },
+      { text: 'Наименование', width: '65%', breakpoint: () => true },
       { text: 'Пришло / Заказано', width: '10%', breakpoint: () => true },
       { text: 'Дата', width: '10%', breakpoint: () => true },
-      { text: 'Статус', width: '5%', breakpoint: () => true },
+      { text: 'Статус', width: '10%', breakpoint: () => true },
     ],
     statuses: [
       { text: 'В ожидании', value: true },

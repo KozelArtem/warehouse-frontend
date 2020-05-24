@@ -9,14 +9,13 @@
         />
         <Toolbar
           title="Журнал работ"
-          color="orange lighten-2"
           :loading="isLoading"
           @search="onSearchChange"
         />
         <v-simple-table
           fixed-header
           dense
-          class="elevation-10"
+          class="elevation-10 fixed-table__wrapper"
         >
           <template v-slot:default>
             <thead>
@@ -46,14 +45,11 @@
                 </td>
               </tr>
             </tbody>
-            <tfoot class="orange lighten-4">
-              <TablePagination
-                :totalPages="totalPages"
-                :headersLength="headers.length"
-                color="dark orange"
-                @change="pageChange"
-              />
-            </tfoot>
+            <TablePagination
+              :totalPages="totalPages"
+              :headersLength="headers.length"
+              @change="pageChange"
+            />
           </template>
         </v-simple-table>
       </v-flex>
@@ -66,7 +62,7 @@
       fab
       bottom
       right
-      color="orange lighten-2"
+      color="blue lighten-2"
       @click="newMachineModal = true"
     >
       <v-icon>mdi-plus</v-icon>

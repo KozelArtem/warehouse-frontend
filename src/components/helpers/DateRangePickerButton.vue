@@ -9,6 +9,13 @@
       <template v-slot:activator="{ on }">
         <v-btn block v-on="on" text class="font-weight-black">
           <v-icon :color="buttonColor">mdi-calendar</v-icon>
+          <div class="ml-2" :class="`${buttonColor}--text`">
+            {{ startPeriod }}
+            <span v-if="endPeriod">
+              <v-divider></v-divider>
+              {{ endPeriod }}
+            </span>
+          </div>
         </v-btn>
       </template>
       <v-date-picker
@@ -73,6 +80,20 @@ export default {
         moment(start).startOf('month').format(),
         moment(end || start).endOf('month').format(),
       ];
+    },
+
+    startPeriod() {
+      const [start] = this.period;
+
+      return moment(start).format('MMM YYYY');
+    },
+
+
+    endPeriod() {
+      const [start, end] = this.period;
+
+      const isSame = moment(start).isSame(moment(end), 'month');
+      return isSame ? false : moment(end).format('MMM YYYY');
     },
   },
 

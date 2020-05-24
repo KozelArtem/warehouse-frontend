@@ -18,7 +18,6 @@
       <v-flex xs12>
         <Toolbar
           :title="localMachine.name"
-          color="blue lighten-2"
           :loading="isLoading"
         >
           <template v-slot:title>
@@ -32,9 +31,18 @@
               @click:clear="editing = false"
               @click:append-outer="updateMachineName"
             />
-              <span class="headline font-weight-black">
-                {{ localMachine.name }}
-              </span>
+            <span class="headline font-weight-black">
+              {{ localMachine.name }}
+            </span>
+          </template>
+          <template v-slot:afterTitle>
+            <div>
+              <DateRangePickerButton
+                color="blue lighten-2"
+                buttonColor="white"
+                v-model="range"
+              />
+            </div>
           </template>
           <template v-slot:right>
             <DropdownMenu
@@ -50,10 +58,9 @@
             <div>
               <v-switch
                 v-model="onlyCompleted"
-                :label="`${localMachine.currentServicesCount} / ${localMachine.totalServicesCount}`"
+                :label="label"
                 color="green"
                 dense
-                dark
                 hide-details
               ></v-switch>
               <v-divider class="my-1"></v-divider>
@@ -62,7 +69,6 @@
                 :label="`${localMachine.activeServicesCount || 0}`"
                 color="red"
                 dense
-                dark
                 hide-details
               ></v-switch>
             </div>
@@ -80,7 +86,7 @@
             <thead>
               <tr>
                 <th
-                  class="subtitle-2 font-weight-bold blue lighten-4 black--text px-0 text-center"
+                  class="subtitle-2 font-weight-bold px-0 text-center"
                   v-for="header in headers"
                   :key="header.text"
                   :width="header.width"
@@ -130,24 +136,12 @@
                 </td>
               </tr>
             </tbody>
-            <tfoot class="blue lighten-2">
-              <TablePagination
-                :totalPages="totalPages"
-                :headersLength="headers.length - 1"
-                color="blue"
-                @change="pageChange"
-              >
-                <template v-slot:right>
-                  <td>
-                    <DateRangePickerButton
-                      color="blue lighten-2"
-                      buttonColor="white"
-                      v-model="range"
-                    />
-                  </td>
-                </template>
-              </TablePagination>
-            </tfoot>
+            <TablePagination
+              :totalPages="totalPages"
+              :headersLength="headers.length "
+              @change="pageChange"
+            >
+            </TablePagination>
           </template>
         </v-simple-table>
       </v-flex>
@@ -209,6 +203,7 @@ export default {
     limit: 10,
     offset: 0,
     activeServicesCount: null,
+    onlyTO: true,
 
     editing: false,
 
@@ -262,10 +257,18 @@ export default {
     totalPages() {
       return Math.ceil(this.servicesTotalCount / this.limit);
     },
+
+    label() {
+      return `${this.localMachine.currentServicesCount} / ${this.localMachine.totalServicesCount}`;
+    },
   },
 
   watch: {
     range() {
+      this.loadServices();
+    },
+
+    onlyTO() {
       this.loadServices();
     },
   },
@@ -309,7 +312,7 @@ export default {
       const query = {
         dateFrom,
         dateTo,
-        onlyTO: false,
+        onlyTO: this.onlyTO ? undefined : false,
         limit: this.limit,
         offset: this.offset,
       };

@@ -5,7 +5,6 @@
       <v-flex xs12>
         <Toolbar
           title="Накладные"
-          color="white"
           :loading="isLoading"
           @search="updateSearch"
         >
@@ -15,14 +14,14 @@
         </Toolbar>
         <v-divider></v-divider>
       </v-flex>
-      <v-flex xs12>
+      <v-flex xs12 style="max-height: 86vh; overflow-y: auto">
         <v-alert type="info" dense :value="showAlert" class="text-center">
           Нет накладных за выбранный период
         </v-alert>
         <v-simple-table
           fixed-header
           dense
-          class="elevation-10"
+          class="elevation-10 fixed-table__wrapper"
         >
           <template v-slot:default>
             <tbody>

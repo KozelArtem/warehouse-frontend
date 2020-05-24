@@ -11,7 +11,6 @@
         />
         <Toolbar
           title="Валы на реставрацию"
-          color="brown lighten-3"
           :loading="isLoading"
           @search="onSearchChange"
         />
@@ -24,7 +23,7 @@
             <thead>
               <tr>
                 <th
-                  class="brown lighten-4 text-center"
+                  class="text-center"
                   v-for="header in headers"
                   :key="header.text"
                   :width="header.width"
@@ -46,7 +45,7 @@
                   <span class="show-on-hover" v-if="isAdmin">
                     <v-icon
                       @click.stop="showEditModal(repairItem)"
-                      color="gray"
+                      color="white"
                       small
                     >
                       mdi-lead-pencil
@@ -55,12 +54,12 @@
                 </td>
                 <td v-if="repairItem.toWarehouse">Склад</td>
                 <td v-else>
-                  <router-link :to="`./machines/${repairItem.machineId}`">
+                  <router-link :to="`./machines/${repairItem.machineId}`" style="color: #D1E8E2">
                     {{ (repairItem.machine || {}).name }}
                   </router-link>
                 </td>
                 <td>
-                  <router-link :to="`./items/${repairItem.itemId}`">
+                  <router-link :to="`./items/${repairItem.itemId}`" style="color: #D1E8E2">
                     {{ (repairItem.item || {}).name }}
                   </router-link>
                 </td>
@@ -70,14 +69,11 @@
                 <td class="text-center">{{ repairItem.arrivalDate | date }}</td>
               </tr>
             </tbody>
-            <tfoot class="brown lighten-4">
-              <TablePagination
-                :totalPages="totalPages"
-                :headersLength="headers.length"
-                color="brown lighten-2"
-                @change="pageChange"
-              />
-            </tfoot>
+            <TablePagination
+              :totalPages="totalPages"
+              :headersLength="headers.length"
+              @change="pageChange"
+            />
           </template>
         </v-simple-table>
       </v-flex>

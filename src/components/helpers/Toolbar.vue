@@ -1,8 +1,10 @@
 <template>
   <div>
-    <v-toolbar :color="color">
+    <v-toolbar color="#D9B08C">
       <slot name="title">
-        <v-toolbar-title class="font-weight-black headline">{{ title }}</v-toolbar-title>
+        <v-toolbar-title class="font-weight-black headline" style="color: #2C3531">
+          {{ title }}
+        </v-toolbar-title>
       </slot>
       <v-divider class="mx-4" inset vertical></v-divider>
       <slot name="afterTitle"></slot>
@@ -27,7 +29,7 @@
     <v-progress-linear
       :active="loading"
       indeterminate
-      :color="color"
+      color="#D9B08C"
       height="7px"
       opacity="0.3"
     ></v-progress-linear>

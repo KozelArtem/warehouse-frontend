@@ -16,19 +16,20 @@
       <v-flex xs12>
         <Toolbar
           title="Список компаний"
-          color="blue lighten-3"
           :loading="isLoading"
           @search="updateSearch"
         />
       </v-flex>
-      <v-flex xs12 v-for="company in companies" :key="company.id">
-        <CompanyCard
-          :company="company"
-          :canManage="isAdmin"
-          @update="showEditModal"
-          @remove="showDeleteModal"
-        />
-      </v-flex>
+      <v-layout wrap style="max-height: 86vh; overflow-y: scroll">
+        <v-flex xs12 v-for="company in companies" :key="company.id">
+          <CompanyCard
+            :company="company"
+            :canManage="isAdmin"
+            @update="showEditModal"
+            @remove="showDeleteModal"
+          />
+        </v-flex>
+      </v-layout>
       <v-btn
         v-if="isAdmin"
         small

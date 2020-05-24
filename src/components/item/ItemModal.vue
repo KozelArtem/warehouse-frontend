@@ -138,8 +138,12 @@ export default {
   beforeMount() {
     this.item = { ...this.itemTemplate, ...this.data };
 
-    if (this.data.urls.length) {
+    if (this.data && this.data.urls.length) {
       this.urls = this.data.urls.map(url => ({ ...url }));
+    }
+
+    if (this.category) {
+      this.item.categoryId = this.category.id;
     }
 
     this.fetchCategories();

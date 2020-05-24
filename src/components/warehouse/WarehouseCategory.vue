@@ -1,5 +1,11 @@
 <template>
   <div>
+    <ItemModal
+      v-if="modal"
+      @close="closeModal()"
+      @submit="onModalSubmit()"
+      :category="category"
+    />
     <v-layout row wrap>
       <v-flex xs12>
         <Toolbar
@@ -7,7 +13,17 @@
           :loading="isLoading"
           :title="category.name"
           :showSearch="false"
-        />
+        >
+          <template v-slot:afterTitle>
+            <DropdownMenu
+              v-if="isAdmin"
+              color="black"
+              icon="mdi-dots-horizontal"
+              :fields="menuFields"
+              @create="showCreateModal"
+            />
+          </template>
+        </Toolbar>
       </v-flex>
       <v-flex xs12>
         <v-list dense>
@@ -51,12 +67,14 @@
 <script>
 import { mapActions, mapGetters } from 'vuex';
 
-import { CATEGORY_NAMESPACE } from '../../store/namespaces';
+import { CATEGORY_NAMESPACE, AUTH_NAMESPACE } from '../../store/namespaces';
 
 export default {
   components: {
     Toolbar: () => import('../helpers/Toolbar.vue'),
+    DropdownMenu: () => import('../helpers/DropdownMenu.vue'),
     CategoryLine: () => import('./CategoryLine.vue'),
+    ItemModal: () => import('../item/ItemModal.vue'),
     ItemLine: () => import('./ItemLine.vue'),
   },
 
@@ -69,8 +87,14 @@ export default {
     },
   },
 
+  data: () => ({
+    menuFields: ['create'],
+    modal: false,
+  }),
+
   computed: {
     ...mapGetters(CATEGORY_NAMESPACE, ['isLoading', 'category']),
+    ...mapGetters(AUTH_NAMESPACE, ['isAdmin']),
   },
 
   async beforeMount() {
@@ -92,6 +116,19 @@ export default {
 
     openItem(itemId) {
       this.$router.push(`/items/${itemId}`);
+    },
+
+    showCreateModal() {
+      this.modal = true;
+    },
+
+    closeModal() {
+      this.modal = false;
+    },
+
+    onModalSubmit() {
+      this.fetchCategoryInfo(this.categoryId);
+      this.closeModal();
     },
   },
 };

@@ -1,6 +1,7 @@
 <template>
   <div>
-    <v-toolbar color="#D9B08C">
+    <v-toolbar :color="color">
+      <ColorPickerMenu v-model="color" />
       <slot name="title">
         <v-toolbar-title class="font-weight-black headline" style="color: #2C3531">
           {{ title }}
@@ -38,16 +39,14 @@
 
 <script>
 export default {
+  components: {
+    ColorPickerMenu: () => import('./ColorPickerMenu.vue'),
+  },
   props: {
     title: {
       type: String,
       required: true,
       default: '',
-    },
-    color: {
-      type: String,
-      required: false,
-      default: 'white',
     },
     loading: {
       type: Boolean,
@@ -61,6 +60,7 @@ export default {
     },
   },
   data: () => ({
+    color: '#D9B08C',
     search: null,
   }),
   watch: {

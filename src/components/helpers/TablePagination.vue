@@ -1,7 +1,10 @@
 <template>
-  <tfoot style="background-color: #D9B08C">
+  <tfoot>
     <tr>
-      <td :colspan="headersLength">
+      <td :style="{ 'background-color': color }">
+        <ColorPickerMenu v-model="color" />
+      </td>
+      <td :colspan="headersLength" :style="{ 'background-color': color }">
         <v-row no-gutters align="center">
           <v-col cols="10">
             <v-pagination
@@ -31,6 +34,9 @@
 
 <script>
 export default {
+  components: {
+    ColorPickerMenu: () => import('./ColorPickerMenu.vue'),
+  },
   props: {
     headersLength: {
       type: Number,
@@ -42,13 +48,9 @@ export default {
       required: true,
       default: 1,
     },
-    color: {
-      type: String,
-      required: true,
-      default: 'black',
-    },
   },
   data: () => ({
+    color: '#D9B08C',
     page: 1,
     limits: [
       { text: 3, value: 3 },

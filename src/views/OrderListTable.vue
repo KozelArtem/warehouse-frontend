@@ -29,10 +29,14 @@
           <template v-slot:default>
             <thead>
               <tr>
+                <th :style="{ 'background-color': `${color} !important` }" width="5%">
+                  <ColorPickerMenu v-model="color" />
+                </th>
                 <th
                   v-for="header in headers"
                   :key="header.text"
                   :width="header.width"
+                  :style="{ 'background-color': `${color} !important` }"
                   v-show="header.breakpoint()"
                 >
                   {{ header.text }}
@@ -40,17 +44,21 @@
               </tr>
             </thead>
             <tbody>
-              <tr v-for="(order, i) in purchaseList" :key="order.id">
-                <td v-if="headers[0].breakpoint()">{{ getIndex(i) }}</td>
-                <td>
+              <tr v-for="(order, i) in purchaseList" :key="order.id" class="asd">
+                <td :style="cellStyle" v-if="i === 0">
+                  <ColorPickerMenu v-model="cellColor" />
+                </td>
+                <td :style="cellStyle" v-else></td>
+                <td :style="cellStyle" v-if="headers[0].breakpoint()">{{ getIndex(i) }}</td>
+                <td :style="cellStyle">
                   {{ order.item.name }}
                   <span class="show-on-hover" v-if="isAdmin">
                     <v-icon @click="editOrder(order)" color="gray" small>mdi-lead-pencil</v-icon>
                   </span>
                 </td>
-                <td>{{ order.amount || 0 }} / {{ order.orderAmount }}</td>
-                <td>{{ order.date | date }}</td>
-                <td>
+                <td :style="cellStyle">{{ order.amount || 0 }} / {{ order.orderAmount }}</td>
+                <td :style="cellStyle">{{ order.date | date }}</td>
+                <td :style="cellStyle">
                   <v-icon v-if="order.active" color="orange" small>mdi-calendar-clock</v-icon>
                   <v-icon v-else color="green" small>mdi-check</v-icon>
 
@@ -110,12 +118,16 @@ import { PURCHASE_NAMESPACE, AUTH_NAMESPACE } from '../store/namespaces';
 export default {
   components: {
     Toolbar: () => import('../components/helpers/Toolbar.vue'),
+    ColorPickerMenu: () => import('../components/helpers/ColorPickerMenu.vue'),
     TablePagination: () => import('../components/helpers/TablePagination.vue'),
     OrderForm: () => import('../components/order/OrderForm.vue'),
     CompanyInfoModal: () => import('../components/company/CompanyInfoModal.vue'),
   },
 
   data: vm => ({
+    color: '',
+    cellColor: '',
+
     query: {
       search: '',
       active: true,
@@ -128,7 +140,7 @@ export default {
 
     headers: [
       { text: '№', width: '5%', breakpoint: () => vm.$vuetify.breakpoint.smAndUp },
-      { text: 'Наименование', width: '65%', breakpoint: () => true },
+      { text: 'Наименование', width: '60%', breakpoint: () => true },
       { text: 'Пришло / Заказано', width: '10%', breakpoint: () => true },
       { text: 'Дата', width: '10%', breakpoint: () => true },
       { text: 'Статус', width: '10%', breakpoint: () => true },
@@ -151,6 +163,12 @@ export default {
   computed: {
     ...mapGetters(PURCHASE_NAMESPACE, ['totalPages', 'purchaseList', 'isLoading']),
     ...mapGetters(AUTH_NAMESPACE, ['isAdmin']),
+
+    cellStyle() {
+      return {
+        'background-color': this.cellColor,
+      };
+    },
   },
 
   beforeMount() {

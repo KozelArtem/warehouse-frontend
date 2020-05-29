@@ -1,10 +1,14 @@
 <template>
   <v-app>
     <AppWrapper />
-    <v-content style="background: linear-gradient(0deg, #2C3531, #116466);">
+    <v-content :style="style">
       <v-container fill-height fluid wrap>
         <v-layout row wrap>
           <v-flex class="px-5">
+            <div>
+              <ColorPickerMenu class="d-inline-block" v-model="startColor" />
+              <ColorPickerMenu class="d-inline-block" v-model="endColor" />
+            </div>
             <router-view />
           </v-flex>
         </v-layout>
@@ -35,10 +39,22 @@ export default {
   name: 'App',
   components: {
     AppWrapper,
+    ColorPickerMenu: () => import('./components/helpers/ColorPickerMenu.vue'),
   },
+
+  data: () => ({
+    startColor: '#2C3531',
+    endColor: '#116466',
+  }),
 
   computed: {
     ...mapGetters(['alert']),
+
+    style() {
+      return {
+        background: `linear-gradient(180deg, ${this.startColor}, ${this.endColor})`,
+      };
+    },
   },
   methods: {
     ...mapMutations({ closeAlert: 'CLOSE_ALERT' }),

@@ -88,7 +88,7 @@ export default {
     },
 
     getItemRouteParams(item) {
-      return { name: 'itemView', params: { itemId: item.categoryId } };
+      return { name: 'itemView', params: { itemId: item.id } };
     },
 
     getCategoryRouteParams(item) {
@@ -97,7 +97,3 @@ export default {
   },
 };
 </script>
-
-<style lang="scss" scoped>
-
-</style>

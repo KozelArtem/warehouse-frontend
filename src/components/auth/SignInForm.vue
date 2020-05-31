@@ -1,6 +1,6 @@
 <template>
   <v-layout row fill-height class="justify-center align-center">
-    <v-flex xs4>
+    <v-flex xs12 md6 lg4>
       <v-card class="elevation-12" shaped>
         <v-card-title>
           <span class="mx-auto headline blue--text font-weight-black">

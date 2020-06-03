@@ -24,7 +24,7 @@
         <v-simple-table
           fixed-header
           dense
-          class="fixed-table__wrapper"
+          class="fixed-table__wrapper elevation-10"
         >
           <template v-slot:default>
             <thead>
@@ -34,6 +34,7 @@
                   :key="header.text"
                   :width="header.width"
                   v-show="header.breakpoint()"
+                  class="body-2 font-weight-black black--text"
                 >
                   {{ header.text }}
                 </th>

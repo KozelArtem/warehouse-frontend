@@ -4,7 +4,6 @@
       <v-flex xs12>
         <Toolbar
           title="График ТО"
-          color="orange lighten-2"
           :showSearch="false"
           :loading="loading"
         >
@@ -42,7 +41,7 @@
             <tbody>
               <tr v-for="machine in machineList" :key="machine.id">
               <td>
-                <router-link :to="`./${machine.id}`" style="color: #D1E8E2">
+                <router-link :to="`./${machine.id}`">
                   {{machine.name}}
                 </router-link>
               </td>
@@ -145,16 +144,16 @@ export default {
 
 <style lang="scss" scoped>
 .color-green {
-  background-color: #14A76C;
+  background-color: lightgreen !important;
 }
 
 .color-red {
-  color: white;
-  background-color: #FF652F;
+  color: white !important;
+  background-color: red !important;
 }
 
 .color-yellow {
   color: black;
-  background-color: #FFE400;
+  background-color: yellow !important;
 }
 </style>

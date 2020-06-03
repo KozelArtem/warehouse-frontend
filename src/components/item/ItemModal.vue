@@ -2,7 +2,7 @@
   <div>
     <v-dialog :value="true" persistent max-width="600px">
       <v-card>
-        <v-card-title>
+        <v-card-title class="primary white--text">
           <span class="headline">
             {{ (category || {}).name ? 'Добавление нового' : 'Редактирование' }} элемента
           </span>

@@ -141,6 +141,7 @@ export default {
     ...mapActions(ITEM_NAMESPACE, ['loadItem']),
 
     closeModal() {
+      this.editedItem = {};
       this.dialog = false;
     },
 

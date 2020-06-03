@@ -26,7 +26,7 @@
         </Toolbar>
       </v-flex>
       <v-flex xs12>
-        <v-list dense>
+        <v-list dense class="elevation-10 pb-0">
           <v-list-item
             v-if="category.parentId"
             @click="openCategory(category.parentId)"
@@ -58,6 +58,8 @@
             icon="mdi-file"
             @click="openItem(item.id)"
           />
+          <v-list-item style="min-height: 20px; background: rgba(189, 189, 189, 0.4)" dense>
+          </v-list-item>
         </v-list>
       </v-flex>
     </v-layout>

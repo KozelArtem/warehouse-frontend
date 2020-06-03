@@ -1,7 +1,7 @@
 <template>
   <v-app>
     <AppWrapper />
-    <v-content style="background: linear-gradient(0deg, #2C3531, #116466);">
+    <v-content>
       <v-container fill-height fluid wrap>
         <v-layout row wrap>
           <v-flex class="px-5">
@@ -47,6 +47,11 @@ export default {
 </script>
 
 <style lang="scss">
+#appToolbar {
+  border-bottom-color: rgba(0,0,0,.2)!important;
+  border-bottom: 1px solid black;
+}
+
 .pointer {
   cursor: pointer;
 };
@@ -74,6 +79,9 @@ input[type="button"]{
   outline: none !important;
 }
 
+.v-data-table__wrapper {
+  overflow: visible !important;
+}
 .fixed-table__wrapper {
   table {
     width: 100%;
@@ -87,24 +95,40 @@ input[type="button"]{
     }
 
     thead {
-      th {
-        border-right: thin solid rgba(255, 255, 255, 0.12) !important;
-        border-bottom: thin solid rgba(255, 255, 255, 0.12) !important;
-        background: #FFCB9A !important;
-        color: #D1E8E2;
+      tr {
+        th {
+          // border: thin solid rgba(0, 0, 0, 0.4) !important;
+          background: rgba(189, 189, 189, 0.4) !important;
+          color: white;
+
+
+          &:last-child {
+            border: none;
+          }
+        }
       }
     }
 
-    td {
-      border-right: thin solid rgba(255, 255, 255, 0.12) !important;
-      border-bottom: thin solid rgba(255, 255, 255, 0.12) !important;
-      background: #2C3531;
-      color: #D1E8E2;
+    td:not(:last-child) {
+      border: thin solid rgba(0, 0, 0, 0.12) !important;
+      background: white;
+      color: black;
+    }
+
+    tr {
+      td {
+        min-width: 50px;
+      }
+      &:hover {
+        td {
+          background: rgba(0,0,0,0.12);
+        }
+      }
     }
 
     tfoot {
-      td, th {
-        background: #D9B08C ;
+      td {
+        background: rgba(189, 189, 189, 0.4);
       }
     }
   }
@@ -117,7 +141,7 @@ input[type="button"]{
 
 .theme--light.v-pagination {
   .v-pagination__item {
-    background: #FFCB9A !important;
+    background: rgba(189, 189, 189, 0.4) !important;
     color: rgba(0, 0, 0, 0.87);
   }
   .v-pagination__navigation {

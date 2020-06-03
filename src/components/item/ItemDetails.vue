@@ -18,7 +18,7 @@
         :loading="isLoading"
       >
         <template v-slot:title>
-          <router-link :to="`/categories/${itemInfo.categoryId}`" class="body-2">
+          <router-link :to="`/categories/${itemInfo.categoryId}`" class="body-2 white--text">
             {{ itemInfo.category && itemInfo.category.name }}
           </router-link>
         </template>
@@ -27,19 +27,14 @@
         </template>
         <template v-slot:right>
           <span
-            class="font-weight-bold headline"
-            :class="{
-              'green--text': itemInfo.amount > 10,
-              'orange--text': itemInfo.amount < 5 && itemInfo.amount > 0,
-              'red--text': itemInfo.amount < 1,
-            }"
+            class="font-weight-bold headline white--text"
           >
             {{ itemInfo.amount }}
           </span>
           <v-divider vertical inset class="mx-2"></v-divider>
           <DropdownMenu
             v-if="isAdmin"
-            color="black"
+            color="white"
             icon="mdi-dots-horizontal"
             @update="editModal = true"
             @remove="showRemoveModal"

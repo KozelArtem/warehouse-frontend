@@ -1,7 +1,7 @@
 <template>
   <v-dialog :value="true" persistent max-width="600px">
     <v-card shaped>
-      <v-card-title class="grey">
+      <v-card-title class="primary white--text">
         <span class="headline">Списание</span>
         <v-spacer></v-spacer>
         <v-icon color="red" @click="$emit('close')">mdi-close</v-icon>
@@ -84,11 +84,16 @@ export default {
     this.fetchPlaces();
     this.fetchWaybills({ itemId: this.itemId });
 
+    if (!this.data) {
+      return;
+    }
+
     this.itemDistribution = {
       ...this.itemDistribution,
       ...this.data,
       itemId: this.itemId,
-      // placeId: this.data.place && this.data.place.id,
+      placeId: this.data.place && this.data.place.id,
+      waybillId: this.data.waybill && this.data.waybill.id,
     };
   },
 

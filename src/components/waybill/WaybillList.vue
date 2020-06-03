@@ -9,18 +9,19 @@
           @search="updateSearch"
         >
           <template v-slot:afterTitle>
-            <DateRangePickerButton color="primary" buttonColor="black" v-model="period" />
+            <DateRangePickerButton color="primary" buttonColor="white" v-model="period" />
           </template>
         </Toolbar>
         <v-divider></v-divider>
       </v-flex>
-      <v-flex xs12 style="max-height: 86vh; overflow-y: auto">
+      <v-flex xs12 style="overflow: auto">
         <v-alert type="info" dense :value="showAlert" class="text-center">
           Нет накладных за выбранный период
         </v-alert>
         <v-simple-table
           fixed-header
           dense
+          style="max-height: 84vh;"
           class="elevation-10 fixed-table__wrapper"
         >
           <template v-slot:default>

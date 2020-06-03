@@ -1,12 +1,11 @@
 <template>
-  <tfoot style="background-color: #D9B08C">
+  <tfoot>
     <tr>
       <td :colspan="headersLength">
         <v-row no-gutters align="center">
           <v-col cols="10">
             <v-pagination
               bottom
-              color="#FFCB9A"
               v-model="page"
               :length="totalPages"
               :total-visible="7"
@@ -41,11 +40,6 @@ export default {
       type: Number,
       required: true,
       default: 1,
-    },
-    color: {
-      type: String,
-      required: true,
-      default: 'black',
     },
   },
   data: () => ({

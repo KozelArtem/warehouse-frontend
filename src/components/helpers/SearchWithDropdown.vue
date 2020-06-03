@@ -13,12 +13,11 @@
         v-model="search"
         @input="menu = true"
         v-on="on"
-        solo-inverted
+        solo
         rounded
         dense
         label="Поиск..."
         clearable
-        dark
         autocomplete="off"
         hide-details
         prepend-inner-icon="mdi-magnify"
@@ -88,7 +87,7 @@ export default {
     },
 
     getItemRouteParams(item) {
-      return { name: 'itemView', params: { itemId: item.id } };
+      return { name: 'itemView', params: { itemId: item.categoryId } };
     },
 
     getCategoryRouteParams(item) {
@@ -97,3 +96,7 @@ export default {
   },
 };
 </script>
+
+<style lang="scss" scoped>
+
+</style>

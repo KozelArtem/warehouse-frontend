@@ -1,8 +1,8 @@
 <template>
   <div>
-    <v-list-item @click="open()" style="min-height: 20px">
+    <v-list-item @click="open()" style="min-height: 20px;">
       <v-list-item-avatar class="my-0" size="20" tile>
-        <v-icon color="yellow darken-3">mdi-folder</v-icon>
+        <v-icon color="primary">mdi-folder</v-icon>
       </v-list-item-avatar>
 
       <v-list-item-content>

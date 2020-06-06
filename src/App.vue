@@ -1,7 +1,7 @@
 <template>
   <v-app>
     <AppWrapper />
-    <v-content>
+    <v-content style="background: linear-gradient(90deg, grey, transparent);">
       <v-container fill-height fluid wrap>
         <v-layout row wrap>
           <v-flex class="px-5">

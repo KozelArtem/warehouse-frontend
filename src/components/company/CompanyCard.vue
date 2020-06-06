@@ -1,5 +1,5 @@
 <template>
-  <v-card dark class="mb-1">
+  <v-card class="mb-1">
     <v-card-title primary-title class="pb-0 lh-0">
       <div class="d-flex subtitle-2">{{ company.name }} | {{ company.person }}</div>
       <v-spacer></v-spacer>
@@ -106,7 +106,6 @@
       <v-btn
         @click="showInfo = !showInfo"
         text
-        color="#D9B08C"
         small
       >
         Контактные данные

@@ -45,7 +45,6 @@
                   <span class="show-on-hover" v-if="isAdmin">
                     <v-icon
                       @click.stop="showEditModal(repairItem)"
-                      color="white"
                       small
                     >
                       mdi-lead-pencil
@@ -54,12 +53,12 @@
                 </td>
                 <td v-if="repairItem.toWarehouse">Склад</td>
                 <td v-else>
-                  <router-link :to="`./machines/${repairItem.machineId}`" style="color: #D1E8E2">
+                  <router-link :to="`./machines/${repairItem.machineId}`" class="black--text">
                     {{ (repairItem.machine || {}).name }}
                   </router-link>
                 </td>
                 <td>
-                  <router-link :to="`./items/${repairItem.itemId}`" style="color: #D1E8E2">
+                  <router-link :to="`./items/${repairItem.itemId}`" class="black--text">
                     {{ (repairItem.item || {}).name }}
                   </router-link>
                 </td>

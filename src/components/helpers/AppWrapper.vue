@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div v-if="isLoggedIn">
     <v-app-bar
       id="appToolbar"
       dense
@@ -9,7 +9,7 @@
       color="white"
       flat
     >
-      <v-app-bar-nav-icon  v-if="isLoggedIn" @click="updateVisible"></v-app-bar-nav-icon>
+      <v-app-bar-nav-icon @click="updateVisible"></v-app-bar-nav-icon>
       <v-toolbar-title></v-toolbar-title>
       <v-spacer></v-spacer>
       <SearchWithDropdown />
@@ -41,34 +41,6 @@
           </v-list-item>
         </v-list-item-group>
 
-        <v-list-group
-          v-for="item in itemsWithChild"
-          :key="item.title"
-          v-model="item.active"
-        >
-          <template v-slot:activator>
-            <v-list-item-icon>
-              <v-icon v-text="item.icon"></v-icon>
-            </v-list-item-icon>
-            <v-list-item-content>
-              <v-list-item-title v-text="item.title"></v-list-item-title>
-            </v-list-item-content>
-          </template>
-          <v-list-item
-            class="ml-5"
-            v-for="child in item.children"
-            :key="child.title"
-            :to="child.link"
-            exact
-          >
-            <v-list-item-icon>
-              <v-icon v-text="child.icon"></v-icon>
-            </v-list-item-icon>
-            <v-list-item-content>
-              <v-list-item-title v-text="child.title"></v-list-item-title>
-            </v-list-item-content>
-          </v-list-item>
-        </v-list-group>
       </v-list>
     </v-navigation-drawer>
     <!-- <v-footer
@@ -113,26 +85,7 @@ export default {
       { link: '/company', icon: 'mdi-domain', title: 'Компании' },
       { link: '/repairItems', icon: 'mdi-cog-box', title: 'Валы на реставрацию' },
     ],
-    itemsWithChild: [
-      {
-        icon: 'mdi-cog',
-        title: 'Админка',
-        children: [
-          {
-            link: '/admin/places', icon: 'mdi-information', title: 'Места списания',
-          },
-          {
-            link: '/admin/categories', icon: 'mdi-folder-outline', title: 'Категории',
-          },
-          {
-            link: '/admin/workers', icon: 'mdi-folder-outline', title: 'Рабочие',
-          },
-          {
-            link: '/admin/users', icon: 'mdi-account', title: 'Пользователи',
-          },
-        ],
-      },
-    ],
+
     showSearch: false,
     search: '',
   }),

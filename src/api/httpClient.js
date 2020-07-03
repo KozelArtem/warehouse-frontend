@@ -19,7 +19,7 @@ const authInterceptor = (config) => {
 const errorInterceptor = error => store.dispatch('handleError', error.response);
 const responseInterceptor = response => response;
 
-httpClient.interceptors.request.use(authInterceptor);
+httpClient.interceptors.request.use(authInterceptor, errorInterceptor);
 httpClient.interceptors.response.use(responseInterceptor, errorInterceptor);
 
 export default httpClient;

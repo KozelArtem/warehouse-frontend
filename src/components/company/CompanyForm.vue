@@ -155,7 +155,11 @@ export default {
 
     processData() {
       if ((this.data || {}).id) {
-        const phones = this.data.phones.map(phone => phone.data);
+        let phones = this.data.phones.map(phone => phone.data);
+
+        if (!phones.length) {
+          phones = [''];
+        }
 
         this.company = { ...this.data, phones };
 

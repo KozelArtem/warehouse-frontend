@@ -45,7 +45,7 @@ export default new Vuex.Store({
   },
   actions: {
     handleError({ commit }, error) {
-      switch (error.status) {
+      switch ((error || {}).status) {
         case 403:
           commit(`${AUTH_NAMESPACE}/RESET_USER_DATA`);
           break;

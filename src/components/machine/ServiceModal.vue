@@ -61,6 +61,16 @@
             <v-flex xs6>
               <DatePicker label="Дата выполнения" v-model="task.completedAt" />
             </v-flex>
+            <v-flex xs12>
+              <v-file-input
+                v-model="images"
+                multiple
+                hide-details
+                small-chips
+                clearable
+              >
+              </v-file-input>
+            </v-flex>
             <v-flex xs12 class="mt-5">
               <v-btn
                 v-if="data"
@@ -93,7 +103,7 @@
 import { mapActions, mapGetters } from 'vuex';
 
 import translate from '../../helpers/translate';
-import { MACHINE_NAMESPACE, WORKER_NAMESPACE } from '../../store/namespaces';
+import { MACHINE_NAMESPACE, WORKER_NAMESPACE, UPLOADER_NAMESPACE } from '../../store/namespaces';
 
 export default {
   components: {
@@ -127,16 +137,20 @@ export default {
       diagnostic: '',
       elimination: '',
       doneWorkerId: null,
+      images: [],
     },
+    images: [],
   }),
 
   beforeMount() {
     this.task = { ...this.task, ...this.data };
+    this.images = this.data.images.map((image, i) => i + 1);
     this.fetchWorkers({ position: 'mechanic' });
   },
 
   computed: {
     ...mapGetters(WORKER_NAMESPACE, ['workerList']),
+    ...mapGetters(UPLOADER_NAMESPACE, ['imageUploading']),
 
     workers() {
       return this.workerList.map(i => ({
@@ -162,6 +176,14 @@ export default {
     },
   },
 
+  watch: {
+    async images() {
+      if (this.images.length !== this.task.images.length) {
+        this.task.images = await this.uploadImages(this.images);
+      }
+    },
+  },
+
   methods: {
     ...mapActions(MACHINE_NAMESPACE, [
       'createMachineService',
@@ -169,6 +191,7 @@ export default {
       'removeMachineService',
     ]),
     ...mapActions(WORKER_NAMESPACE, ['fetchWorkers']),
+    ...mapActions(UPLOADER_NAMESPACE, ['uploadImages']),
 
     close() {
       this.$emit('close');

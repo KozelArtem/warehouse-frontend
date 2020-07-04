@@ -4,7 +4,7 @@ import store from '../store';
 
 const httpClient = axios.create({
   baseURL: 'https://mpp-dev.herokuapp.com/',
-  timeout: 5000,
+  timeout: 60000,
 });
 
 

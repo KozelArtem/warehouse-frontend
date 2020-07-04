@@ -14,6 +14,11 @@
       @close="closeServiceModal"
       @submit="onServiceModalSubmit"
     />
+    <ImagesSlider
+      v-if="imageSlider"
+      :images="images"
+      @close="closeImagesSlider()"
+    />
     <v-layout row wrap>
       <v-flex xs12>
         <Toolbar
@@ -114,6 +119,12 @@
                   </span>
                 </td>
                 <td :class="{ 'truncate': isActive(service.id) }" class="border-right">
+                  <v-icon
+                    v-if="service.images.length"
+                    @click="showImagesSlider(service)"
+                  >
+                    mdi-image
+                  </v-icon>
                   {{ service.description }}</td>
                 <td :class="{ 'truncate': isActive(service.id) }" class="border-right">
                   {{ service.diagnostic }}
@@ -164,6 +175,7 @@ export default {
     DateRangePickerButton: () => import('../helpers/DateRangePickerButton.vue'),
     TablePagination: () => import('../helpers/TablePagination.vue'),
     DropdownMenu: () => import('../helpers/DropdownMenu.vue'),
+    ImagesSlider: () => import('../helpers/ImagesSlider.vue'),
   },
 
   props: {
@@ -219,6 +231,8 @@ export default {
       description: '',
       task: null,
     },
+
+    imageSlider: false,
   }),
 
   computed: {
@@ -367,6 +381,17 @@ export default {
       this.deleteTask = {
         dialog: false,
       };
+    },
+
+    showImagesSlider(service) {
+      console.log('->service', service);
+      this.images = service.images;
+      this.imageSlider = true;
+    },
+
+    closeImagesSlider() {
+      this.images = [];
+      this.imageSlider = false;
     },
   },
 };

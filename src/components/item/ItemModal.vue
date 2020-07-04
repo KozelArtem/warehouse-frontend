@@ -50,10 +50,20 @@
                   hide-details
                 />
               </v-flex>
-              <v-flex>
+              <v-flex xs6>
+                <v-switch label="Загрузить" v-model="upload"></v-switch>
+                 <v-file-input
+                  v-if="upload"
+                  v-model="image"
+                  label="Выберите изображение"
+                  dense
+                  hide-details
+                  :loading="imageUploading"
+                ></v-file-input>
                 <v-text-field
+                  v-else
                   v-model="item.imagePath"
-                  label="Изображение"
+                  label="Ссылка на изображение"
                   dense
                   hide-details
                 >
@@ -116,7 +126,7 @@
 <script>
 import { mapActions, mapGetters } from 'vuex';
 
-import { ITEM_NAMESPACE, CATEGORY_NAMESPACE } from '../../store/namespaces';
+import { ITEM_NAMESPACE, CATEGORY_NAMESPACE, UPLOADER_NAMESPACE } from '../../store/namespaces';
 
 export default {
   props: {
@@ -150,6 +160,7 @@ export default {
   },
 
   data: () => ({
+    upload: false,
     item: {},
     itemTemplate: {
       categoryId: -1,
@@ -164,11 +175,13 @@ export default {
         data: '',
       },
     ],
+    image: null,
   }),
 
   computed: {
     ...mapGetters(CATEGORY_NAMESPACE, { categoriesLoading: 'isLoading', categories: 'categoryList' }),
     ...mapGetters(ITEM_NAMESPACE, { loading: 'isLoading' }),
+    ...mapGetters(UPLOADER_NAMESPACE, ['imageUploading']),
 
     isValid() {
       const { name, categoryId, amount } = this.item;
@@ -185,13 +198,26 @@ export default {
         return false;
       }
 
+      if (this.imageLoading) {
+        return false;
+      }
+
       return true;
+    },
+  },
+
+  watch: {
+    async image() {
+      if (this.image) {
+        this.item.imagePath = await this.uploadImage(this.image);
+      }
     },
   },
 
   methods: {
     ...mapActions(ITEM_NAMESPACE, ['createItem', 'updateItem']),
     ...mapActions(CATEGORY_NAMESPACE, ['createCategory', 'fetchCategories']),
+    ...mapActions(UPLOADER_NAMESPACE, ['uploadImage']),
 
     getOuterIcon(i) {
       const firstElement = i === 0;

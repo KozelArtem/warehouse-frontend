@@ -54,6 +54,12 @@ export default {
         icon: 'mdi-plus',
       },
       {
+        title: 'Новая папка',
+        event: 'newFolder',
+        color: 'green',
+        icon: 'mdi-folder',
+      },
+      {
         title: 'Редактировать',
         event: 'update',
         color: 'primary',

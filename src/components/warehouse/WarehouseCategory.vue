@@ -6,6 +6,7 @@
       @submit="onModalSubmit()"
       :category="category"
     />
+    <CategoryModal v-if="newFolderModal" :categoryId="categoryId" @close="closeNewFolderModal" />
     <v-layout row wrap>
       <v-flex xs12>
         <Toolbar
@@ -21,6 +22,7 @@
               icon="mdi-dots-horizontal"
               :fields="menuFields"
               @create="showCreateModal"
+              @newFolder="showNewFolderModal"
             />
           </template>
         </Toolbar>
@@ -77,6 +79,7 @@ export default {
     DropdownMenu: () => import('../helpers/DropdownMenu.vue'),
     CategoryLine: () => import('./CategoryLine.vue'),
     ItemModal: () => import('../item/ItemModal.vue'),
+    CategoryModal: () => import('../warehouse/CategoryModal.vue'),
     ItemLine: () => import('./ItemLine.vue'),
   },
 
@@ -90,8 +93,9 @@ export default {
   },
 
   data: () => ({
-    menuFields: ['create'],
+    menuFields: ['create', 'newFolder'],
     modal: false,
+    newFolderModal: false,
   }),
 
   computed: {
@@ -131,6 +135,14 @@ export default {
     onModalSubmit() {
       this.fetchCategoryInfo(this.categoryId);
       this.closeModal();
+    },
+
+    showNewFolderModal() {
+      this.newFolderModal = true;
+    },
+
+    closeNewFolderModal() {
+      this.newFolderModal = false;
     },
   },
 };

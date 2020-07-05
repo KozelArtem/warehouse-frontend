@@ -54,10 +54,10 @@ export default {
         icon: 'mdi-plus',
       },
       {
-        title: 'Новая папка',
+        title: 'Новая категория',
         event: 'newFolder',
         color: 'green',
-        icon: 'mdi-folder',
+        icon: 'mdi-folder-plus',
       },
       {
         title: 'Редактировать',

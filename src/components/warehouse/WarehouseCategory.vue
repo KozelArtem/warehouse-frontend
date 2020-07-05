@@ -47,15 +47,16 @@
           </v-list-item>
           <CategoryLine
             v-for="item in category.categories"
-            :key="item.id"
+            :key="`cat_${item.id}`"
             :value="item"
             icon="mdi-folder"
             @click="openCategory(item.id)"
+            @rename="renameCategory"
           />
 
           <ItemLine
             v-for="item in category.items"
-            :key="item.id"
+            :key="`item_${item.id}`"
             :value="item"
             icon="mdi-file"
             @click="openItem(item.id)"
@@ -114,10 +115,15 @@ export default {
   },
 
   methods: {
-    ...mapActions(CATEGORY_NAMESPACE, ['fetchCategoryInfo']),
+    ...mapActions(CATEGORY_NAMESPACE, ['fetchCategoryInfo', 'updateCategory']),
 
     openCategory(categoryId) {
       this.$router.push(`/categories/${categoryId}`);
+    },
+
+    async renameCategory(data) {
+      await this.updateCategory(data);
+      this.fetchCategoryInfo(this.categoryId);
     },
 
     openItem(itemId) {

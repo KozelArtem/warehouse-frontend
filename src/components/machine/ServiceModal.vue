@@ -16,7 +16,7 @@
         <v-container grid-list-sm>
           <v-layout row wrap>
             <v-flex xs11>
-              <v-text-field label="Название" v-model="task.name" />
+              <v-text-field label="Название" autofocus v-model="task.name" />
             </v-flex>
             <v-flex xs1>
               <v-switch v-model="task.isTO" label="TO" />

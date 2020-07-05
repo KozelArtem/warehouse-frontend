@@ -36,6 +36,10 @@
               @click:clear="editing = false"
               @click:append-outer="updateMachineName"
             />
+            <router-link to="/machines" class="body-2 white--text">
+              Журнал работ
+            </router-link>
+            <v-divider vertical class="mx-3"></v-divider>
             <span class="headline font-weight-black">
               {{ localMachine.name }}
             </span>
@@ -384,7 +388,6 @@ export default {
     },
 
     showImagesSlider(service) {
-      console.log('->service', service);
       this.images = service.images;
       this.imageSlider = true;
     },

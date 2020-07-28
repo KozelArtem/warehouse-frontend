@@ -43,20 +43,6 @@
 
       </v-list>
     </v-navigation-drawer>
-    <!-- <v-footer
-      height="48"
-      app
-      color="purple"
-    >
-      <v-layout row wrap>
-        <v-flex xs4>
-
-        </v-flex>
-        <v-flex xs8>
-          2131231
-        </v-flex>
-      </v-layout>
-    </v-footer> -->
   </div>
 </template>
 

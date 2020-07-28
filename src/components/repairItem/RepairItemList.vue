@@ -39,7 +39,7 @@
                 v-for="(repairItem, i) in repairItemList"
                 :key="repairItem.id"
               >
-                <td v-if="headers[0].breakpoint()">{{ i + 1 }}</td>
+                <td v-if="headers[0].breakpoint()">{{ getIndex(i) }}</td>
                 <td>
                   {{ repairItem.orderNumber }}
                   <span class="show-on-hover" v-if="isAdmin">
@@ -187,6 +187,10 @@ export default {
 
   methods: {
     ...mapActions(REPAIR_ITEM_NAMESPACE, ['fetchRepairItems', 'createRepairItem']),
+
+    getIndex(i) {
+      return this.query.limit * (this.page - 1) + i + 1;
+    },
 
     onSearchChange(search) {
       this.query.search = search;

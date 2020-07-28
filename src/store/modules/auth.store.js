@@ -50,7 +50,7 @@ const actions = {
     commit('RESET_USER_DATA');
     commit('SET_LOADING', false);
   },
-  async getUserData({ state, commit }) {
+  async getUserData({ state, dispatch, commit }) {
     if (state.user.id) {
       return;
     }
@@ -59,6 +59,8 @@ const actions = {
 
     if (response) {
       commit('SET_USER_DATA', response.data);
+    } else {
+      setTimeout(() => dispatch('getUserData'), 200);
     }
   },
 };

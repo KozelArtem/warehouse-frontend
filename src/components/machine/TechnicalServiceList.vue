@@ -124,15 +124,10 @@ export default {
 
     updateServiceCompletedDate(service, date) {
       if (date) {
-        const {
-          id, machineId, name, addedAt,
-        } = service;
+        const { id, machineId } = service;
         const data = {
           id,
           machineId,
-          name,
-          isTO: true,
-          addedAt,
           completedAt: date,
         };
         this.updateTechnicalService(data);

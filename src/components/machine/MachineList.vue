@@ -37,7 +37,7 @@
                 :key="machine.id"
                 @click="openInfo(machine)"
               >
-                <td v-if="headers[0].breakpoint()">{{ i + 1 }}</td>
+                <td v-if="headers[0].breakpoint()">{{ getIndex(i) }}</td>
                 <td>{{ machine.name }}</td>
                 <td>{{ machine.services.length }}</td>
                 <td>

@@ -98,6 +98,18 @@ const routes = [
     component: () => import('../components/repairItem/RepairItemList.vue'),
   },
   {
+    path: '/admin/users',
+    name: 'users',
+    meta: { title: 'Пользователи' },
+    component: () => import('../components/admin/users'),
+  },
+  {
+    path: '/admin/workers',
+    name: 'workers',
+    meta: { title: 'Персонал' },
+    component: () => import('../components/admin/workers'),
+  },
+  {
     path: '/login',
     name: 'login',
     meta: { title: 'Авторизация' },
